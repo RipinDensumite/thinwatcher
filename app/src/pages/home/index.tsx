@@ -20,7 +20,7 @@ interface Client {
   status: ClientStatus;
 }
 
-const API_URL = 'http://167.71.207.105:3001';
+const API_URL = 'https://thinwatcherbackend.ripin.live';
 
 export default function HomePage() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -30,7 +30,7 @@ export default function HomePage() {
       upgrade: false,
       reconnectionAttempts: 5,
       withCredentials: true,
-      extraHeaders: { "Access-Control-Allow-Origin": "*" }
+      extraHeaders: { "Access-Control-Allow-Origin": API_URL }
     })
   );
 
