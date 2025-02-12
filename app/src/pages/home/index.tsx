@@ -1,26 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, Typography, Button, Chip, Grid } from '@mui/material';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
+
+interface Session {
+  ID: string;
+  User: string;
+  State: string;
+}
+
+interface ClientStatus {
+  isOnline: boolean;
+  users: string[];
+  sessions: Session[];
+  lastUpdated: Date;
+}
+
+interface Client {
+  clientId: string;
+  status: ClientStatus;
+}
 
 const API_URL = 'http://167.71.207.105:3001';
 
 export default function HomePage() {
-  const [clients, setClients] = useState([]);
-  const [socket] = useState(() => io(API_URL, {
-    transports: ['websocket'],
-    withCredentials: true,
-    extraHeaders: {
-      "Access-Control-Allow-Origin": "*"
-    }
-  }));
+  const [clients, setClients] = useState<Client[]>([]);
+  const [socket] = useState<Socket>(() => 
+    io(API_URL, {
+      transports: ['websocket', 'polling'],
+      upgrade: false,
+      reconnectionAttempts: 5,
+      withCredentials: true,
+      extraHeaders: { "Access-Control-Allow-Origin": "*" }
+    })
+  );
 
   useEffect(() => {
-    // Initial data load with error handling
     const fetchData = async () => {
       try {
         const response = await fetch(`${API_URL}/api/clients`);
-        if (!response.ok) throw new Error('Network response failed');
-        const data = await response.json();
+        const data: Client[] = await response.json();
         setClients(data);
       } catch (error) {
         console.error('Fetch error:', error);
@@ -29,17 +47,18 @@ export default function HomePage() {
 
     fetchData();
 
-    // Real-time updates
-    socket.on('update', ({ clientId, status }) => {
+    socket.on('update', ({ clientId, status }: { clientId: string; status: ClientStatus }) => {
       setClients(prev => prev.map(client => 
         client.clientId === clientId ? { ...client, status } : client
       ));
     });
 
-    return () => socket.disconnect();
-  }, []);
+    return () => {
+      socket.disconnect();
+    };
+  }, [socket]);
 
-  const terminateSession = async (clientId, sessionId) => {
+  const terminateSession = async (clientId: string, sessionId: string) => {
     try {
       await fetch(`${API_URL}/api/terminate`, {
         method: 'POST',
@@ -53,6 +72,7 @@ export default function HomePage() {
 
   return (
     <Grid container spacing={3} sx={{ p: 3 }}>
+      <h1>Clients</h1>
       {clients.map(client => (
         <Grid item xs={12} sm={6} md={4} key={client.clientId}>
           <Card variant="outlined">
