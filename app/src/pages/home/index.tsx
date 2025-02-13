@@ -25,7 +25,7 @@ const API_URL = "https://thinwatcherbackend.ripin.live";
 
 export default function HomePage() {
   const [clients, setClients] = useState<Client[]>([]);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
