@@ -15,7 +15,7 @@ export default defineConfig({
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       manifest: {
         name: "ThinWatcher",
-        short_name: "TW",
+        short_name: "ThinWatcher",
         theme_color: "#ffffff",
         icons: [
           {
