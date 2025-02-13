@@ -37,24 +37,24 @@ export default function HomePage() {
 
     setSocket(newSocket);
 
-    // Dummy data for display
-    const dummyData: Client[] = [
-      {
-        clientId: "THINCLIENT-01",
-        status: {
-          isOnline: true,
-          users: ["ripin"],
-          sessions: [
-            { ID: "0", User: "SYSTEM", State: "Disconnected" },
-            { ID: "1", User: "ripin", State: "Active" },
-            { ID: "36", User: "SYSTEM", State: "Listen" },
-          ],
-          lastUpdated: "2025-02-12T22:56:03.386Z",
-        },
-      },
-    ];
+    // // Dummy data for display
+    // const dummyData: Client[] = [
+    //   {
+    //     clientId: "THINCLIENT-01",
+    //     status: {
+    //       isOnline: true,
+    //       users: ["ripin"],
+    //       sessions: [
+    //         { ID: "0", User: "SYSTEM", State: "Disconnected" },
+    //         { ID: "1", User: "ripin", State: "Active" },
+    //         { ID: "36", User: "SYSTEM", State: "Listen" },
+    //       ],
+    //       lastUpdated: "2025-02-12T22:56:03.386Z",
+    //     },
+    //   },
+    // ];
 
-    setClients(dummyData);
+    // setClients(dummyData);
 
     return () => {
       newSocket.disconnect();
