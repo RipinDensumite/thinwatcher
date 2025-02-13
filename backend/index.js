@@ -23,8 +23,9 @@ const io = new Server(server, {
 const clients = new Map();
 
 // Configuration
-const OFFLINE_TIMEOUT = 20000; // 1 minute
-const CLEANUP_INTERVAL = 10000; // 30 seconds
+const OFFLINE_TIMEOUT = 20000;
+const CLEANUP_INTERVAL = 10000;
+const PORT = 3001;
 
 app.use(express.json());
 
@@ -89,6 +90,6 @@ io.on("connection", (socket) => {
   socket.emit("initial-data", Array.from(clients.entries()));
 });
 
-server.listen(3001, () => {
-  console.log("Monitoring server running on port 3001");
+server.listen(PORT, () => {
+  console.log("Monitoring server running on port " + PORT);
 });
