@@ -4,7 +4,21 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+
+// In your server.js
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "https://thinwatcher.vercel.app", // Your production domain
+      "http://localhost:3000", // Keep for local development
+    ],
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true,
+  },
+  transports: ["websocket", "polling"],
+});
+
 const clients = new Map();
 
 // Configuration
