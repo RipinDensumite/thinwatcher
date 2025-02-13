@@ -113,22 +113,22 @@ export default function HomePage() {
     };
   }, []);
 
-  const terminateSession = async (clientId: string, sessionId: string) => {
-    try {
-      const response = await fetch(`${API_URL}/api/terminate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId, sessionId }),
-      });
+  // const terminateSession = async (clientId: string, sessionId: string) => {
+  //   try {
+  //     const response = await fetch(`${API_URL}/api/terminate`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ clientId, sessionId }),
+  //     });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    } catch (error) {
-      console.error("Termination failed:", error);
-      setError("Failed to terminate session. Please try again.");
-    }
-  };
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Termination failed:", error);
+  //     setError("Failed to terminate session. Please try again.");
+  //   }
+  // };
 
   return (
     <Layout>
@@ -215,7 +215,7 @@ export default function HomePage() {
                             {session.State}
                           </span>
                         </div>
-                        {session.State === "Active" && (
+                        {/* {session.State === "Active" && (
                           <button
                             onClick={() =>
                               terminateSession(client.clientId, session.ID)
@@ -224,7 +224,7 @@ export default function HomePage() {
                           >
                             Terminate
                           </button>
-                        )}
+                        )} */}
                       </li>
                     ))}
                   </ul>
