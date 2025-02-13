@@ -188,7 +188,7 @@ export default function HomePage() {
                 <div>
                   <div className="flex items-center gap-3 mb-3">
                     <h3 className="text-lg font-semibold">Active Sessions</h3>
-                    <span className="flex items-center justify-center gap-1 bg-slate-300 ring-2 ring-black/50 rounded-4xl px-3 py-1">
+                    <span className="flex items-center justify-center gap-1 bg-slate-300/60 ring-2 ring-black/40 rounded-4xl px-3 py-1">
                       <span className="text-sm">
                         {client.status.users.length}
                       </span>{" "}
@@ -220,7 +220,7 @@ export default function HomePage() {
                             onClick={() =>
                               terminateSession(client.clientId, session.ID)
                             }
-                            className="px-3 py-1 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                            className="px-3 py-1 bg-red-500 text-white text-xs font-medium rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 cursor-pointer"
                           >
                             Terminate
                           </button>
