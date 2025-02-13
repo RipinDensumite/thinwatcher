@@ -1,5 +1,5 @@
 {
-  "name": "skillsource",
+  "name": "thinwatcher",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,9 +13,6 @@
     "generate-pwa-assets": "pwa-assets-generator --preset minimal public/logo.svg"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/material": "^6.4.4",
     "@tailwindcss/vite": "^4.0.1",
     "lucide-react": "^0.474.0",
     "react": "^18.3.1",
