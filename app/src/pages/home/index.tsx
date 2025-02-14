@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import Layout from "@/layout/layout";
-import { UserRound, WifiOff } from "lucide-react";
+import { UserRound, WifiOff, Wifi } from "lucide-react";
 
 interface Session {
   ID: string;
@@ -138,7 +138,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             {isConnected ? (
               <span className="text-green-600 flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-green-600" />
+                <Wifi className="h-4 w-4" />
                 Connected
               </span>
             ) : (
