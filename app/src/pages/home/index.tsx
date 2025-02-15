@@ -308,71 +308,93 @@ export default function HomePage() {
               </thead>
               <tbody className="divide-y divide-gray-100 border-t border-gray-100">
                 {clients.map((client) => (
-                  <tr key={client.clientId} className="hover:bg-gray-50">
-                    <th className="px-6 py-4 font-medium text-gray-900 flex items-center gap-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        x="0px"
-                        y="0px"
-                        className="size-4"
-                        viewBox="0 0 30 30"
-                      >
-                        <path d="M12 16L3 16 3 23.75 12 24.988zM12 5L3 6.25 3 14 12 14zM14 4.75L14 14 27 14 27 3zM14 16L14 25.25 27 27 27 16z"></path>
-                      </svg>
+                  <>
+                    <tr key={client.clientId} className="hover:bg-gray-50">
+                      <th className="px-6 py-4 font-medium text-gray-900 flex items-center gap-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          x="0px"
+                          y="0px"
+                          className="size-4"
+                          viewBox="0 0 30 30"
+                        >
+                          <path d="M12 16L3 16 3 23.75 12 24.988zM12 5L3 6.25 3 14 12 14zM14 4.75L14 14 27 14 27 3zM14 16L14 25.25 27 27 27 16z"></path>
+                        </svg>
+                        {client.clientId}
+                      </th>
+                      <td className="px-6 py-4">
+                        <p className="text-sm text-gray-600">
+                          {new Date(client.status.lastUpdated).toLocaleString()}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="flex items-center gap-1">
+                          <span className="text-sm">
+                            {client.status.users.length}
+                          </span>{" "}
+                          <UserRound className="text-black size-4" />
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {client.status.isOnline ? (
+                          <span className="select-none inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              className="h-3 w-3"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                            Online
+                          </span>
+                        ) : (
+                          <span className="select-none inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-600">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              className="h-3 w-3"
+                            >
+                              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                            </svg>
+                            Offline
+                          </span>
+                        )}
+                      </td>
+                      <td className="flex justify-end gap-4 px-6 py-4 font-medium">
+                        <a href="">
+                          <Trash2 size={18} />
+                        </a>
+                      </td>
+                    </tr>
 
-                      {client.clientId}
-                    </th>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600">
-                        {new Date(client.status.lastUpdated).toLocaleString()}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="flex items-center gap-1">
-                        <span className="text-sm">
-                          {client.status.users.length}
-                        </span>{" "}
-                        <UserRound className="text-black size-4" />
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {client.status.isOnline ? (
-                        <span className="select-none inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            className="h-3 w-3"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
-                          Online
-                        </span>
-                      ) : (
-                        <span className="select-none inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-600">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            className="h-3 w-3"
-                          >
-                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                          </svg>
-                          Offline
-                        </span>
-                      )}
-                    </td>
-                    <td className="flex justify-end gap-4 px-6 py-4 font-medium">
-                      <a href=""><Trash2 size={18}/></a>
-                      {/* <a href="" className="text-primary-700">
-                        Edit
-                      </a> */}
-                    </td>
-                  </tr>
+                    {/* Session List */}
+                    {client.status.sessions.length > 0 && (
+                      <h1 className="px-6 py-3 text-xl">Session</h1>
+                    )}
+                    {client.status.sessions.map((session) => (
+                      <tr key={session.ID} className="bg-gray-200">
+                        <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-1">
+                          {session.User} ({session.State})
+                        </td>
+                        <td className="px-6 py-4"></td>
+                        <td className="px-6 py-4"></td>
+                        <td className="px-6 py-4"></td>
+                        <td className="flex justify-end gap-4 px-6 py-4 font-medium">
+                          {session.State === "Active" && (
+                            <button className="px-2 py-1 w-fit bg-red-500 text-white rounded-md cursor-pointer">
+                              Terminate
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </>
                 ))}
               </tbody>
             </table>
