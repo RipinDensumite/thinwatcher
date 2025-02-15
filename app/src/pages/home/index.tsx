@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import Layout from "@/layout/layout";
-import { UserRound, WifiOff, Wifi, PcCase } from "lucide-react";
+import { UserRound, WifiOff, Wifi, Trash2 } from "lucide-react";
 import { useMediaQuery } from "@uidotdev/usehooks";
 
 interface Session {
@@ -310,7 +310,16 @@ export default function HomePage() {
                 {clients.map((client) => (
                   <tr key={client.clientId} className="hover:bg-gray-50">
                     <th className="px-6 py-4 font-medium text-gray-900 flex items-center gap-1">
-                      <PcCase size={18}/>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        x="0px"
+                        y="0px"
+                        className="size-4"
+                        viewBox="0 0 30 30"
+                      >
+                        <path d="M12 16L3 16 3 23.75 12 24.988zM12 5L3 6.25 3 14 12 14zM14 4.75L14 14 27 14 27 3zM14 16L14 25.25 27 27 27 16z"></path>
+                      </svg>
+
                       {client.clientId}
                     </th>
                     <td className="px-6 py-4">
@@ -358,10 +367,10 @@ export default function HomePage() {
                       )}
                     </td>
                     <td className="flex justify-end gap-4 px-6 py-4 font-medium">
-                      <a href="">Delete</a>
-                      <a href="" className="text-primary-700">
+                      <a href=""><Trash2 size={18}/></a>
+                      {/* <a href="" className="text-primary-700">
                         Edit
-                      </a>
+                      </a> */}
                     </td>
                   </tr>
                 ))}
