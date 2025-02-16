@@ -386,11 +386,11 @@ export default function HomePage() {
                         <td className="px-6 py-4"></td>
                         <td className="px-6 py-4"></td>
                         <td className="flex justify-end gap-4 px-6 py-4 font-medium">
-                          {session.State === "Active" && (
+                          {/* {session.State === "Active" && (
                             <button className="px-2 py-1 w-fit bg-red-500 text-white rounded-md cursor-pointer">
                               Terminate
                             </button>
-                          )}
+                          )} */}
                         </td>
                       </tr>
                     ))}
