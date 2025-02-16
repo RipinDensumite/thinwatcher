@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import Layout from "@/layout/layout";
-import { UserRound, WifiOff, Wifi, Trash2 } from "lucide-react";
+import { UserRound, WifiOff, Wifi, Trash2, Computer } from "lucide-react";
 import { useMediaQuery } from "@uidotdev/usehooks";
 
 interface Session {
@@ -260,6 +260,19 @@ export default function HomePage() {
             </div>
           </div>
 
+          <div className="flex items-center justify-center gap-5 bg-white border-1 border-gray-200 rounded-2xl w-fit px-4 py-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              x="0px"
+              y="0px"
+              className="size-24"
+              viewBox="0 0 30 30"
+            >
+              <path d="M12 16L3 16 3 23.75 12 24.988zM12 5L3 6.25 3 14 12 14zM14 4.75L14 14 27 14 27 3zM14 16L14 25.25 27 27 27 16z"></path>
+            </svg>
+            <h1 className="text-7xl font-mono">{clients.length}</h1>
+          </div>
+
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
               {error}
@@ -375,12 +388,21 @@ export default function HomePage() {
 
                     {/* Session List */}
                     {client.status.sessions.length > 0 && (
-                      <h1 className="px-6 py-3 text-xl">Session</h1>
+                      <h1 className="px-6 py-3 text-md">Session</h1>
                     )}
                     {client.status.sessions.map((session) => (
-                      <tr key={session.ID} className="bg-gray-200">
+                      <tr key={session.ID} className="bg-gray-100">
                         <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-1">
-                          {session.User} ({session.State})
+                          <Computer size={17}/> {session.User}{" "}
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              session.State === "Active"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {session.State}
+                          </span>
                         </td>
                         <td className="px-6 py-4"></td>
                         <td className="px-6 py-4"></td>
