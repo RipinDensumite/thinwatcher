@@ -68,6 +68,12 @@ app.get("/api/clients", (req, res) => {
   );
 });
 
+// Client existence check
+app.get("/api/check-client/:clientId", (req, res) => {
+  const exists = clients.has(req.params.clientId);
+  res.json({ exists });
+});
+
 // Session termination
 app.post("/api/terminate", (req, res) => {
   const { clientId, sessionId } = req.body;
