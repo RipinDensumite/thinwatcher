@@ -1,7 +1,7 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const cors = require("cors");
 
 const app = express();
 const server = http.createServer(app);
@@ -10,14 +10,14 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      'https://thinwatcher.vercel.app', // Your production domain
-      'http://localhost:3000' // Keep for local development
+      "https://thinwatcher.vercel.app", // Your production domain
+      "http://localhost:3000", // Keep for local development
     ],
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
-    credentials: true
+    credentials: true,
   },
-  transports: ['websocket', 'polling']
+  transports: ["websocket", "polling"],
 });
 
 const clients = new Map();
@@ -50,9 +50,9 @@ setInterval(() => {
   const now = Date.now();
   clients.forEach((client, clientId) => {
     if (client.isOnline && now - client.lastUpdated > OFFLINE_TIMEOUT) {
-        client.isOnline = false;
-        client.users = [];
-        client.sessions = [];
+      client.isOnline = false;
+      client.users = [];
+      client.sessions = [];
       io.emit("update", { clientId, status: client });
     }
   });
