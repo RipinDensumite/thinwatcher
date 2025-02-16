@@ -1,4 +1,5 @@
-$CLIENT_ID = "THINCLIENT-01"
+$OS_TYPE = "Windows"
+$CLIENT_ID = "THINCLIENT-02"
 $BACKEND_URL = "http://167.71.207.105:3001/api/status"
 $TERMINATE_CHECK_URL = "http://167.71.207.105:3001/api/terminate"
 $HEARTBEAT_INTERVAL = 10 # seconds
@@ -53,7 +54,8 @@ function Get-SessionData {
                 "STATE" { 
                     if ($stateMap.ContainsKey($value)) {
                         $session.State = $stateMap[$value]
-                    } else {
+                    }
+                    else {
                         $session.State = $value
                     }
                 }
@@ -72,11 +74,12 @@ function Send-Heartbeat {
     try {
         $sessions = Get-SessionData
         $activeUsers = $sessions | 
-            Where-Object { $_.State -eq "Active" } | 
-            Select-Object -ExpandProperty User
+        Where-Object { $_.State -eq "Active" } | 
+        Select-Object -ExpandProperty User
 
         $body = @{
             clientId = $CLIENT_ID
+            os       = $OS_TYPE
             users    = @($activeUsers)
             sessions = $sessions
         }
