@@ -31,9 +31,10 @@ app.use(express.json());
 
 // Status update endpoint
 app.post("/api/status", (req, res) => {
-  const { clientId, users, sessions } = req.body;
+  const { clientId, users, sessions, os } = req.body;
   const clientData = {
     isOnline: true,
+    os,
     users,
     sessions,
     lastUpdated: new Date(),
