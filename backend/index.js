@@ -11,7 +11,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       "https://thinwatcher.vercel.app", // Your production domain
-      "http://localhost:3000", // Keep for local development
+      "http://localhost:5173", // Keep for local development
     ],
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
@@ -66,6 +66,19 @@ app.get("/api/clients", (req, res) => {
       status: data,
     }))
   );
+});
+
+// Client removal endpoint
+app.delete("/api/clients/:clientId", (req, res) => {
+  const clientId = req.params.clientId;
+
+  if (clients.has(clientId)) {
+    clients.delete(clientId);
+    io.emit("client-removed", clientId);
+    res.sendStatus(200);
+  } else {
+    res.status(404).json({ error: "Client not found" });
+  }
 });
 
 // Client existence check
