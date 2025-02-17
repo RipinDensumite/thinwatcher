@@ -50,6 +50,21 @@ export default function HomePage() {
     fetchInitialData();
   }, []);
 
+  const deleteClient = async (clientId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
+        method: 'DELETE',
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete client:', error);
+      setError('Failed to delete client. Please try again.');
+    }
+  };
+
   // Socket connection
   useEffect(() => {
     const newSocket = io(API_URL, {
@@ -107,6 +122,14 @@ export default function HomePage() {
         });
       }
     );
+
+    // Delete client
+    newSocket.on("client-removed", (clientId: string) => {
+      console.log("Client removed:", clientId);
+      setClients((prev) =>
+        prev.filter((client) => client.clientId !== clientId)
+      );
+    });
 
     setSocket(newSocket);
 
@@ -380,9 +403,9 @@ export default function HomePage() {
                         )}
                       </td>
                       <td className="flex justify-end gap-4 px-6 py-4 font-medium">
-                        <a href="">
+                        <button onClick={() => deleteClient(client.clientId)} className="cursor-pointer">
                           <Trash2 size={18} />
-                        </a>
+                        </button>
                       </td>
                     </tr>
 
@@ -393,7 +416,7 @@ export default function HomePage() {
                     {client.status.sessions.map((session) => (
                       <tr key={session.ID} className="bg-gray-100">
                         <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-1">
-                          <Computer size={17}/> {session.User}{" "}
+                          <Computer size={17} /> {session.User}{" "}
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${
                               session.State === "Active"
