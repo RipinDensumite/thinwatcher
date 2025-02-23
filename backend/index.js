@@ -86,7 +86,7 @@ app.get("/api/clients", apiKeyAuth, (req, res) => {
 });
 
 // Client removal endpoint
-app.delete("/api/clients/:clientId", apiKeyAuth, (req, res) => {
+app.delete("/api/clients/:clientId", (req, res) => {
   const clientId = req.params.clientId;
 
   if (clients.has(clientId)) {
