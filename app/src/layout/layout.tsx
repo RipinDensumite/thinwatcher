@@ -1,5 +1,5 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { ChevronRight, View, Router, Settings } from "lucide-react";
+import { View, Router } from "lucide-react";
 import { useNavigate } from "react-router";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
