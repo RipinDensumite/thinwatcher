@@ -27,15 +27,26 @@ const clients = new Map();
 const OFFLINE_TIMEOUT = parseInt(process.env.OFFLINE_TIMEOUT, 10);
 const CLEANUP_INTERVAL = parseInt(process.env.CLEANUP_INTERVAL, 10);
 const PORT = process.env.PORT || 3001; // Fallback to 3001 if PORT is not set
+const API_KEY = process.env.API_KEY; // Load API key from environment variables
+
+// Middleware to check API key
+function apiKeyAuth(req, res, next) {
+  const apiKey = req.headers["x-api-key"]; // Get API key from request headers
+
+  if (apiKey === API_KEY) {
+    next(); // API key is valid, proceed to the next middleware/route
+  } else {
+    res.status(401).json({ error: "Unauthorized: Invalid API key" }); // API key is invalid
+  }
+}
 
 app.use(express.json());
 
-// Client connection test
+// Apply API key middleware to protected endpoints
 app.delete("/api/clients/ctest", (req, res) => {
   res.sendStatus(200);
 });
 
-// Status update endpoint
 app.post("/api/status", (req, res) => {
   const { clientId, users, sessions, os } = req.body;
   const clientData = {
@@ -65,7 +76,7 @@ setInterval(() => {
 }, CLEANUP_INTERVAL);
 
 // Client data endpoint
-app.get("/api/clients", (req, res) => {
+app.get("/api/clients", apiKeyAuth, (req, res) => {
   res.json(
     Array.from(clients.entries()).map(([id, data]) => ({
       clientId: id,
@@ -75,7 +86,7 @@ app.get("/api/clients", (req, res) => {
 });
 
 // Client removal endpoint
-app.delete("/api/clients/:clientId", (req, res) => {
+app.delete("/api/clients/:clientId", apiKeyAuth, (req, res) => {
   const clientId = req.params.clientId;
 
   if (clients.has(clientId)) {
@@ -94,7 +105,7 @@ app.get("/api/check-client/:clientId", (req, res) => {
 });
 
 // Session termination
-app.post("/api/terminate", (req, res) => {
+app.post("/api/terminate", apiKeyAuth, (req, res) => {
   const { clientId, sessionId } = req.body;
   const client = clients.get(clientId);
 
@@ -113,6 +124,15 @@ app.post("/api/terminate", (req, res) => {
 
 // WebSocket initialization
 io.on("connection", (socket) => {
+  const apiKey = socket.handshake.query.apiKey;
+
+  if (apiKey !== API_KEY) {
+    console.log("Unauthorized WebSocket connection attempt");
+    socket.disconnect(true); // Disconnect unauthorized clients
+    return;
+  }
+
+  console.log("Authorized WebSocket connection");
   socket.emit("initial-data", Array.from(clients.entries()));
 });
 

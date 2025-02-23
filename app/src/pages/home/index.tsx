@@ -35,7 +35,11 @@ export default function HomePage() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/clients`);
+        const response = await fetch(`${API_URL}/api/clients`, {
+          headers: {
+            "x-api-key": import.meta.env.VITE_API_KEY,
+          }
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -54,6 +58,9 @@ export default function HomePage() {
     try {
       const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
         method: 'DELETE',
+        headers: {
+          "x-api-key": import.meta.env.VITE_API_KEY,
+        }
       });
 
       
@@ -75,6 +82,9 @@ export default function HomePage() {
       upgrade: false,
       reconnectionAttempts: 5,
       withCredentials: true,
+      query: {
+        apiKey: import.meta.env.VITE_API_KEY,
+      }
     });
 
     // Connection event handlers
