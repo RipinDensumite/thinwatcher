@@ -1,10 +1,44 @@
-$OS_TYPE = "Windows"
-$CLIENT_ID = "THINCLIENT-02"
-$BACKEND_URL = "https://thinwatcherbackend.ripin.live/api/status"
-$TERMINATE_CHECK_URL = "https://thinwatcherbackend.ripin.live/api/terminate"
-$HEARTBEAT_INTERVAL = 1 # seconds
-
 $directoryPath = $PSScriptRoot
+$configFile = "$directoryPath\config.txt"
+
+function Read-Config {
+    $config = @{}
+    if (Test-Path $configFile) {
+        Get-Content $configFile | Foreach-Object {
+            if ($_ -match '^\s*([^=]+)\s*=\s*(.+)\s*$') {
+                $key = $matches[1].Trim()
+                $value = $matches[2].Trim()
+                $config[$key] = $value
+            }
+        }
+    }
+    else {
+        Write-Error "Configuration file not found: $configFile"
+        exit 1
+    }
+    return $config
+}
+
+$config = Read-Config
+
+# Assign configuration values to variables
+$CLIENT_ID = $config["CLIENT_ID"]
+$BACKEND_URL = $config["BACKEND_URL"]
+$HEARTBEAT_INTERVAL = [int]$config["HEARTBEAT_INTERVAL"]
+
+# Validate required configuration
+if (-not $CLIENT_ID -or -not $BACKEND_URL -or -not $HEARTBEAT_INTERVAL) {
+    Write-Error "Missing required configuration values. Please check config.txt"
+    exit 1
+}
+
+# Output configuration values for verification
+Write-Host "Configuration loaded:"
+Write-Host "Backend URL: $BACKEND_URL"
+Write-Host "Heartbeat Interval: $HEARTBEAT_INTERVAL seconds"
+Write-Host "Client ID: $CLIENT_ID"
+
+$OS_TYPE = "Windows"
 $dialogPath = Join-Path $directoryPath 'dialog-gui.ps1'
 
 # Declare $isGUIOpen at the script level to maintain its state across function calls
@@ -105,7 +139,7 @@ function Send-Heartbeat {
             sessions = $sessions
         }
 
-        Invoke-RestMethod -Uri $BACKEND_URL -Method Post `
+        Invoke-RestMethod -Uri "$BACKEND_URL/api/status" -Method Post `
             -ContentType "application/json" `
             -Body ($body | ConvertTo-Json -Depth 4)
     }
@@ -116,7 +150,7 @@ function Send-Heartbeat {
 
 function Check-Termination {
     try {
-        $command = Invoke-RestMethod -Uri "$TERMINATE_CHECK_URL/$CLIENT_ID"
+        $command = Invoke-RestMethod -Uri "$BACKEND_URL/api/terminate/$CLIENT_ID"
         if ($command.action -eq 'logoff') {
             & logoff $command.sessionId
         }
