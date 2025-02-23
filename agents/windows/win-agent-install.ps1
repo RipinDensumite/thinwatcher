@@ -8,6 +8,7 @@ $InstallDir = "$env:ProgramFiles\WinAgent"
 $AgentScript = "win-agent.ps1"
 $GuiDialog = "dialog-gui.ps1"
 $ConfigFile = "$InstallDir\config.txt"
+$GitHubRepoBaseUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/"
 
 # Self-elevate if not running as admin
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -74,6 +75,11 @@ try {
         New-Item -Path $InstallDir -ItemType Directory | Out-Null
     }
 
+    # Download necessary scripts from GitHub
+    Write-Host "Downloading $AgentScript and $GuiDialog from GitHub..." -ForegroundColor Cyan
+    Invoke-WebRequest -Uri "$GitHubRepoBaseUrl/$AgentScript" -OutFile "$InstallDir\$AgentScript"
+    Invoke-WebRequest -Uri "$GitHubRepoBaseUrl/$GuiDialog" -OutFile "$InstallDir\$GuiDialog"
+
     # Config file
     Write-Host "Please provide the following configuration values or CTRL + C to cancel the installation" -ForegroundColor Cyan
 
@@ -108,10 +114,6 @@ CLIENT_ID=$CLIENT_ID
 
     Set-Content -Path $ConfigFile -Value $configContent
     Write-Host "Configuration file created at $ConfigFile" -ForegroundColor Green
-
-    # Copy agent script
-    Copy-Item -Path $AgentScript -Destination $InstallDir -Force
-    Copy-Item -Path $GuiDialog -Destination $InstallDir -Force
 
     # Create scheduled task
     $TaskAction = New-ScheduledTaskAction `
