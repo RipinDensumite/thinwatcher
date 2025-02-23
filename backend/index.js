@@ -29,6 +29,11 @@ const PORT = 3001;
 
 app.use(express.json());
 
+// Client connection test
+app.delete("/api/clients/ctest", (req, res) => {
+  res.sendStatus(200);
+});
+
 // Status update endpoint
 app.post("/api/status", (req, res) => {
   const { clientId, users, sessions, os } = req.body;
