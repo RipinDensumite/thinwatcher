@@ -22,7 +22,7 @@ interface Client {
   status: ClientStatus;
 }
 
-const API_URL = "https://thinwatcherbackend.ripin.live";
+const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 export default function HomePage() {
   const isMobile = useMediaQuery("only screen and (max-width : 768px)");
