@@ -6,6 +6,12 @@ $ErrorActionPreference = "Stop"
 $InstallDir = "$env:ProgramFiles\WinAgent"
 $ConfigFile = "$InstallDir\config.txt"
 
+# Self-elevate if not running as admin
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`"" -Verb RunAs
+    exit
+}
+
 function Restart-ScheduleTask {
     # Restart the scheduled task to apply changes
     $ServiceName = "WinAgent"
@@ -40,12 +46,6 @@ function Restart-ScheduleTask {
     Start-Sleep -Seconds 2
 
     Start-ScheduledTask -TaskName $ServiceName
-}
-
-# Self-elevate if not running as admin
-if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`"" -Verb RunAs
-    exit
 }
 
 try {
