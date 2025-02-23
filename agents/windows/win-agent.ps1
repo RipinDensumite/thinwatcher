@@ -1,8 +1,15 @@
 $OS_TYPE = "Windows"
 $CLIENT_ID = "THINCLIENT-02"
-$BACKEND_URL = "http://167.71.207.105:3001/api/status"
-$TERMINATE_CHECK_URL = "http://167.71.207.105:3001/api/terminate"
-$HEARTBEAT_INTERVAL = 10 # seconds
+$BACKEND_URL = "https://thinwatcherbackend.ripin.live/api/status"
+$TERMINATE_CHECK_URL = "https://thinwatcherbackend.ripin.live/api/terminate"
+$HEARTBEAT_INTERVAL = 1 # seconds
+
+$directoryPath = $PSScriptRoot
+$dialogPath = Join-Path $directoryPath 'dialog-gui.ps1'
+
+# Declare $isGUIOpen at the script level to maintain its state across function calls
+$script:isGUIOpen = $false
+Add-Type -AssemblyName System.Windows.Forms
 
 function Get-SessionData {
     $raw = query session
@@ -76,6 +83,20 @@ function Send-Heartbeat {
         $activeUsers = $sessions | 
         Where-Object { $_.State -eq "Active" } | 
         Select-Object -ExpandProperty User
+
+        # Check if there are any active sessions
+        if ($activeUsers.Count -gt 0) {
+            if (-not $script:isGUIOpen) {
+                Start-Process -FilePath "powershell.exe" -ArgumentList "-File $dialogPath"
+                $script:isGUIOpen = $true
+            }
+            Write-Output 1
+       
+        }
+        else {
+            $script:isGUIOpen = $false
+            Write-Output 0
+        }
 
         $body = @{
             clientId = $CLIENT_ID
