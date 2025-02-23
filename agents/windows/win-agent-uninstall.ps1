@@ -5,6 +5,7 @@ $ErrorActionPreference = "Stop"
 # Configuration
 $ServiceName = "WinAgent"
 $InstallDir = "$env:ProgramFiles\WinAgent"
+$ConfigFile = "$InstallDir\config.txt"
 
 # Self-elevate if not running as admin
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -13,6 +14,23 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 try {
+    # Read the config file to get the CLIENT_ID and BACKEND_URL
+    if (Test-Path $ConfigFile) {
+        $config = @{}
+        Get-Content $ConfigFile | ForEach-Object {
+            if ($_ -match '^\s*([^=]+)\s*=\s*(.+)\s*$') {
+                $key = $matches[1].Trim()
+                $value = $matches[2].Trim()
+                $config[$key] = $value
+            }
+        }
+        $CLIENT_ID = $config["CLIENT_ID"]
+        $BACKEND_URL = $config["BACKEND_URL"]
+    }
+    else {
+        Write-Host "Config file not found. Proceeding with uninstallation without notifying the backend." -ForegroundColor Yellow
+    }
+
     # Stop and remove scheduled task
     if (Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue) {
         Stop-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue
@@ -45,6 +63,18 @@ try {
     # Remove installation directory
     if (Test-Path $InstallDir) {
         Remove-Item -Path $InstallDir -Recurse -Force
+    }
+
+    # Notify the backend server to remove the client
+    if ($CLIENT_ID -and $BACKEND_URL) {
+        try {
+            $url = "$BACKEND_URL/api/clients/$CLIENT_ID"
+            Invoke-RestMethod -Uri $url -Method Delete
+            Write-Host "Notified backend server to remove client $CLIENT_ID." -ForegroundColor Green
+        }
+        catch {
+            Write-Warning "Failed to notify backend server: $_"
+        }
     }
 
     Write-Host "Uninstallation completed successfully." -ForegroundColor Green
