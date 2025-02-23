@@ -38,7 +38,7 @@ export default function LoginPage() {
           </div>
 
           <div className="pt-2">
-            <button onClick={() => navigate("/home")} className="w-full py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-700 text-white rounded-lg font-medium transition-all duration-200 transform hover:translate-y-[-1px] hover:shadow-lg active:translate-y-0 active:shadow-md">
+            <button onClick={() => navigate("/watchers")} className="w-full py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-700 text-white rounded-lg font-medium transition-all duration-200 transform hover:translate-y-[-1px] hover:shadow-lg active:translate-y-0 active:shadow-md">
               Sign In
             </button>
           </div>

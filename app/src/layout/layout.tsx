@@ -1,8 +1,10 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
 import { ChevronRight, View, Router, Settings } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const isMobile = useMediaQuery("only screen and (max-width : 768px)");
+const navigate = useNavigate();
 
   if (isMobile) {
     return (
@@ -29,11 +31,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               ThinWatcher
             </h1>
             <ul className="flex flex-col items-center gap-2 mx-2 mt-3 text-left text-sm">
-              <li className="hover:bg-slate-200 flex items-center gap-2 transition-all w-full py-2 pl-2 rounded-md cursor-pointer">
+              <li onClick={() => navigate("/watchers")} className="hover:bg-slate-200 flex items-center gap-2 transition-all w-full py-2 pl-2 rounded-md cursor-pointer">
                 <View size={16} color="gray" />
                 Watchers
               </li>
-              <li className="hover:bg-slate-200 flex items-center gap-2 transition-all w-full py-2 pl-2 rounded-md cursor-pointer">
+              <li onClick={() => navigate("/agents")} className="hover:bg-slate-200 flex items-center gap-2 transition-all w-full py-2 pl-2 rounded-md cursor-pointer">
                 <Router size={16} color="gray" />
                 Agents
               </li>

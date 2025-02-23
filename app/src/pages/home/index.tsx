@@ -55,6 +55,9 @@ export default function HomePage() {
       const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
         method: 'DELETE',
       });
+
+      
+      console.log("response" + response)
   
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
