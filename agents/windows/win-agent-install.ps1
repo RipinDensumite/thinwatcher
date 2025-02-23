@@ -22,9 +22,9 @@ try {
     }
 
     #Config file
-    Write-Host "Please provide the following configuration values:" -ForegroundColor Cyan
+    Write-Host "Please provide the following configuration values or CTRL + C to cancel the installation" -ForegroundColor Cyan
 
-    $BACKEND_URL = Read-Host "Backend URL (e.g., http://167.71.207.105:3001/api/status)"
+    $BACKEND_URL = Read-Host "Backend URL (e.g., https://backend-url.com)"
     $HEARTBEAT_INTERVAL = Read-Host "Heartbeat Interval in seconds (e.g., 5)"
     $CLIENT_ID = Read-Host "Client ID (e.g., THINCLIENT-02)"
 
