@@ -6,6 +6,7 @@ $ErrorActionPreference = "Stop"
 $ServiceName = "WinAgent"
 $InstallDir = "$env:ProgramFiles\WinAgent"
 $AgentScript = "win-agent.ps1"
+$GuiDialog = "dialog-gui.ps1"
 
 # Self-elevate if not running as admin
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -21,6 +22,7 @@ try {
 
     # Copy agent script
     Copy-Item -Path $AgentScript -Destination $InstallDir -Force
+    Copy-Item -Path $GuiDialog -Destination $InstallDir -Force
 
     # Create scheduled task
     $TaskAction = New-ScheduledTaskAction `
