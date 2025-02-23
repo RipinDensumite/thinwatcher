@@ -1,17 +1,18 @@
+require("dotenv").config();
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const cors = require("cors");
 
 const app = express();
 const server = http.createServer(app);
 
-// In your server.js
+// Configure CORS origins from environment variables
 const io = new Server(server, {
   cors: {
     origin: [
-      "https://thinwatcher.vercel.app", // Your production domain
-      "http://localhost:5173", // Keep for local development
+      process.env.CORS_ORIGIN_PROD, // Production domain
+      process.env.CORS_ORIGIN_DEV, // Local development domain
     ],
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
@@ -22,10 +23,10 @@ const io = new Server(server, {
 
 const clients = new Map();
 
-// Configuration
-const OFFLINE_TIMEOUT = 20000;
-const CLEANUP_INTERVAL = 10000;
-const PORT = 3001;
+// Configuration from environment variables
+const OFFLINE_TIMEOUT = parseInt(process.env.OFFLINE_TIMEOUT, 10);
+const CLEANUP_INTERVAL = parseInt(process.env.CLEANUP_INTERVAL, 10);
+const PORT = process.env.PORT || 3001; // Fallback to 3001 if PORT is not set
 
 app.use(express.json());
 
@@ -116,5 +117,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log("Monitoring server running on port " + PORT);
+  console.log(`Monitoring server running on port ${PORT}`);
 });
