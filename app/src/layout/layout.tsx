@@ -39,13 +39,13 @@ const navigate = useNavigate();
                 <Router size={16} color="gray" />
                 Agents
               </li>
-              <li className="hover:bg-slate-200 flex items-center gap-2 transition-all w-full py-2 pl-2 rounded-md cursor-pointer">
+              {/* <li className="hover:bg-slate-200 flex items-center gap-2 transition-all w-full py-2 pl-2 rounded-md cursor-pointer">
                 <Settings size={16} color="gray" />
                 Settings
-              </li>
+              </li> */}
             </ul>
           </div>
-          <span className="hover:bg-slate-200 transition-all mx-2 mb-2 p-2 rounded-md cursor-pointer text-center flex items-center justify-between gap-3">
+          {/* <span className="hover:bg-slate-200 transition-all mx-2 mb-2 p-2 rounded-md cursor-pointer text-center flex items-center justify-between gap-3">
             <div className=" flex items-center gap-3">
               <img
                 className="size-6 rounded-md"
@@ -55,7 +55,7 @@ const navigate = useNavigate();
               <span className="text-sm font-semibold">Admin</span>
             </div>
             <ChevronRight size={16} />
-          </span>
+          </span> */}
         </nav>
         <main className="w-full min-h-[100dvh] pl-60 bg-slate-50 overflow-auto">
           {children}
