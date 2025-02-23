@@ -1,7 +1,7 @@
 # URLs for the scripts
 $installScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/win-agent-install.ps1"
 $uninstallScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/win-agent-uninstall.ps1"
-$reconfigScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/win-agent-reconfig.ps1"
+# $reconfigScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/win-agent-reconfig.ps1"
 
 # Function to install the agent
 function Install-Agent {
@@ -44,17 +44,17 @@ function Update-Agent {
 }
 
 # Function to reconfigure the agent
-function Reconfig-Agent {
-    Write-Host "Reconfiguring ThinWatcher..." -ForegroundColor Cyan
-    try {
-        Invoke-RestMethod -Uri $reconfigScriptUrl | Invoke-Expression
-        Write-Host "Reconfiguration completed successfully." -ForegroundColor Green
-    }
-    catch {
-        Write-Host "Reconfiguration failed: $_" -ForegroundColor Red
-    }
-    Pause
-}
+# function Reconfig-Agent {
+#     Write-Host "Reconfiguring ThinWatcher..." -ForegroundColor Cyan
+#     try {
+#         Invoke-RestMethod -Uri $reconfigScriptUrl | Invoke-Expression
+#         Write-Host "Reconfiguration completed successfully." -ForegroundColor Green
+#     }
+#     catch {
+#         Write-Host "Reconfiguration failed: $_" -ForegroundColor Red
+#     }
+#     Pause
+# }
 
 # Function to display the menu
 function Show-Menu {
@@ -63,10 +63,10 @@ function Show-Menu {
     Write-Host "ThinWatcher Agent Launcher"
     Write-Host "============================================"
     Write-Host "1. Install ThinWatcher Agent"
-    Write-Host "2. Reconfigure ThinWatcher Agent"
-    Write-Host "3. Update ThinWatcher Agent"
-    Write-Host "4. Uninstall ThinWatcher Agent"
-    Write-Host "5. Exit"
+    # Write-Host "2. Reconfigure ThinWatcher Agent"
+    Write-Host "2. Update ThinWatcher Agent"
+    Write-Host "3. Uninstall ThinWatcher Agent"
+    Write-Host "4. Exit"
     Write-Host "============================================"
 }
 
@@ -83,10 +83,10 @@ while ($true) {
 
     switch ($choice) {
         1 { Install-Agent }
-        2 { Reconfig-Agent }
-        3 { Update-Agent }
-        4 { Uninstall-Agent }
-        5 { 
+        # 2 { Reconfig-Agent }
+        2 { Update-Agent }
+        3 { Uninstall-Agent }
+        4 { 
             Write-Host "Exiting ThinWatcher Launcher. Goodbye!" -ForegroundColor Yellow
             exit 
         }
