@@ -38,7 +38,7 @@ export default function HomePage() {
         const response = await fetch(`${API_URL}/api/clients`, {
           headers: {
             "x-api-key": import.meta.env.VITE_API_KEY,
-          }
+          },
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -57,21 +57,20 @@ export default function HomePage() {
   const deleteClient = async (clientId: string) => {
     try {
       const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           "x-api-key": import.meta.env.VITE_API_KEY,
-        }
+        },
       });
 
-      
-      console.log("response" + response)
-  
+      console.log("response" + response);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Failed to delete client:', error);
-      setError('Failed to delete client. Please try again.');
+      console.error("Failed to delete client:", error);
+      setError("Failed to delete client. Please try again.");
     }
   };
 
@@ -84,7 +83,7 @@ export default function HomePage() {
       withCredentials: true,
       query: {
         apiKey: import.meta.env.VITE_API_KEY,
-      }
+      },
     });
 
     // Connection event handlers
@@ -210,15 +209,35 @@ export default function HomePage() {
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">{client.clientId}</h2>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        client.status.isOnline
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {client.status.isOnline ? "Online" : "Offline"}
-                    </span>
+                    {client.status.isOnline ? (
+                      <span className="select-none inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className="h-3 w-3"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                        Healthy
+                      </span>
+                    ) : (
+                      <span className="select-none inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-600">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className="h-3 w-3"
+                        >
+                          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                        </svg>
+                        Unhealthy
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-gray-600 mb-4">
                     Last Updated:{" "}
@@ -296,7 +315,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-5 bg-white border-1 border-gray-200 rounded-2xl w-fit px-4 py-2">
+          {/* <div className="flex items-center justify-center gap-5 bg-white border-1 border-gray-200 rounded-2xl w-fit px-4 py-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               x="0px"
@@ -307,7 +326,7 @@ export default function HomePage() {
               <path d="M12 16L3 16 3 23.75 12 24.988zM12 5L3 6.25 3 14 12 14zM14 4.75L14 14 27 14 27 3zM14 16L14 25.25 27 27 27 16z"></path>
             </svg>
             <h1 className="text-7xl font-mono">{clients.length}</h1>
-          </div>
+          </div> */}
 
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -416,7 +435,10 @@ export default function HomePage() {
                         )}
                       </td>
                       <td className="flex justify-end gap-4 px-6 py-4 font-medium">
-                        <button onClick={() => deleteClient(client.clientId)} className="cursor-pointer">
+                        <button
+                          onClick={() => deleteClient(client.clientId)}
+                          className="cursor-pointer"
+                        >
                           <Trash2 size={18} />
                         </button>
                       </td>
