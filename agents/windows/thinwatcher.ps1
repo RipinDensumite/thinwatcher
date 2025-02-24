@@ -22,6 +22,7 @@ function Test-ScheduledTask {
     $task = Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue
 
     if ($task) {
+        $taskState = $task.State
         if ($taskState -eq "Running") {
             return "Running"
         }
