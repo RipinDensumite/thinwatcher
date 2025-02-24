@@ -131,4 +131,7 @@ while ($true) {
             Pause
         }
     }
+
+    $isWinAgentExist = Test-WinAgentInstallation
+    $isWinAgentRunning = Test-ScheduledTask
 }
