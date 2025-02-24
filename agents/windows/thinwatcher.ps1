@@ -3,6 +3,40 @@ $installScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatche
 $uninstallScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/win-agent-uninstall.ps1"
 # $reconfigScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/win-agent-reconfig.ps1"
 
+# Configuration
+$ServiceName = "WinAgent"
+$InstallDir = "$env:ProgramFiles\WinAgent"
+
+# Function to check if the WinAgent folder and files exist
+function Test-WinAgentInstallation {
+    if (Test-Path $InstallDir) {
+        return "WinAgent installed"
+    }
+    else {
+        return "WinAgent not installed"
+    }
+}
+
+# Function to check if the scheduled task exists and is running
+function Test-ScheduledTask {
+    $task = Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue
+
+    if ($task) {
+        if ($taskState -eq "Running") {
+            return "Running"
+        }
+        else {
+            return "Not running" 
+        }
+    }
+    else {
+        return "Not exist on schedule"
+    }
+}
+
+$isWinAgentExist = Test-WinAgentInstallation
+$isWinAgentRunning = Test-ScheduledTask
+
 # Function to install the agent
 function Install-Agent {
     Write-Host "Installing ThinWatcher..." -ForegroundColor Cyan
@@ -61,6 +95,7 @@ function Show-Menu {
     Clear-Host
     Write-Host "============================================"
     Write-Host "ThinWatcher Agent Launcher"
+    Write-Host "Status: $isWinAgentExist | $isWinAgentRunning"
     Write-Host "============================================"
     Write-Host "1. Install ThinWatcher Agent"
     # Write-Host "2. Reconfigure ThinWatcher Agent"
