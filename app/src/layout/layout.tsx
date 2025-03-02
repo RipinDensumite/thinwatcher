@@ -1,10 +1,18 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { View, Router } from "lucide-react";
+import { View, Router, LogOut } from "lucide-react";
 import { useNavigate } from "react-router";
+import { AuthContext } from "@/context/AuthContext";
+import { useContext } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const isMobile = useMediaQuery("only screen and (max-width : 768px)");
   const navigate = useNavigate();
+  const { logout, user } = useContext(AuthContext);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   if (isMobile) {
     return (
@@ -63,6 +71,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               >
                 <Router size={16} color="gray" />
                 Agents
+              </li>
+            </ul>
+          </div>
+          <div>
+            <ul>
+              <li className="flex flex-row items-center justify-between gap-2 p-2 select-none">
+                <div className="flex flex-row items-center gap-2">
+                  <div className="avatar">
+                    <div className="w-11 rounded-full">
+                      <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                    </div>
+                  </div>
+                  <span>{user?.username}</span>
+                </div>
+                <LogOut
+                  onClick={handleLogout}
+                  size={16}
+                  className="cursor-pointer mr-2"
+                />
               </li>
             </ul>
           </div>
