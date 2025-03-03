@@ -1,5 +1,5 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { View, Router, LogOut } from "lucide-react";
+import { View, Router, LogOut, Menu } from "lucide-react";
 import { useNavigate } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
 import { useContext } from "react";
@@ -19,8 +19,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <section className="min-h-[100dvh] bg-slate-200/70">
         {/* Top Navigation Bar */}
         <nav className="fixed z-10 top-0 left-0 py-4 w-full flex justify-center bg-slate-100 border-b-1 border-slate-500/30">
-          <div className="flex items-center justify-center w-full">
+          <div className="flex items-center justify-center w-full relative">
             <h1 className="text-xl font-bold select-none">ThinWatcher</h1>
+            <div className="dropdown dropdown-end absolute right-5">
+              <div tabIndex={0} role="button" className="btn btn-ghost m-1">
+                <Menu size={20} />
+              </div>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+              >
+                <li>
+                  <button onClick={handleLogout} className="btn">
+                    Logout
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
         </nav>
 
