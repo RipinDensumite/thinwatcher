@@ -13,7 +13,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const { login, loading, error, isAuthenticated } = useContext(AuthContext);
+  const [isBtnLoading, setIsBtnLoading] = useState(false);
+  const { login, error, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = location.state as LocationState;
@@ -32,10 +33,12 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsBtnLoading(true);
     setErrorMessage("");
 
     if (!username || !password) {
       setErrorMessage("Please enter both username and password");
+      setIsBtnLoading(false);
       return;
     }
 
@@ -46,6 +49,7 @@ const LoginPage = () => {
     } catch (err) {
       // Error is already set in the context
       console.error("Login failed:", err);
+      setIsBtnLoading(false);
     }
   };
 
@@ -79,7 +83,7 @@ const LoginPage = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full p-2 border rounded"
-              disabled={loading}
+              disabled={isBtnLoading}
             />
           </div>
 
@@ -93,16 +97,20 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-2 border rounded"
-              disabled={loading}
+              disabled={isBtnLoading}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
-            disabled={loading}
+            className="btn w-full bg-slate-900 text-white"
+            disabled={isBtnLoading}
           >
-            {loading ? "Logging in..." : "Login"}
+            {isBtnLoading ? (
+              <span className="loading loading-spinner"></span>
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
 
