@@ -17,10 +17,14 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   error: string | null;
-  register: (username: string, email: string, password: string) => Promise<any>;
+  canRegister: boolean;
+  register: (username: string, email: string, password: string) => Promise<{
+    isFirstUser?: boolean;
+  }>;
   login: (username: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
   authFetch: (endpoint: string, options?: RequestInit) => Promise<Response>;
+  checkRegistrationStatus: () => Promise<void>;
 }
 
 // Create the context with default values
@@ -31,10 +35,12 @@ export const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   loading: true,
   error: null,
+  canRegister: false,
   register: async () => ({}),
   login: async () => ({}),
   logout: async () => {},
   authFetch: async () => new Response(),
+  checkRegistrationStatus: async () => {},
 });
 
 interface AuthProviderProps {
@@ -48,12 +54,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [canRegister, setCanRegister] = useState<boolean>(false);
 
   const API_URL = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3001";
+
+  // Check registration status
+  const checkRegistrationStatus = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/can-register`);
+      const data = await response.json();
+      setCanRegister(data.canRegister);
+      return data.canRegister;
+    } catch (err) {
+      console.error("Error checking registration status:", err);
+      setCanRegister(false);
+      return false;
+    }
+  };
 
   // Check if user is logged in on page load
   useEffect(() => {
     const loadUser = async () => {
+      // Check registration status first
+      await checkRegistrationStatus();
+
       if (token) {
         try {
           const response = await fetch(`${API_URL}/api/auth/profile`, {
@@ -86,6 +110,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Register user
   const register = async (username: string, email: string, password: string) => {
+    // Check if registration is allowed
+    if (!canRegister) {
+      throw new Error("Registration is not currently allowed");
+    }
+
     setError(null);
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
@@ -108,7 +137,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(data.user);
       setIsAuthenticated(true);
       setIsAdmin(data.user.role === "admin");
-      return data;
+      
+      // Update registration status
+      setCanRegister(false);
+
+      return {
+        isFirstUser: data.isFirstUser || false
+      };
     } catch (err) {
       const error = err as Error;
       setError(error.message);
@@ -116,7 +151,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  // Login user
+  // Login user (unchanged from previous version)
   const login = async (username: string, password: string) => {
     setError(null);
     try {
@@ -148,7 +183,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  // Logout user
+  // Logout user (mostly unchanged)
   const logout = async (): Promise<void> => {
     try {
       if (token) {
@@ -168,10 +203,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(null);
       setIsAuthenticated(false);
       setIsAdmin(false);
+
+      // Recheck registration status after logout
+      await checkRegistrationStatus();
     }
   };
 
-  // API request with authentication
+  // API request with authentication (unchanged)
   const authFetch = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
     if (!token) {
       throw new Error("Authentication required");
@@ -209,10 +247,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isAdmin,
         loading,
         error,
+        canRegister,
         register,
         login,
         logout,
         authFetch,
+        checkRegistrationStatus,
       }}
     >
       {children}

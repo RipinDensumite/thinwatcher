@@ -1,6 +1,7 @@
-import { useState, useContext } from "react";
-import { useNavigate, Link } from "react-router";
+import { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
+import axios from "axios"; // Ensure you have axios installed
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -9,11 +10,37 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isBtnLoading, setIsBtnLoading] = useState(false);
+  const [canRegister, setCanRegister] = useState(false);
   const { register, error } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+
+  useEffect(() => {
+    // Check if registration is allowed
+    const checkRegistrationStatus = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/auth/can-register`);
+        console.log(response.data);
+        setCanRegister(response.data.canRegister);
+      } catch (err) {
+        console.error("Error checking registration status", err);
+        setErrorMessage("Unable to check registration status");
+      }
+    };
+
+    checkRegistrationStatus();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Additional check for registration permission
+    if (!canRegister) {
+      setErrorMessage("Registration is currently not allowed");
+      return;
+    }
+
     setIsBtnLoading(true);
     setErrorMessage("");
 
@@ -37,7 +64,14 @@ const RegisterPage = () => {
     }
 
     try {
-      await register(username, email, password);
+      const response = await register(username, email, password);
+
+      // Check if this is the first user (admin)
+      if (response.isFirstUser) {
+        // Optionally, show a special message for first admin user
+        alert("You are the first user and have been granted admin privileges!");
+      }
+
       navigate("/"); // Redirect to home page after successful registration
     } catch (err) {
       // Error is already set in the context
@@ -46,10 +80,27 @@ const RegisterPage = () => {
     }
   };
 
+  // If registration is not allowed, show a message
+  if (!canRegister) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md text-center">
+          <h1 className="text-2xl font-bold mb-6">Registration Closed</h1>
+          <p className="text-gray-600">
+            Registration is currently not available. An administrator account
+            already exists.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Register</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          Create First Admin Account
+        </h1>
 
         {(error || errorMessage) && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -125,17 +176,10 @@ const RegisterPage = () => {
             {isBtnLoading ? (
               <span className="loading loading-spinner"></span>
             ) : (
-              "Register"
+              "Create Admin Account"
             )}
           </button>
         </form>
-
-        <p className="mt-4 text-center">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Login
-          </Link>
-        </p>
       </div>
     </div>
   );

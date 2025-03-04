@@ -3,13 +3,13 @@ require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const cors = require('cors');
-const { body, validationResult } = require('express-validator');
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
-const path = require('path');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
+const { body, validationResult } = require("express-validator");
+const sqlite3 = require("sqlite3").verbose();
+const { open } = require("sqlite");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
@@ -29,15 +29,14 @@ const io = new Server(server, {
 });
 
 // Apply CORS middleware to Express
-app.use(cors({
-  origin: [
-    process.env.CORS_ORIGIN_PROD, 
-    process.env.CORS_ORIGIN_DEV
-  ],
-  methods: ["GET", "POST", "DELETE", "PUT"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [process.env.CORS_ORIGIN_PROD, process.env.CORS_ORIGIN_DEV],
+    methods: ["GET", "POST", "DELETE", "PUT"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+    credentials: true,
+  })
+);
 
 const clients = new Map();
 
@@ -53,8 +52,8 @@ let db;
 async function setupDatabase() {
   // Open the database
   db = await open({
-    filename: path.join(__dirname, 'database.db'),
-    driver: sqlite3.Database
+    filename: path.join(__dirname, "database.db"),
+    driver: sqlite3.Database,
   });
 
   // Create users table if it doesn't exist
@@ -67,12 +66,12 @@ async function setupDatabase() {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  console.log('SQLite database connected');
+  console.log("SQLite database connected");
 }
 
 // Initialize database
-setupDatabase().catch(err => {
-  console.error('Database setup error:', err);
+setupDatabase().catch((err) => {
+  console.error("Database setup error:", err);
   process.exit(1);
 });
 
@@ -90,31 +89,34 @@ function apiKeyAuth(req, res, next) {
 // JWT Authentication middleware
 const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+
     if (!token) {
-      return res.status(401).json({ message: 'Authentication required' });
+      return res.status(401).json({ message: "Authentication required" });
     }
-    
+
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await db.get('SELECT id, username, email, role FROM users WHERE id = ?', decoded.userId);
-    
+    const user = await db.get(
+      "SELECT id, username, email, role FROM users WHERE id = ?",
+      decoded.userId
+    );
+
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      return res.status(401).json({ message: "User not found" });
     }
-    
+
     req.user = user;
     req.token = token;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Please authenticate' });
+    res.status(401).json({ message: "Please authenticate" });
   }
 };
 
 // Admin role check middleware
 const adminAuth = async (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Admin access required' });
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Admin access required" });
   }
   next();
 };
@@ -123,14 +125,22 @@ app.use(express.json());
 
 // Validation middleware
 const registerValidation = [
-  body('username').trim().isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
-  body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+  body("username")
+    .trim()
+    .isLength({ min: 3 })
+    .withMessage("Username must be at least 3 characters"),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Please provide a valid email"),
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters"),
 ];
 
 const loginValidation = [
-  body('username').trim().notEmpty().withMessage('Username is required'),
-  body('password').notEmpty().withMessage('Password is required')
+  body("username").trim().notEmpty().withMessage("Username is required"),
+  body("password").notEmpty().withMessage("Password is required"),
 ];
 
 // AUTH ROUTES
@@ -141,48 +151,72 @@ app.post("/api/auth/register", registerValidation, async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  
+
   const { username, email, password } = req.body;
-  
+
   try {
+    // Check if any users exist in the database
+    const existingUsers = await db.get("SELECT COUNT(*) as count FROM users");
+    const isFirstUser = existingUsers.count === 0;
+
     // Check if user already exists
-    const existingUser = await db.get('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]);
+    const existingUser = await db.get(
+      "SELECT * FROM users WHERE username = ? OR email = ?",
+      [username, email]
+    );
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists" });
     }
-    
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    
-    // Create new user
+
+    // Create new user - first user becomes admin
     const result = await db.run(
-      'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-      [username, email, hashedPassword]
+      "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
+      [username, email, hashedPassword, isFirstUser ? "admin" : "user"]
     );
-    
+
     // Get the inserted user
-    const user = await db.get('SELECT id, username, email, role FROM users WHERE id = ?', result.lastID);
-    
-    // Create JWT token
-    const token = jwt.sign(
-      { userId: user.id }, 
-      JWT_SECRET,
-      { expiresIn: '1h' }
+    const user = await db.get(
+      "SELECT id, username, email, role FROM users WHERE id = ?",
+      result.lastID
     );
-    
+
+    // Create JWT token
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
     res.status(201).json({
       token,
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+        isFirstUser: isFirstUser,
+      },
     });
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Registration error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Add a new endpoint to check if registration is allowed
+app.get("/api/auth/can-register", async (req, res) => {
+  try {
+    const existingUsers = await db.get("SELECT COUNT(*) as count FROM users");
+    if(existingUsers.count === 0){
+      return res.json({ canRegister: true });
+    }else {
+      return res.json({ canRegister: false });
+    }
+  } catch (error) {
+    console.error("Registration check error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -193,41 +227,42 @@ app.post("/api/auth/login", loginValidation, async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  
+
   const { username, password } = req.body;
-  
+
   try {
     // Check if user exists
-    const user = await db.get('SELECT * FROM users WHERE username = ?', username);
+    const user = await db.get(
+      "SELECT * FROM users WHERE username = ?",
+      username
+    );
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
-    
+
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
-    
+
     // Create JWT token
-    const token = jwt.sign(
-      { userId: user.id },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-    
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
     res.json({
       token,
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -237,14 +272,14 @@ app.get("/api/auth/profile", auth, async (req, res) => {
     // User information is already available from the auth middleware
     res.json(req.user);
   } catch (error) {
-    console.error('Profile error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Profile error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
 // Logout (optional - can be handled on client side)
 app.post("/api/auth/logout", auth, (req, res) => {
-  res.json({ message: 'Logged out successfully' });
+  res.json({ message: "Logged out successfully" });
 });
 
 // EXISTING ROUTES WITH AUTHENTICATION
@@ -332,11 +367,13 @@ app.post("/api/terminate", auth, apiKeyAuth, (req, res) => {
 // Get all users (admin only)
 app.get("/api/admin/users", auth, adminAuth, async (req, res) => {
   try {
-    const users = await db.all('SELECT id, username, email, role, created_at FROM users');
+    const users = await db.all(
+      "SELECT id, username, email, role, created_at FROM users"
+    );
     res.json(users);
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -344,41 +381,44 @@ app.get("/api/admin/users", auth, adminAuth, async (req, res) => {
 app.put("/api/admin/users/:id/role", auth, adminAuth, async (req, res) => {
   const { role } = req.body;
   const userId = req.params.id;
-  
-  if (!['admin', 'user'].includes(role)) {
-    return res.status(400).json({ message: 'Invalid role' });
+
+  if (!["admin", "user"].includes(role)) {
+    return res.status(400).json({ message: "Invalid role" });
   }
-  
+
   try {
-    await db.run('UPDATE users SET role = ? WHERE id = ?', [role, userId]);
-    const updatedUser = await db.get('SELECT id, username, email, role FROM users WHERE id = ?', userId);
-    
+    await db.run("UPDATE users SET role = ? WHERE id = ?", [role, userId]);
+    const updatedUser = await db.get(
+      "SELECT id, username, email, role FROM users WHERE id = ?",
+      userId
+    );
+
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-    
+
     res.json(updatedUser);
   } catch (error) {
-    console.error('Error updating user role:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error updating user role:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
 // Delete user (admin only)
 app.delete("/api/admin/users/:id", auth, adminAuth, async (req, res) => {
   const userId = req.params.id;
-  
+
   try {
-    const result = await db.run('DELETE FROM users WHERE id = ?', userId);
-    
+    const result = await db.run("DELETE FROM users WHERE id = ?", userId);
+
     if (result.changes === 0) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-    
-    res.json({ message: 'User deleted successfully' });
+
+    res.json({ message: "User deleted successfully" });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
