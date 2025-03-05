@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from "react";
-import { useNavigate, Navigate, useLocation, Link } from "react-router";
+import { useNavigate, Navigate, useLocation } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
+import axios from "axios";
 
 interface LocationState {
   from?: {
@@ -8,12 +9,15 @@ interface LocationState {
   };
 }
 
+const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isBtnLoading, setIsBtnLoading] = useState(false);
+  const [canRegister, setCanRegister] = useState(false);
   const { login, error, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,6 +33,21 @@ const LoginPage = () => {
     }, 100);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Check if registration is allowed
+    const checkRegistrationStatus = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/auth/can-register`);
+        setCanRegister(response.data.canRegister);
+      } catch (err) {
+        console.error("Error checking registration status", err);
+        setErrorMessage("Unable to check registration status");
+      }
+    };
+
+    checkRegistrationStatus();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,6 +74,10 @@ const LoginPage = () => {
 
   if (isLoading) {
     return null;
+  }
+
+  if(canRegister){
+    return <Navigate to="/register" replace />;
   }
 
   if (isAuthenticated) {
@@ -113,13 +136,6 @@ const LoginPage = () => {
             )}
           </button>
         </form>
-
-        <p className="mt-4 text-center">
-          Don't have an account?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline">
-            Register
-          </Link>
-        </p>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [isBtnLoading, setIsBtnLoading] = useState(false);
   const [canRegister, setCanRegister] = useState(false);
   const { register, error } = useContext(AuthContext);
@@ -17,11 +18,22 @@ const RegisterPage = () => {
   const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
   useEffect(() => {
+    // Short timeout to ensure auth state is properly loaded
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     // Check if registration is allowed
     const checkRegistrationStatus = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/auth/can-register`);
-        console.log(response.data);
+        if (response.data.canRegister === false) {
+          navigate("/login");
+        }
         setCanRegister(response.data.canRegister);
       } catch (err) {
         console.error("Error checking registration status", err);
@@ -79,6 +91,10 @@ const RegisterPage = () => {
       setIsBtnLoading(false);
     }
   };
+
+  if (isLoading) {
+    return null;
+  }
 
   // If registration is not allowed, show a message
   if (!canRegister) {
