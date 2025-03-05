@@ -16,6 +16,7 @@ const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 function ManageUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isBtnLoading, setIsBtnLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { user } = useContext(AuthContext);
 
@@ -116,6 +117,7 @@ function ManageUsersPage() {
   // Handle new user creation
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsBtnLoading(true);
 
     try {
       const token = localStorage.getItem("token");
@@ -136,11 +138,14 @@ function ManageUsersPage() {
       toast.success("User created successfully");
       setNewUser({ username: "", email: "", password: "" });
       fetchUsers(); // Refresh the user list
+      (document.getElementById("createModal") as HTMLDialogElement)?.close();
     } catch (error) {
       console.error("Error creating user:", error);
       toast.error(
         error instanceof Error ? error.message : "Failed to create user"
       );
+    } finally {
+      setIsBtnLoading(false);
     }
   };
 
@@ -211,7 +216,7 @@ function ManageUsersPage() {
                     </td>
                     <td>
                       <button
-                        className="btn btn-error btn-sm"
+                        className="btn btn-error btn-sm text-white"
                         onClick={() => {
                           setSelectedUser(user);
                           (
@@ -220,6 +225,7 @@ function ManageUsersPage() {
                             ) as HTMLDialogElement
                           )?.showModal();
                         }}
+                        disabled={currentAdminUsername === user.username}
                       >
                         Delete
                       </button>
@@ -253,6 +259,7 @@ function ManageUsersPage() {
                   onChange={(e) =>
                     setNewUser({ ...newUser, username: e.target.value })
                   }
+                  disabled={isBtnLoading}
                   required
                 />
               </fieldset>
@@ -266,6 +273,7 @@ function ManageUsersPage() {
                   onChange={(e) =>
                     setNewUser({ ...newUser, email: e.target.value })
                   }
+                  disabled={isBtnLoading}
                   required
                 />{" "}
               </fieldset>
@@ -279,13 +287,22 @@ function ManageUsersPage() {
                   onChange={(e) =>
                     setNewUser({ ...newUser, password: e.target.value })
                   }
+                  disabled={isBtnLoading}
                   required
                 />{" "}
               </fieldset>
 
-              <div className="flex items-center justify-end gap-2 mt-4">
-                <button type="submit" className="btn btn-neutral">
-                  Create User
+              <div className="flex items-center justify-end gap-5 mt-4">
+                <button
+                  type="submit"
+                  className="btn btn-neutral"
+                  disabled={isBtnLoading}
+                >
+                  {isBtnLoading ? (
+                    <span className="loading loading-spinner"></span>
+                  ) : (
+                    "Create User"
+                  )}
                 </button>
 
                 <form method="dialog">
@@ -306,7 +323,10 @@ function ManageUsersPage() {
             </p>
             <div className="modal-action">
               <form method="dialog" className="space-x-3">
-                <button className="btn btn-error" onClick={handleDeleteUser}>
+                <button
+                  className="btn btn-error text-white"
+                  onClick={handleDeleteUser}
+                >
                   Delete
                 </button>
                 <button className="btn">Cancel</button>
