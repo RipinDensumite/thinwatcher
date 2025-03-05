@@ -164,7 +164,7 @@ function ManageUsersPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Manage Users</h1>
           <button
-            className="btn"
+            className="btn btn-neutral"
             onClick={() =>
               (
                 document.getElementById("createModal") as HTMLDialogElement
