@@ -27,7 +27,7 @@ $config = Read-Config
 $BACKEND_URL = $config["BACKEND_URL"]
 
 # Validate required configuration
-if (-not $CLIENT_ID -or -not $BACKEND_URL -or -not $HEARTBEAT_INTERVAL) {
+if (-not $BACKEND_URL) {
     Write-Error "Missing required configuration values. Please check config.txt"
     exit 1
 }
