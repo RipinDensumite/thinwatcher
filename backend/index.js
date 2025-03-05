@@ -209,9 +209,9 @@ app.post("/api/auth/register", registerValidation, async (req, res) => {
 app.get("/api/auth/can-register", async (req, res) => {
   try {
     const existingUsers = await db.get("SELECT COUNT(*) as count FROM users");
-    if(existingUsers.count === 0){
+    if (existingUsers.count === 0) {
       return res.json({ canRegister: true });
-    }else {
+    } else {
       return res.json({ canRegister: false });
     }
   } catch (error) {
@@ -358,6 +358,16 @@ app.post("/api/terminate", auth, apiKeyAuth, (req, res) => {
     res.sendStatus(200);
   } else {
     res.status(404).send("Client not found");
+  }
+});
+
+app.get("/api/clients/users", async (req, res) => {
+  try {
+    const users = await db.all("SELECT username FROM users");
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
