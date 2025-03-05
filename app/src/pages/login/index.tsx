@@ -76,7 +76,7 @@ const LoginPage = () => {
     return null;
   }
 
-  if(canRegister){
+  if (canRegister) {
     return <Navigate to="/register" replace />;
   }
 
@@ -97,7 +97,7 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700 mb-2">
+            {/* <label htmlFor="username" className="block text-gray-700 mb-2">
               Username
             </label>
             <input
@@ -107,11 +107,38 @@ const LoginPage = () => {
               onChange={(e) => setUsername(e.target.value)}
               className="w-full p-2 border rounded"
               disabled={isBtnLoading}
-            />
+            /> */}
+            <label className="input validator w-full">
+              <svg
+                className="h-[1em] opacity-50"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <g
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  strokeWidth="2.5"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </g>
+              </svg>
+              <input
+                type="text"
+                required
+                placeholder="Username"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={isBtnLoading}
+              />
+            </label>
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700 mb-2">
+            {/* <label htmlFor="password" className="block text-gray-700 mb-2">
               Password
             </label>
             <input
@@ -121,7 +148,39 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-2 border rounded"
               disabled={isBtnLoading}
-            />
+            /> */}
+            <label className="input validator w-full">
+              <svg
+                className="h-[1em] opacity-50"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <g
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  strokeWidth="2.5"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path>
+                  <circle
+                    cx="16.5"
+                    cy="7.5"
+                    r=".5"
+                    fill="currentColor"
+                  ></circle>
+                </g>
+              </svg>
+              <input
+                type="password"
+                required
+                placeholder="Password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isBtnLoading}
+              />
+            </label>
           </div>
 
           <button
