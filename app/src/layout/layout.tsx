@@ -30,9 +30,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
               >
                 <li>
-                  <button onClick={handleLogout} className="btn">
-                    Logout
-                  </button>
+                  <a onClick={handleLogout}>
+                    <LogOut
+                      onClick={handleLogout}
+                      size={16}
+                      className="cursor-pointer text-red-600"
+                    />
+                    <span className="text-red-600">Logout</span>
+                  </a>
                 </li>
               </ul>
             </div>
