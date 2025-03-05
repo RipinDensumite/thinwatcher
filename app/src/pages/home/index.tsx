@@ -56,10 +56,12 @@ export default function HomePage() {
 
   const deleteClient = async (clientId: string) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
         method: "DELETE",
         headers: {
           "x-api-key": import.meta.env.VITE_API_KEY,
+          Authorization: `Bearer ${token}`,
         },
       });
 
