@@ -1,5 +1,3 @@
-// Please rename the file name to ecosystem.config.js to be recognized by pm2
-
 module.exports = {
   apps: [
     {
@@ -10,18 +8,20 @@ module.exports = {
         OFFLINE_TIMEOUT: 20000,
         CLEANUP_INTERVAL: 10000,
         CORS_ORIGIN_PROD: "",
-        CORS_ORIGIN_DEV: "",
+        CORS_ORIGIN_DEV: "http://localhost:5173",
         API_KEY: "",
         JWT_SECRET: "",
-        NODE_ENV: "production", // development or production
+        NODE_ENV: "production",
       },
     },
     {
       name: "frontend",
       script: "serve",
-      args: ["-s", "dist", "-l", "4173"],
-      cwd: "./app",
       env: {
+        PM2_SERVE_PATH: "./app/dist",
+        PM2_SERVE_PORT: 4173,
+        PM2_SERVE_SPA: "true",
+        NODE_ENV: "production",
         VITE_BACKEND_API_URL: "",
         VITE_API_KEY: "",
       },
