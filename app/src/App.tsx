@@ -4,8 +4,10 @@ import WrongPage from "./pages/404";
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
 import AgentsPage from "./pages/agents";
+import ManageUsersPage from "./pages/users";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { Toaster } from "sonner";
 
 interface TitleProps {
   title: string;
@@ -24,6 +26,7 @@ function Title({ title, children }: TitleProps) {
 function App() {
   return (
     <AuthProvider>
+      <Toaster />
       <Routes>
         {/* Public routes */}
         <Route
@@ -42,7 +45,6 @@ function App() {
             </Title>
           }
         />
-
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route
@@ -62,19 +64,17 @@ function App() {
             }
           />
         </Route>
-
-        {/* Admin routes
+        Admin routes
         <Route element={<ProtectedRoute requireAdmin={true} />}>
           <Route
-            path="/admin"
+            path="/users"
             element={
-              <Title title="Admin Dashboard">
-                <AdminPage />
+              <Title title="Users">
+                <ManageUsersPage />
               </Title>
             }
           />
-        </Route> */}
-
+        </Route>
         {/* Catch-all route for 404 */}
         <Route
           path="*"

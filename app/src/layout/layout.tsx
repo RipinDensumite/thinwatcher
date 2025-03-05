@@ -1,5 +1,5 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { View, Router, LogOut, Menu } from "lucide-react";
+import { View, Router, LogOut, Menu, User } from "lucide-react";
 import { useNavigate } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
 import { useContext } from "react";
@@ -59,6 +59,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Router size={20} color="gray" />
               <span className="text-xs">Agents</span>
             </li>
+            {user?.role === "admin" && (
+              <li
+                onClick={() => navigate("/users")}
+                className="flex flex-col items-center gap-1 p-2 rounded-md cursor-pointer hover:bg-slate-200 transition-all"
+              >
+                <User size={20} color="gray" />
+                <span className="text-xs">Users</span>
+              </li>
+            )}
           </ul>
         </nav>
       </section>
@@ -87,6 +96,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <Router size={16} color="gray" />
                 Agents
               </li>
+              {user?.role === "admin" && (
+                <li
+                  onClick={() => navigate("/users")}
+                  className="hover:bg-slate-200 flex items-center gap-2 transition-all w-full py-2 pl-2 rounded-md cursor-pointer"
+                >
+                  <User size={16} color="gray" />
+                  Users
+                </li>
+              )}
             </ul>
           </div>
           <div>
@@ -98,7 +116,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
                     </div>
                   </div>
-                  <span>{user?.username}</span>
+                  <span className="font-bold">{user?.username}</span>
                 </div>
                 <LogOut
                   onClick={handleLogout}
