@@ -112,8 +112,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <li className="flex flex-row items-center justify-between gap-2 p-2 select-none">
                 <div className="flex flex-row items-center gap-2">
                   <div className="avatar">
-                    <div className="w-11 rounded-full">
-                      <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                    <div className="w-8 rounded-md bg-gray-400">
+                      {/* <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" /> */}
                     </div>
                   </div>
                   <span className="font-bold">{user?.username}</span>
