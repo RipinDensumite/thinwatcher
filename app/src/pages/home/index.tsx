@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import Layout from "@/layout/layout";
 import { UserRound, WifiOff, Wifi, Trash2, Computer } from "lucide-react";
 import { useMediaQuery } from "@uidotdev/usehooks";
+import { AuthContext } from "@/context/AuthContext";
 
 interface Session {
   ID: string;
@@ -30,6 +31,8 @@ export default function HomePage() {
   const [, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { user } = useContext(AuthContext);
 
   // Initial data fetch
   useEffect(() => {
@@ -437,12 +440,12 @@ export default function HomePage() {
                         )}
                       </td>
                       <td className="flex justify-end gap-4 px-6 py-4 font-medium">
-                        <button
+                        {user?.role === "admin" && <button
                           onClick={() => deleteClient(client.clientId)}
                           className="cursor-pointer"
                         >
                           <Trash2 size={18} />
-                        </button>
+                        </button>}
                       </td>
                     </tr>
 
