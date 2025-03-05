@@ -288,7 +288,7 @@ app.delete("/api/clients/ctest", apiKeyAuth, (req, res) => {
   res.sendStatus(200);
 });
 
-app.post("/api/status", apiKeyAuth, (req, res) => {
+app.post("/api/status", (req, res) => {
   const { clientId, users, sessions, os } = req.body;
   const clientData = {
     isOnline: true,
