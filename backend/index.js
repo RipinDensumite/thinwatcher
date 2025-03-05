@@ -282,9 +282,7 @@ app.post("/api/auth/logout", auth, (req, res) => {
   res.json({ message: "Logged out successfully" });
 });
 
-// EXISTING ROUTES WITH AUTHENTICATION
-// Apply both API key middleware and JWT auth to protected endpoints
-app.delete("/api/clients/ctest", apiKeyAuth, (req, res) => {
+app.delete("/api/clients/ctest", (req, res) => {
   res.sendStatus(200);
 });
 
