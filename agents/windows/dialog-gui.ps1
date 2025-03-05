@@ -1,5 +1,41 @@
 Add-Type -AssemblyName System.Windows.Forms
 
+$directoryPath = $PSScriptRoot
+$configFile = "$directoryPath\config.txt"
+
+function Read-Config {
+    $config = @{}
+    if (Test-Path $configFile) {
+        Get-Content $configFile | Foreach-Object {
+            if ($_ -match '^\s*([^=]+)\s*=\s*(.+)\s*$') {
+                $key = $matches[1].Trim()
+                $value = $matches[2].Trim()
+                $config[$key] = $value
+            }
+        }
+    }
+    else {
+        Write-Error "Configuration file not found: $configFile"
+        exit 1
+    }
+    return $config
+}
+
+$config = Read-Config
+
+# Assign configuration values to variables
+$BACKEND_URL = $config["BACKEND_URL"]
+
+# Validate required configuration
+if (-not $CLIENT_ID -or -not $BACKEND_URL -or -not $HEARTBEAT_INTERVAL) {
+    Write-Error "Missing required configuration values. Please check config.txt"
+    exit 1
+}
+
+# Output configuration values for verification
+Write-Host "Configuration loaded:"
+Write-Host "Backend URL: $BACKEND_URL"
+
 # Set up logging
 $logPath = Join-Path $PSScriptRoot "script_log.txt"
 
@@ -11,6 +47,22 @@ function Write-Log {
     $logMessage = "$timestamp - $Message"
     Add-Content -Path $logPath -Value $logMessage
     Write-Host $logMessage
+}
+
+function Get-UserNames {
+    try {
+        Write-Log "Fetching user names from API"
+        $apiUrl = "${BACKEND_URL}/api/clients/users"
+        $response = Invoke-RestMethod -Uri $apiUrl -Method Get
+        $usernames = $response | ForEach-Object { $_.username }
+        Write-Log "Successfully fetched user names: $($usernames -join ', ')"
+        return $usernames
+    }
+    catch {
+        Write-Log "ERROR: An exception occurred while fetching user names: $($_.Exception.Message)"
+        Write-Log "Stack Trace: $($_.Exception.StackTrace)"
+        return @()
+    }
 }
 
 function Open-GUI {
@@ -38,13 +90,18 @@ function Open-GUI {
         $comboBox.Size = New-Object System.Drawing.Size(260, 20)
         $comboBox.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-        # Add some example names to the combo box
-        $names = @("John Doe", "Jane Smith", "Alice Johnson", "Bob Brown")
-        foreach ($name in $names) {
-            $comboBox.Items.Add($name)
+        # Fetch user names from the API
+        $usernames = Get-UserNames
+        if ($usernames.Count -gt 0) {
+            foreach ($username in $usernames) {
+                $comboBox.Items.Add($username)
+            }
+            Write-Log "Combo box populated with user names"
+        }
+        else {
+            Write-Log "No user names fetched from API"
         }
         $form.Controls.Add($comboBox)
-        Write-Log "Combo box created and populated with names"
 
         # Create a submit button
         $button = New-Object System.Windows.Forms.Button
