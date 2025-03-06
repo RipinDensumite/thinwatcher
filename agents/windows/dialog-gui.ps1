@@ -1,11 +1,4 @@
-try {
-    Add-Type -AssemblyName PresentationFramework -ErrorAction Stop;
-    Add-Type -AssemblyName PresentationCore -ErrorAction Stop;
-    Add-Type -AssemblyName WindowsBase -ErrorAction Stop;
-    Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop;
-} catch {
-    Log-Error
-}
+Add-Type -AssemblyName System.Windows.Forms
 
 $directoryPath = $PSScriptRoot
 $configFile = "$directoryPath\config.txt"
