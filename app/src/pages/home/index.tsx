@@ -29,6 +29,7 @@ export default function HomePage() {
   const isMobile = useMediaQuery("only screen and (max-width : 768px)");
   const [clients, setClients] = useState<Client[]>([]);
   const [, setSocket] = useState<Socket | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,9 +49,12 @@ export default function HomePage() {
         }
         const data = await response.json();
         setClients(data);
+        setError(null);
       } catch (error) {
         console.error("Failed to fetch initial data:", error);
         setError("Failed to fetch initial data. Please refresh the page.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -204,69 +208,73 @@ export default function HomePage() {
               <p className="text-gray-500">No clients connected</p>
             </div>
           )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {clients.map((client) => (
-              <div
-                key={client.clientId}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
-              >
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">{client.clientId}</h2>
-                    {client.status.isOnline ? (
-                      <span className="select-none inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
-                        <div className="inline-grid *:[grid-area:1/1]">
-                          <div className="status status-success animate-ping"></div>
-                          <div className="status status-success"></div>
-                        </div>
-                        Healthy
-                      </span>
-                    ) : (
-                      <span className="select-none inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-600">
-                        <div className="inline-grid *:[grid-area:1/1]">
-                          <div className="status status-error animate-ping"></div>
-                          <div className="status status-error"></div>
-                        </div>
-                        Unhealthy
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Last Updated:{" "}
-                    {new Date(client.status.lastUpdated).toLocaleString()}
-                  </p>
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-semibold">Active Sessions</h3>
-                      <span className="flex items-center justify-center gap-1 bg-slate-300/60 ring-2 ring-black/40 rounded-4xl px-3 py-1">
-                        <span className="text-sm">
-                          {client.status.users.length}
-                        </span>{" "}
-                        <UserRound className="text-black size-4" />
-                      </span>
-                    </div>
-                    <ul className="space-y-2">
-                      {client.status.sessions.map((session) => (
-                        <li
-                          key={session.ID}
-                          className="flex justify-between items-center bg-gray-50 p-2 rounded"
-                        >
-                          <div>
-                            <span className="font-medium mr-2">
-                              {session.User}
-                            </span>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                session.State === "Active"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {session.State}
-                            </span>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {clients.map((client) => (
+                <div
+                  key={client.clientId}
+                  className="bg-white rounded-lg shadow-md overflow-hidden"
+                >
+                  <div className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-semibold">
+                        {client.clientId}
+                      </h2>
+                      {client.status.isOnline ? (
+                        <span className="select-none inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
+                          <div className="inline-grid *:[grid-area:1/1]">
+                            <div className="status status-success animate-ping"></div>
+                            <div className="status status-success"></div>
                           </div>
-                          {/* {session.State === "Active" && (
+                          Healthy
+                        </span>
+                      ) : (
+                        <span className="select-none inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-600">
+                          <div className="inline-grid *:[grid-area:1/1]">
+                            <div className="status status-error animate-ping"></div>
+                            <div className="status status-error"></div>
+                          </div>
+                          Unhealthy
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Last Updated:{" "}
+                      {new Date(client.status.lastUpdated).toLocaleString()}
+                    </p>
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <h3 className="text-lg font-semibold">
+                          Active Sessions
+                        </h3>
+                        <span className="flex items-center justify-center gap-1 bg-slate-300/60 ring-2 ring-black/40 rounded-4xl px-3 py-1">
+                          <span className="text-sm">
+                            {client.status.users.length}
+                          </span>{" "}
+                          <UserRound className="text-black size-4" />
+                        </span>
+                      </div>
+                      <ul className="space-y-2">
+                        {client.status.sessions.map((session) => (
+                          <li
+                            key={session.ID}
+                            className="flex justify-between items-center bg-gray-50 p-2 rounded"
+                          >
+                            <div>
+                              <span className="font-medium mr-2">
+                                {session.User}
+                              </span>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                  session.State === "Active"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
+                                {session.State}
+                              </span>
+                            </div>
+                            {/* {session.State === "Active" && (
                             <button
                               onClick={() =>
                                 terminateSession(client.clientId, session.ID)
@@ -276,14 +284,19 @@ export default function HomePage() {
                               Terminate
                             </button>
                           )} */}
-                        </li>
-                      ))}
-                    </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex justify-center items-center h-64">
+              <span className="loading loading-spinner loading-lg"></span>
+            </div>
+          )}
         </div>
       </Layout>
     );
