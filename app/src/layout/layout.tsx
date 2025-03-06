@@ -121,11 +121,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <div>
             <ul>
-              <div className="dropdown dropdown-top w-full">
+              <div className="dropdown dropdown-top dropdown-center w-full">
                 <li
                   tabIndex={0}
                   role="button"
-                  className="flex flex-row items-center justify-between gap-2 select-none hover:bg-slate-200 rounded-md cursor-pointer mx-2 mb-2 px-1 py-1"
+                  className="flex flex-row items-center justify-between gap-2 select-none hover:bg-slate-200 transition-all rounded-md cursor-pointer mx-2 mb-2 px-1 py-1"
                 >
                   <div className="flex flex-row items-center gap-2">
                     <div className="avatar">
@@ -145,16 +145,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
                 >
                   <li>
-                  <a onClick={handleLogout}>
-                    <LogOut
-                      onClick={handleLogout}
-                      size={16}
-                      className="cursor-pointer text-red-600"
-                    />
-                    <span className="text-red-600">Logout</span>
-                  </a>                  </li>
+                    <a onClick={handleLogout}>
+                      <LogOut
+                        onClick={handleLogout}
+                        size={16}
+                        className="cursor-pointer text-red-600"
+                      />
+                      <span className="text-red-600">Logout</span>
+                    </a>{" "}
+                  </li>
                   <li>
-                    <a>Profile</a>
+                    <a onClick={() => navigate("/profile")}>Profile</a>
                   </li>
                 </ul>
               </div>

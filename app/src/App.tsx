@@ -8,6 +8,7 @@ import ManageUsersPage from "./pages/users";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "sonner";
+import ProfilePage from "./pages/profile";
 
 interface TitleProps {
   title: string;
@@ -60,6 +61,14 @@ function App() {
             element={
               <Title title="Agents">
                 <AgentsPage />
+              </Title>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <Title title="Profile">
+                <ProfilePage />
               </Title>
             }
           />
