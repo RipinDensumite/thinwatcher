@@ -3,8 +3,7 @@ try {
     Add-Type -AssemblyName PresentationCore -ErrorAction Stop;
     Add-Type -AssemblyName WindowsBase -ErrorAction Stop;
     Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop;
-}
-catch {
+} catch {
     Log-Error
 }
 
@@ -43,14 +42,6 @@ if (-not $BACKEND_URL) {
 # Output configuration values for verification
 Write-Host "Configuration loaded:"
 Write-Host "Backend URL: $BACKEND_URL"
-
-
-$acl = Get-Acl "$InstallDir\$GuiDialog"
-$rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-    "Users", "ReadAndExecute", "Allow"
-)
-$acl.AddAccessRule($rule)
-Set-Acl "$InstallDir\$GuiDialog" $acl
 
 # Set up logging
 $logPath = Join-Path $PSScriptRoot "script_log.txt"

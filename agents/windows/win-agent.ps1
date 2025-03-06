@@ -121,21 +121,11 @@ function Send-Heartbeat {
         # Check if there are any active sessions
         if ($activeUsers.Count -gt 0) {
             if (-not $script:isGUIOpen) {
-                # Get the first active user's session ID
-                $activeSession = $sessions | Where-Object { $_.State -eq "Active" } | Select-Object -First 1
-                
-                # Create process start info to run as active user
-                $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-                $startInfo.FileName = "powershell.exe"
-                $startInfo.Arguments = "-ExecutionPolicy Bypass -File `"$dialogPath`""
-                $startInfo.UseShellExecute = $true
-                $startInfo.LoadUserProfile = $true
-
-                # Start process in user's session
-                $process = [System.Diagnostics.Process]::Start($startInfo)
+                Start-Process -FilePath "powershell.exe" -ArgumentList "-File $dialogPath"
                 $script:isGUIOpen = $true
             }
             Write-Output 1
+       
         }
         else {
             $script:isGUIOpen = $false
