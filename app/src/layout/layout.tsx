@@ -1,5 +1,5 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { View, Router, LogOut, Menu, User } from "lucide-react";
+import { View, Router, LogOut, Menu, User, CircleUserRound } from "lucide-react";
 import { useNavigate } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
 import { useContext } from "react";
@@ -117,7 +117,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <li className="flex flex-row items-center justify-between gap-2 p-2 select-none">
                 <div className="flex flex-row items-center gap-2">
                   <div className="avatar">
-                    <div className="w-8 rounded-md bg-gray-400">
+                    <div className="w-8">
+                      <CircleUserRound size={32} color="black" />
                       {/* <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" /> */}
                     </div>
                   </div>
