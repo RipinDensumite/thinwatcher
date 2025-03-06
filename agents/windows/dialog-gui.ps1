@@ -37,8 +37,7 @@ Write-Host "Configuration loaded:"
 Write-Host "Backend URL: $BACKEND_URL"
 
 # Set up logging
-$logPath = Join-Path $PSScriptRoot "script_log.txt"
-
+$logPath = "$directoryPath\script_log.txt"
 function Write-Log {
     param(
         [string]$Message

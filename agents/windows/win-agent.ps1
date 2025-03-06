@@ -39,7 +39,7 @@ Write-Host "Heartbeat Interval: $HEARTBEAT_INTERVAL seconds"
 Write-Host "Client ID: $CLIENT_ID"
 
 $OS_TYPE = "Windows"
-$dialogPath = Join-Path $directoryPath 'dialog-gui.ps1'
+$dialogPath = "$directoryPath\dialog-gui.ps1"
 
 # Declare $isGUIOpen at the script level to maintain its state across function calls
 $script:isGUIOpen = $false
