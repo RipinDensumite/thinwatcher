@@ -1,5 +1,12 @@
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { View, Router, LogOut, Menu, User, CircleUserRound } from "lucide-react";
+import {
+  View,
+  Router,
+  LogOut,
+  Menu,
+  User,
+  CircleUserRound,
+} from "lucide-react";
 import { useNavigate } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
 import { useContext } from "react";
@@ -114,21 +121,43 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <div>
             <ul>
-              <li className="flex flex-row items-center justify-between gap-2 p-2 select-none">
-                <div className="flex flex-row items-center gap-2">
-                  <div className="avatar">
-                    <div className="w-8">
-                      <CircleUserRound size={32} color="black" strokeWidth={1.2}/>
+              <div className="dropdown dropdown-top w-full">
+                <li
+                  tabIndex={0}
+                  role="button"
+                  className="flex flex-row items-center justify-between gap-2 select-none hover:bg-slate-200 rounded-md cursor-pointer mx-2 mb-2 px-1 py-1"
+                >
+                  <div className="flex flex-row items-center gap-2">
+                    <div className="avatar">
+                      <div className="w-8">
+                        <CircleUserRound
+                          size={32}
+                          color="black"
+                          strokeWidth={1.2}
+                        />
+                      </div>
                     </div>
+                    <span className="font-bold">{user?.username}</span>
                   </div>
-                  <span className="font-bold">{user?.username}</span>
-                </div>
-                <LogOut
-                  onClick={handleLogout}
-                  size={16}
-                  className="cursor-pointer mr-2"
-                />
-              </li>
+                </li>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+                >
+                  <li>
+                  <a onClick={handleLogout}>
+                    <LogOut
+                      onClick={handleLogout}
+                      size={16}
+                      className="cursor-pointer text-red-600"
+                    />
+                    <span className="text-red-600">Logout</span>
+                  </a>                  </li>
+                  <li>
+                    <a>Profile</a>
+                  </li>
+                </ul>
+              </div>
             </ul>
           </div>
         </nav>
