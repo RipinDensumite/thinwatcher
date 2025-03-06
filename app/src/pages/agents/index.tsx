@@ -55,8 +55,7 @@ export default function AgentsPage() {
                   server that manages and monitors your thin clients.
                 </li>
                 <li>
-                  <strong>Heartbeat Interval</strong> (e.g., <code>5</code>{" "}
-                  seconds): The time interval (in seconds) at which the agent
+                  <strong>Heartbeat Interval</strong> (e.g., <code>5</code>): The time interval (in seconds) at which the agent
                   sends a "heartbeat" signal to the backend server. This helps
                   the backend track the client's status and ensure it's online.
                 </li>
