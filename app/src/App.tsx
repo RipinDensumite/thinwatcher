@@ -27,17 +27,19 @@ function Title({ title, children }: TitleProps) {
 
 function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [wasOffline, setWasOffline] = useState(false);
 
   useEffect(() => {
     const handleStatusChange = () => {
       setIsOnline(navigator.onLine);
 
       if (!navigator.onLine) {
+        setWasOffline(true);
         toast.loading("No internet connection...", {
           duration: Infinity,
           id: "offline-toast",
         });
-      } else {
+      } else if (wasOffline) {
         toast.dismiss("offline-toast");
         toast.success("Internet connection restored!");
       }
@@ -55,7 +57,7 @@ function App() {
       window.removeEventListener("online", handleStatusChange);
       window.removeEventListener("offline", handleStatusChange);
     };
-  }, [isOnline]);
+  }, [isOnline, wasOffline]);
 
   return (
     <AuthProvider>
