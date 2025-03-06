@@ -189,7 +189,7 @@ function ManageUsersPage() {
                   <th>Email</th>
                   <th>Role</th>
                   <th>Created At</th>
-                  <th>Actions</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
