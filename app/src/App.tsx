@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router";
 import HomePage from "./pages/home";
 import WrongPage from "./pages/404";
@@ -7,7 +8,7 @@ import AgentsPage from "./pages/agents";
 import ManageUsersPage from "./pages/users";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 import ProfilePage from "./pages/profile";
 
 interface TitleProps {
@@ -25,6 +26,37 @@ function Title({ title, children }: TitleProps) {
 }
 
 function App() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleStatusChange = () => {
+      setIsOnline(navigator.onLine);
+
+      if (!navigator.onLine) {
+        toast.loading("No internet connection...", {
+          duration: Infinity,
+          id: "offline-toast",
+        });
+      } else {
+        toast.dismiss("offline-toast");
+        toast.success("Internet connection restored!");
+      }
+    };
+
+    // Listen to the online status
+    window.addEventListener("online", handleStatusChange);
+    window.addEventListener("offline", handleStatusChange);
+
+    // Initial check
+    handleStatusChange();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("online", handleStatusChange);
+      window.removeEventListener("offline", handleStatusChange);
+    };
+  }, [isOnline]);
+
   return (
     <AuthProvider>
       <Toaster />
