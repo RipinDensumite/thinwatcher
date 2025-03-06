@@ -200,7 +200,7 @@ function ManageUsersPage() {
                     <td>{user.email}</td>
                     <td>
                       <select
-                        className="select select-bordered select-sm w-full max-w-xs"
+                        className="select select-bordered select-sm w-full min-w-24 max-w-xs"
                         value={user.role}
                         onChange={(e) =>
                           handleRoleChange(user.id, e.target.value)
