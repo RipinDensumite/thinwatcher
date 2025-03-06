@@ -119,7 +119,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <div className="avatar">
                     <div className="w-8">
                       <CircleUserRound size={32} color="black" strokeWidth={1.2}/>
-                      {/* <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" /> */}
                     </div>
                   </div>
                   <span className="font-bold">{user?.username}</span>
