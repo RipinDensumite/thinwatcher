@@ -282,7 +282,7 @@ app.post("/api/auth/logout", auth, (req, res) => {
   res.json({ message: "Logged out successfully" });
 });
 
-app.delete("/api/clients/ctest", (req, res) => {
+app.get("/api/ctest", (req, res) => {
   res.sendStatus(200);
 });
 

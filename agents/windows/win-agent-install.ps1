@@ -23,7 +23,7 @@ function Test-BackendConnection {
     )
     try {
         Write-Host "Testing backend connection: $url" -ForegroundColor Cyan
-        $response = Invoke-WebRequest -Uri "$url/api/check-client/ctest" -Method Get -UseBasicParsing -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri "$url/api/ctest" -Method Get -UseBasicParsing -ErrorAction Stop
         if ($response.StatusCode -eq 200) {
             Write-Host "Backend connection successful." -ForegroundColor Green
             return $true
