@@ -33,7 +33,7 @@ export default function HomePage() {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
 
   // Initial data fetch
   useEffect(() => {
@@ -42,6 +42,7 @@ export default function HomePage() {
         const response = await fetch(`${API_URL}/api/clients`, {
           headers: {
             "x-api-key": import.meta.env.VITE_API_KEY,
+            Authorization: `Bearer ${token}`,
           },
         });
         if (!response.ok) {
