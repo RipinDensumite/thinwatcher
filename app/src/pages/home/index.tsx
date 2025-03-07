@@ -73,8 +73,6 @@ export default function HomePage() {
         },
       });
 
-      console.log("response" + response);
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -98,13 +96,11 @@ export default function HomePage() {
 
     // Connection event handlers
     newSocket.on("connect", () => {
-      console.log("Socket connected");
       setIsConnected(true);
       setError(null);
     });
 
     newSocket.on("disconnect", () => {
-      console.log("Socket disconnected");
       setIsConnected(false);
       setError("Connection lost. Attempting to reconnect...");
     });
@@ -116,7 +112,6 @@ export default function HomePage() {
 
     // Initial data from socket
     newSocket.on("initial-data", (data: [string, ClientStatus][]) => {
-      console.log("Received initial data:", data);
       const formattedData = data.map(([clientId, status]) => ({
         clientId,
         status,
@@ -128,7 +123,6 @@ export default function HomePage() {
     newSocket.on(
       "update",
       ({ clientId, status }: { clientId: string; status: ClientStatus }) => {
-        console.log("Received update for client:", clientId);
         setClients((prev) => {
           const clientIndex = prev.findIndex(
             (client) => client.clientId === clientId
@@ -147,7 +141,6 @@ export default function HomePage() {
 
     // Delete client
     newSocket.on("client-removed", (clientId: string) => {
-      console.log("Client removed:", clientId);
       setClients((prev) =>
         prev.filter((client) => client.clientId !== clientId)
       );
