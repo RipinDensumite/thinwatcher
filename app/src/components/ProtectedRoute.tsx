@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Navigate, Outlet, useLocation } from "react-router";
 import { AuthContext } from "../context/AuthContext";
+import PageLoadingComponent from "./PageLoadingComponent";
 
 interface ProtectedRouteProps {
   requireAdmin?: boolean;
@@ -16,11 +17,7 @@ const ProtectedRoute = ({
 
   // Show loading state while authentication state is being determined
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span className="loading loading-spinner loading-xl"></span>
-      </div>
-    );
+    return <PageLoadingComponent />;
   }
 
   // Check if user is authenticated

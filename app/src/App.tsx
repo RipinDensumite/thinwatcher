@@ -10,6 +10,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster, toast } from "sonner";
 import ProfilePage from "./pages/profile";
+import BackendCheckerRoute from "./components/BackendCheckerRoute";
 
 interface TitleProps {
   title: string;
@@ -61,73 +62,75 @@ function App() {
 
   return (
     <AuthProvider>
-      <Toaster />
-      <Routes>
-        {/* Public routes */}
-        <Route
-          path="/login"
-          element={
-            <Title title="Login">
-              <LoginPage />
-            </Title>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <Title title="Register">
-              <RegisterPage />
-            </Title>
-          }
-        />
-        {/* Protected routes */}
-        <Route element={<ProtectedRoute />}>
+      <BackendCheckerRoute>
+        <Toaster />
+        <Routes>
+          {/* Public routes */}
           <Route
-            path="/"
+            path="/login"
             element={
-              <Title title="Watchers">
-                <HomePage />
+              <Title title="Login">
+                <LoginPage />
               </Title>
             }
           />
           <Route
-            path="/agents"
+            path="/register"
             element={
-              <Title title="Agents">
-                <AgentsPage />
+              <Title title="Register">
+                <RegisterPage />
               </Title>
             }
           />
+          {/* Protected routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route
+              path="/"
+              element={
+                <Title title="Watchers">
+                  <HomePage />
+                </Title>
+              }
+            />
+            <Route
+              path="/agents"
+              element={
+                <Title title="Agents">
+                  <AgentsPage />
+                </Title>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <Title title="Profile">
+                  <ProfilePage />
+                </Title>
+              }
+            />
+          </Route>
+          Admin routes
+          <Route element={<ProtectedRoute requireAdmin={true} />}>
+            <Route
+              path="/users"
+              element={
+                <Title title="Users">
+                  <ManageUsersPage />
+                </Title>
+              }
+            />
+          </Route>
+          {/* Catch-all route for 404 */}
           <Route
-            path="/profile"
+            path="*"
             element={
-              <Title title="Profile">
-                <ProfilePage />
+              <Title title="404 - Page Not Found">
+                <WrongPage />
               </Title>
             }
           />
-        </Route>
-        Admin routes
-        <Route element={<ProtectedRoute requireAdmin={true} />}>
-          <Route
-            path="/users"
-            element={
-              <Title title="Users">
-                <ManageUsersPage />
-              </Title>
-            }
-          />
-        </Route>
-        {/* Catch-all route for 404 */}
-        <Route
-          path="*"
-          element={
-            <Title title="404 - Page Not Found">
-              <WrongPage />
-            </Title>
-          }
-        />
-      </Routes>
+        </Routes>
+      </BackendCheckerRoute>
     </AuthProvider>
   );
 }
