@@ -16,6 +16,47 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
+# Install PsExec if necessary
+function Ensure-PsExec {
+    $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
+    
+    if (-not (Test-Path $psExecPath)) {
+        Write-Log "PsExec not found. Attempting to download Sysinternals Suite..."
+        
+        $tempZip = "$env:TEMP\SysinternalsSuite.zip"
+        $tempDir = "$env:TEMP\SysinternalsSuite"
+        
+        try {
+            # Download Sysinternals Suite
+            Invoke-WebRequest -Uri "https://download.sysinternals.com/files/SysinternalsSuite.zip" -OutFile $tempZip
+            
+            # Create temp directory
+            if (-not (Test-Path $tempDir)) {
+                New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+            }
+            
+            # Extract zip file
+            Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
+            
+            # Copy PsExec to System32
+            Copy-Item -Path "$tempDir\PsExec.exe" -Destination $psExecPath -Force
+            
+            # Clean up
+            Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            
+            Write-Log "PsExec installed successfully."
+            return $true
+        }
+        catch {
+            Write-Log "Failed to install PsExec: $($_.Exception.Message)"
+            return $false
+        }
+    }
+    
+    return $true
+}
+
 # Function to test backend connection
 function Test-BackendConnection {
     param (
@@ -114,6 +155,10 @@ CLIENT_ID=$CLIENT_ID
 
     Set-Content -Path $ConfigFile -Value $configContent
     Write-Host "Configuration file created at $ConfigFile" -ForegroundColor Green
+
+    if (-not (Ensure-PsExec)) {
+        Write-Log "ERROR: Could not ensure PsExec is available. GUI functionality may not work."
+    }
 
     # Create scheduled task
     $TaskAction = New-ScheduledTaskAction `

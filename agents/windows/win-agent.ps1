@@ -41,12 +41,22 @@ Write-Host "Client ID: $CLIENT_ID"
 
 $OS_TYPE = "Windows"
 $dialogPath = "$directoryPath\dialog-gui.ps1"
-$guiProcessId = $null
 $lastHeartbeatTime = [DateTime]::MinValue
 $lastTerminationCheckTime = [DateTime]::MinValue
+$lastActiveSession = $false
+$activeGuiProcess = $null
 
-# Optimize by only loading this assembly once
-Add-Type -AssemblyName System.Windows.Forms
+# Set up logging
+$logPath = "$directoryPath\agent_log.txt"
+function Write-Log {
+    param(
+        [string]$Message
+    )
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logMessage = "$timestamp - $Message"
+    Add-Content -Path $logPath -Value $logMessage
+    Write-Host $logMessage
+}
 
 function Get-SessionData {
     $raw = query session
@@ -116,16 +126,53 @@ function Get-SessionData {
 
 function Is-ProcessRunning {
     param (
-        [int]$processId
+        [System.Diagnostics.Process]$process
     )
     
-    if (-not $processId) { return $false }
+    if (-not $process) { return $false }
     
     try {
-        $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
-        return ($process -ne $null)
+        if ($process.HasExited) {
+            return $false
+        }
+        return $true
     }
     catch {
+        return $false
+    }
+}
+
+function Launch-DialogInUserContext {
+    param (
+        [string]$sessionId,
+        [string]$username
+    )
+    
+    Write-Log "Attempting to launch dialog in session $sessionId for user $username"
+    
+    try {
+        # Create a temporary VBS script that will launch our PowerShell dialog
+        $vbsPath = "$directoryPath\launcher.vbs"
+        $psLaunchCmd = "powershell.exe -ExecutionPolicy Bypass -WindowStyle Normal -File `"$dialogPath`""
+        
+        $vbsContent = @"
+Set objShell = CreateObject("WScript.Shell")
+objShell.Run "$psLaunchCmd", 1, False
+"@
+        
+        Set-Content -Path $vbsPath -Value $vbsContent -Force
+        
+        # Use PsExec to run the VBS script in the user's context
+        $result = & psexec -i $sessionId -d -s cscript.exe "$vbsPath" 2>&1
+        
+        # Remove the temporary VBS script
+        Remove-Item -Path $vbsPath -Force -ErrorAction SilentlyContinue
+        
+        Write-Log "Dialog launch attempt result: $result"
+        return $true
+    }
+    catch {
+        Write-Log "Failed to launch dialog in user context: $($_.Exception.Message)"
         return $false
     }
 }
@@ -143,22 +190,28 @@ function Send-Heartbeat {
     try {
         # Get session data once - reuse for both GUI check and heartbeat
         $sessions = Get-SessionData
-        $activeUsers = $sessions | 
-        Where-Object { $_.State -eq "Active" } | 
-        Select-Object -ExpandProperty User
-
-        # Manage GUI dialog efficiently
-        if ($activeUsers.Count -gt 0) {
-            if (-not (Is-ProcessRunning -processId $guiProcessId)) {
-                $guiProcess = Start-Process -FilePath "powershell.exe" -ArgumentList "-File $dialogPath" -PassThru
-                $guiProcessId = $guiProcess.Id
+        $activeSessions = $sessions | Where-Object { $_.State -eq "Active" }
+        $activeUsers = $activeSessions | Select-Object -ExpandProperty User
+        
+        # Manage GUI dialog for active sessions
+        if ($activeSessions.Count -gt 0 -and -not $lastActiveSession) {
+            Write-Log "Detected new active session(s): $($activeUsers -join ', ')"
+            
+            foreach ($session in $activeSessions) {
+                if ($session.User -ne "SYSTEM") {
+                    # Launch dialog in user session
+                    $dialogLaunched = Launch-DialogInUserContext -sessionId $session.ID -username $session.User
+                    if ($dialogLaunched) {
+                        Write-Log "Dialog successfully launched for user $($session.User)"
+                        break
+                    }
+                }
             }
+            
+            $lastActiveSession = $true
         }
-        else {
-            if (Is-ProcessRunning -processId $guiProcessId) {
-                Stop-Process -Id $guiProcessId -Force -ErrorAction SilentlyContinue
-                $guiProcessId = $null
-            }
+        elseif ($activeSessions.Count -eq 0) {
+            $lastActiveSession = $false
         }
 
         # Prepare heartbeat data
@@ -167,6 +220,18 @@ function Send-Heartbeat {
             os       = $OS_TYPE
             users    = @($activeUsers)
             sessions = $sessions
+        }
+        
+        # Check if a user was selected (from the dialog)
+        $selectedUserPath = "$directoryPath\selected_user.txt"
+        if (Test-Path $selectedUserPath) {
+            $selectedUser = Get-Content $selectedUserPath -Raw
+            if ($selectedUser) {
+                $body.selectedUser = $selectedUser.Trim()
+                Write-Log "Including selected user in heartbeat: $($body.selectedUser)"
+                # Remove the file after reading to prevent reusing the selection
+                Remove-Item $selectedUserPath -Force
+            }
         }
 
         # Send heartbeat in a non-blocking way
@@ -180,7 +245,7 @@ function Send-Heartbeat {
         $lastHeartbeatTime = $currentTime
     }
     catch {
-        Write-Warning "Status update failed: $($_.Exception.Message)"
+        Write-Log "Status update failed: $($_.Exception.Message)"
     }
 }
 
@@ -197,17 +262,66 @@ function Check-Termination {
     try {
         $command = Invoke-RestMethod -Uri "$BACKEND_URL/api/terminate/$CLIENT_ID" -TimeoutSec 3 -ErrorAction SilentlyContinue
         if ($command.action -eq 'logoff') {
+            Write-Log "Received logoff command for session $($command.sessionId)"
             & logoff $command.sessionId
         }
         $lastTerminationCheckTime = $currentTime
     }
     catch {
-        Write-Warning "Termination check failed: $($_.Exception.Message)"
+        Write-Log "Termination check failed: $($_.Exception.Message)"
     }
 }
 
+# Install PsExec if necessary
+function Ensure-PsExec {
+    $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
+    
+    if (-not (Test-Path $psExecPath)) {
+        Write-Log "PsExec not found. Attempting to download Sysinternals Suite..."
+        
+        $tempZip = "$env:TEMP\SysinternalsSuite.zip"
+        $tempDir = "$env:TEMP\SysinternalsSuite"
+        
+        try {
+            # Download Sysinternals Suite
+            Invoke-WebRequest -Uri "https://download.sysinternals.com/files/SysinternalsSuite.zip" -OutFile $tempZip
+            
+            # Create temp directory
+            if (-not (Test-Path $tempDir)) {
+                New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+            }
+            
+            # Extract zip file
+            Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
+            
+            # Copy PsExec to System32
+            Copy-Item -Path "$tempDir\PsExec.exe" -Destination $psExecPath -Force
+            
+            # Clean up
+            Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            
+            Write-Log "PsExec installed successfully."
+            return $true
+        }
+        catch {
+            Write-Log "Failed to install PsExec: $($_.Exception.Message)"
+            return $false
+        }
+    }
+    
+    return $true
+}
+
+# Main script
+Write-Log "Win-Agent starting..."
+
+# Ensure PsExec is available
+if (-not (Ensure-PsExec)) {
+    Write-Log "ERROR: Could not ensure PsExec is available. GUI functionality may not work."
+}
+
 # Use a more efficient main loop with non-blocking sleep
-# Main loop
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 while ($true) {
     # Reset stopwatch at beginning of each loop

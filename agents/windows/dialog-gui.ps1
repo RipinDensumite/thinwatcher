@@ -32,12 +32,8 @@ if (-not $BACKEND_URL) {
     exit 1
 }
 
-# Output configuration values for verification
-Write-Host "Configuration loaded:"
-Write-Host "Backend URL: $BACKEND_URL"
-
 # Set up logging
-$logPath = "$directoryPath\script_log.txt"
+$logPath = "$directoryPath\dialog_log.txt"
 function Write-Log {
     param(
         [string]$Message
@@ -73,6 +69,10 @@ function Open-GUI {
         $form.Text = "Select a Name"
         $form.Size = New-Object System.Drawing.Size(300, 200)
         $form.StartPosition = "CenterScreen"
+        $form.TopMost = $true  # Make form appear on top of other windows
+        $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+        $form.MaximizeBox = $false
+        $form.MinimizeBox = $false
         Write-Log "Form object created successfully"
 
         # Create a label
@@ -111,6 +111,8 @@ function Open-GUI {
                 $selectedName = $comboBox.SelectedItem
                 if ($selectedName) {
                     Write-Log "User selected name: $selectedName"
+                    # Save the selected name to a file for win-agent.ps1 to read
+                    $selectedName | Out-File -FilePath "$directoryPath\selected_user.txt" -Force
                     $form.Close()
                 }
                 else {
