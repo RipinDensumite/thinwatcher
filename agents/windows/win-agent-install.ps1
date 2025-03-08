@@ -16,22 +16,11 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
-function Write-Log {
-    param(
-        [string]$Message
-    )
-    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $logMessage = "$timestamp - $Message"
-    Add-Content -Path $logPath -Value $logMessage
-    Write-Host $logMessage
-}
-
 # Install PsExec if necessary
 function Ensure-PsExec {
     $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
     
     if (-not (Test-Path $psExecPath)) {
-        Write-Log "PsExec not found. Attempting to download Sysinternals Suite..."
         
         $tempZip = "$env:TEMP\SysinternalsSuite.zip"
         $tempDir = "$env:TEMP\SysinternalsSuite"
@@ -55,11 +44,9 @@ function Ensure-PsExec {
             Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue
             Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
             
-            Write-Log "PsExec installed successfully."
             return $true
         }
         catch {
-            Write-Log "Failed to install PsExec: $($_.Exception.Message)"
             return $false
         }
     }
@@ -167,7 +154,7 @@ CLIENT_ID=$CLIENT_ID
     Write-Host "Configuration file created at $ConfigFile" -ForegroundColor Green
 
     if (-not (Ensure-PsExec)) {
-        Write-Log "ERROR: Could not ensure PsExec is available. GUI functionality may not work."
+        Write-Host "ERROR: Could not ensure PsExec is available. GUI functionality may not work."
     }
 
     # Create scheduled task
