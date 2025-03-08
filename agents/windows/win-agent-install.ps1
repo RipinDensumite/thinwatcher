@@ -16,6 +16,16 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
+function Write-Log {
+    param(
+        [string]$Message
+    )
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logMessage = "$timestamp - $Message"
+    Add-Content -Path $logPath -Value $logMessage
+    Write-Host $logMessage
+}
+
 # Install PsExec if necessary
 function Ensure-PsExec {
     $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
