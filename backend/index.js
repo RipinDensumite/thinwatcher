@@ -237,13 +237,13 @@ app.post("/api/auth/login", loginValidation, async (req, res) => {
       username
     );
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "Invalid email or password. Please try again." });
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "Invalid email or password. Please try again." });
     }
 
     // Create JWT token
