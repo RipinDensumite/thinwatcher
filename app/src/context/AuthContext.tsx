@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [error, setError] = useState<string | null>(null);
   const [canRegister, setCanRegister] = useState<boolean>(false);
 
-  const API_URL = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3001";
+  const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
   // Check registration status
   const checkRegistrationStatus = async () => {
