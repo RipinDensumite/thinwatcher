@@ -25,6 +25,8 @@ function Ensure-PsExec {
         $tempZip = "$env:TEMP\SysinternalsSuite.zip"
         $tempDir = "$env:TEMP\SysinternalsSuite"
         
+        Write-Host "Installing PsExec..." -ForegroundColor Cyan
+
         try {
             # Download Sysinternals Suite
             Invoke-WebRequest -Uri "https://download.sysinternals.com/files/SysinternalsSuite.zip" -OutFile $tempZip
@@ -44,9 +46,11 @@ function Ensure-PsExec {
             Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue
             Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
             
+            Write-Host "Installation Complete." -ForegroundColor Green
             return $true
         }
         catch {
+            Write-Host "Failed To install PsExec: $_" -ForegroundColor Red
             return $false
         }
     }
