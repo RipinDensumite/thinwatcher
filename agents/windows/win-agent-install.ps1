@@ -17,44 +17,60 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 # Install PsExec if necessary
+# Install PsExec if necessary
 function Ensure-PsExec {
     $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
     
     if (-not (Test-Path $psExecPath)) {
-        
-        $tempZip = "$env:TEMP\SysinternalsSuite.zip"
-        $tempDir = "$env:TEMP\SysinternalsSuite"
+        $psExecUrl = "https://live.sysinternals.com/PsExec.exe"
         
         Write-Host "Installing PsExec..." -ForegroundColor Cyan
 
         try {
-            # Download Sysinternals Suite
-            Invoke-WebRequest -Uri "https://download.sysinternals.com/files/SysinternalsSuite.zip" -OutFile $tempZip
+            # Download PsExec directly (not the entire suite)
+            Invoke-WebRequest -Uri $psExecUrl -OutFile $psExecPath -TimeoutSec 60
             
-            # Create temp directory
-            if (-not (Test-Path $tempDir)) {
-                New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+            if (Test-Path $psExecPath) {
+                Write-Host "PsExec installation complete." -ForegroundColor Green
+                return $true
             }
-            
-            # Extract zip file
-            Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
-            
-            # Copy PsExec to System32
-            Copy-Item -Path "$tempDir\PsExec.exe" -Destination $psExecPath -Force
-            
-            # Clean up
-            Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            
-            Write-Host "Installation Complete." -ForegroundColor Green
-            return $true
+            else {
+                Write-Host "Failed to install PsExec: File not found after download." -ForegroundColor Red
+                return $false
+            }
         }
         catch {
-            Write-Host "Failed To install PsExec: $_" -ForegroundColor Red
-            return $false
+            Write-Host "Failed to install PsExec: $_" -ForegroundColor Red
+            
+            # Fallback method if direct download fails
+            try {
+                Write-Host "Trying alternative download method..." -ForegroundColor Yellow
+                $tempFile = "$env:TEMP\PsExec.exe"
+                
+                # Using .NET WebClient as alternative
+                $webClient = New-Object System.Net.WebClient
+                $webClient.DownloadFile($psExecUrl, $tempFile)
+                
+                # Copy to System32
+                Copy-Item -Path $tempFile -Destination $psExecPath -Force
+                Remove-Item -Path $tempFile -Force -ErrorAction SilentlyContinue
+                
+                if (Test-Path $psExecPath) {
+                    Write-Host "PsExec installation complete (alternative method)." -ForegroundColor Green
+                    return $true
+                }
+                else {
+                    return $false
+                }
+            }
+            catch {
+                Write-Host "Alternative download method also failed: $_" -ForegroundColor Red
+                return $false
+            }
         }
     }
     
+    Write-Host "PsExec is already installed." -ForegroundColor Green
     return $true
 }
 
