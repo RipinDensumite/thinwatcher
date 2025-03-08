@@ -19,6 +19,7 @@ function Read-Config {
     return $config
 }
 
+# Read configuration only once at startup
 $config = Read-Config
 
 # Assign configuration values to variables
@@ -40,9 +41,11 @@ Write-Host "Client ID: $CLIENT_ID"
 
 $OS_TYPE = "Windows"
 $dialogPath = "$directoryPath\dialog-gui.ps1"
+$guiProcessId = $null
+$lastHeartbeatTime = [DateTime]::MinValue
+$lastTerminationCheckTime = [DateTime]::MinValue
 
-# Declare $isGUIOpen at the script level to maintain its state across function calls
-$script:isGUIOpen = $false
+# Optimize by only loading this assembly once
 Add-Type -AssemblyName System.Windows.Forms
 
 function Get-SessionData {
@@ -111,27 +114,54 @@ function Get-SessionData {
     return $sessionList
 }
 
-function Send-Heartbeat {
+function Is-ProcessRunning {
+    param (
+        [int]$processId
+    )
+    
+    if (-not $processId) { return $false }
+    
     try {
+        $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
+        return ($process -ne $null)
+    }
+    catch {
+        return $false
+    }
+}
+
+function Send-Heartbeat {
+    # Throttle heartbeat requests to avoid overwhelming the backend
+    $currentTime = Get-Date
+    $heartbeatInterval = [TimeSpan]::FromSeconds($HEARTBEAT_INTERVAL)
+    $timeSinceLastHeartbeat = $currentTime - $lastHeartbeatTime
+    
+    if ($timeSinceLastHeartbeat.TotalSeconds -lt $HEARTBEAT_INTERVAL) {
+        return
+    }
+    
+    try {
+        # Get session data once - reuse for both GUI check and heartbeat
         $sessions = Get-SessionData
         $activeUsers = $sessions | 
         Where-Object { $_.State -eq "Active" } | 
         Select-Object -ExpandProperty User
 
-        # Check if there are any active sessions
+        # Manage GUI dialog efficiently
         if ($activeUsers.Count -gt 0) {
-            if (-not $script:isGUIOpen) {
-                Start-Process -FilePath "powershell.exe" -ArgumentList "-File $dialogPath"
-                $script:isGUIOpen = $true
+            if (-not (Is-ProcessRunning -processId $guiProcessId)) {
+                $guiProcess = Start-Process -FilePath "powershell.exe" -ArgumentList "-File $dialogPath" -PassThru
+                $guiProcessId = $guiProcess.Id
             }
-            Write-Output 1
-       
         }
         else {
-            $script:isGUIOpen = $false
-            Write-Output 0
+            if (Is-ProcessRunning -processId $guiProcessId) {
+                Stop-Process -Id $guiProcessId -Force -ErrorAction SilentlyContinue
+                $guiProcessId = $null
+            }
         }
 
+        # Prepare heartbeat data
         $body = @{
             clientId = $CLIENT_ID
             os       = $OS_TYPE
@@ -139,9 +169,15 @@ function Send-Heartbeat {
             sessions = $sessions
         }
 
-        Invoke-RestMethod -Uri "$BACKEND_URL/api/status" -Method Post `
+        # Send heartbeat in a non-blocking way
+        $jsonBody = ($body | ConvertTo-Json -Depth 4)
+        $task = Invoke-RestMethod -Uri "$BACKEND_URL/api/status" -Method Post `
             -ContentType "application/json" `
-            -Body ($body | ConvertTo-Json -Depth 4)
+            -Body $jsonBody `
+            -TimeoutSec 5 `
+            -ErrorAction SilentlyContinue
+            
+        $lastHeartbeatTime = $currentTime
     }
     catch {
         Write-Warning "Status update failed: $($_.Exception.Message)"
@@ -149,20 +185,43 @@ function Send-Heartbeat {
 }
 
 function Check-Termination {
+    # Throttle termination checks - don't need to check as often as heartbeat
+    $currentTime = Get-Date
+    $timeSinceLastCheck = $currentTime - $lastTerminationCheckTime
+    
+    # Check termination less frequently (e.g., every 5 seconds) to reduce API calls
+    if ($timeSinceLastCheck.TotalSeconds -lt 5) {
+        return
+    }
+    
     try {
-        $command = Invoke-RestMethod -Uri "$BACKEND_URL/api/terminate/$CLIENT_ID"
+        $command = Invoke-RestMethod -Uri "$BACKEND_URL/api/terminate/$CLIENT_ID" -TimeoutSec 3 -ErrorAction SilentlyContinue
         if ($command.action -eq 'logoff') {
             & logoff $command.sessionId
         }
+        $lastTerminationCheckTime = $currentTime
     }
     catch {
         Write-Warning "Termination check failed: $($_.Exception.Message)"
     }
 }
 
+# Use a more efficient main loop with non-blocking sleep
 # Main loop
+$stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 while ($true) {
+    # Reset stopwatch at beginning of each loop
+    $stopwatch.Reset()
+    $stopwatch.Start()
+    
+    # Perform operations
     Send-Heartbeat
     Check-Termination
-    Start-Sleep -Seconds $HEARTBEAT_INTERVAL
+    
+    # Calculate how long operations took
+    $processingTime = $stopwatch.ElapsedMilliseconds
+    
+    # Calculate sleep time to maintain interval
+    $sleepTime = [Math]::Max(1, ($HEARTBEAT_INTERVAL * 1000) - $processingTime)
+    Start-Sleep -Milliseconds $sleepTime
 }
