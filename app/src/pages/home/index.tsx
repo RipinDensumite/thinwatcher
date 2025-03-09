@@ -239,9 +239,9 @@ export default function HomePage() {
   if (isMobile) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-6 max-w-4xl">
+        <div className="container mx-auto px-4 py-6 max-w-4xl overflow-x-auto">
           <div className="flex flex-col space-y-4 mb-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col gap-5 sm:flex-row sm:gap-0 justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="bg-slate-500 p-2 rounded-lg shadow-lg">
                   <Computer className="h-6 w-6 text-white" />
@@ -259,13 +259,13 @@ export default function HomePage() {
           </div>
 
           {!isLoading ? (
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {clients.map((client) => (
                 <div
                   key={client.clientId}
                   className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-md"
                 >
-                  <div className="p-6">
+                  <div className="p-4">
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center gap-2">
                         <div className="bg-gray-100 p-1.5 rounded-lg">
@@ -298,7 +298,7 @@ export default function HomePage() {
                       </p>
                     </div>
 
-                    <div className="mt-6">
+                    <div className="mt-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <h3 className="text-md font-semibold text-gray-800">
