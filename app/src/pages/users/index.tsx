@@ -183,7 +183,7 @@ function ManageUsersPage() {
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors flex items-center justify-center"
+              className="cursor-pointer px-4 py-2.5 bg-slate-600 text-white font-medium rounded-lg shadow-sm hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors flex items-center justify-center"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -221,7 +221,7 @@ function ManageUsersPage() {
               </div>
               <input
                 type="text"
-                className="pl-10 w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="pl-10 w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                 placeholder="Search users by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -232,7 +232,7 @@ function ManageUsersPage() {
           {/* Users table */}
           {loading ? (
             <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-500"></div>
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -310,14 +310,16 @@ function ManageUsersPage() {
                               <select
                                 className={`appearance-none w-full bg-transparent border ${
                                   user.role === "admin"
-                                    ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                                    ? "border-slate-200 bg-slate-50 text-slate-700"
                                     : "border-gray-200 bg-gray-50 text-gray-700"
-                                } rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium`}
+                                } rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-sm font-medium`}
                                 value={user.role}
                                 onChange={(e) =>
                                   handleRoleChange(user.id, e.target.value)
                                 }
-                                disabled={currentAdminUsername === user.username}
+                                disabled={
+                                  currentAdminUsername === user.username
+                                }
                               >
                                 <option value="user">User</option>
                                 <option value="admin">Admin</option>
@@ -354,7 +356,7 @@ function ManageUsersPage() {
                               className={`text-sm font-medium rounded-md px-3 py-1.5 ${
                                 currentAdminUsername === user.username
                                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                  : "bg-red-50 text-red-600 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                                  : "cursor-pointer bg-red-50 text-red-600 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                               }`}
                             >
                               Delete
@@ -375,8 +377,7 @@ function ManageUsersPage() {
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div
-                className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                onClick={() => setIsCreateModalOpen(false)}
+                className="fixed inset-0 bg-gray-500/50 transition-opacity"
               ></div>
 
               <span
@@ -390,7 +391,7 @@ function ManageUsersPage() {
                 <div className="absolute top-0 right-0 pt-4 pr-4">
                   <button
                     type="button"
-                    className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="cursor-pointer bg-white rounded-md text-gray-400 hover:text-gray-500 focus:bg-gray-300"
                     onClick={() => setIsCreateModalOpen(false)}
                   >
                     <span className="sr-only">Close</span>
@@ -414,10 +415,10 @@ function ManageUsersPage() {
 
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
-                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-slate-100 sm:mx-0 sm:h-10 sm:w-10">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 text-indigo-600"
+                        className="h-6 w-6 text-slate-600"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -449,7 +450,7 @@ function ManageUsersPage() {
                             <input
                               type="text"
                               id="username"
-                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
                               value={newUser.username}
                               onChange={(e) =>
                                 setNewUser({
@@ -472,7 +473,7 @@ function ManageUsersPage() {
                             <input
                               type="email"
                               id="email"
-                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
                               value={newUser.email}
                               onChange={(e) =>
                                 setNewUser({
@@ -495,7 +496,7 @@ function ManageUsersPage() {
                             <input
                               type="password"
                               id="password"
-                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
                               value={newUser.password}
                               onChange={(e) =>
                                 setNewUser({
@@ -511,7 +512,7 @@ function ManageUsersPage() {
                           <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                             <button
                               type="submit"
-                              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+                              className="cursor-pointer w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-slate-600 text-base font-medium text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 sm:ml-3 sm:w-auto sm:text-sm"
                               disabled={isBtnLoading}
                             >
                               {isBtnLoading ? (
@@ -540,7 +541,7 @@ function ManageUsersPage() {
                             </button>
                             <button
                               type="button"
-                              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+                              className="cursor-pointer mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 sm:mt-0 sm:w-auto sm:text-sm"
                               onClick={() => setIsCreateModalOpen(false)}
                             >
                               Cancel
@@ -561,7 +562,7 @@ function ManageUsersPage() {
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div
-                className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                className="fixed inset-0 bg-gray-500/50 transition-opacity"
                 onClick={() => setIsDeleteModalOpen(false)}
               ></div>
 
@@ -612,14 +613,14 @@ function ManageUsersPage() {
                 <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
                     type="button"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="cursor-pointer w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
                     onClick={handleDeleteUser}
                   >
                     Delete
                   </button>
                   <button
                     type="button"
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="cursor-pointer mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                     onClick={() => setIsDeleteModalOpen(false)}
                   >
                     Cancel
