@@ -1,7 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
-import axios from "axios";
 
 import {
   CheckCircle2,
@@ -48,11 +47,15 @@ const RegisterPage = () => {
     // Check if registration is allowed
     const checkRegistrationStatus = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/auth/can-register`);
-        if (response.data.canRegister === false) {
+        const response = await fetch(`${API_URL}/api/auth/can-register`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.canRegister === false) {
           navigate("/login");
         }
-        setCanRegister(response.data.canRegister);
+        setCanRegister(data.canRegister);
       } catch (err) {
         console.error("Error checking registration status", err);
         setErrorMessage("Unable to check registration status");
@@ -136,7 +139,9 @@ const RegisterPage = () => {
           formData.password
         );
 
-        console.log("response" + response);
+        if (response.isFirstUser) {
+          // Do nothing
+        }
 
         navigate("/");
       } catch (err) {
