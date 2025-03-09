@@ -1,10 +1,11 @@
+# win-agent-uninstall.ps1
 #Requires -RunAsAdministrator
 
 $ErrorActionPreference = "Stop"
 
 # Configuration
 $ServiceName = "WinAgent"
-$InstallDir = "$env:ProgramFiles\WinAgent"
+$InstallDir = "$env:ProgramFiles\ThinWatcher\scripts"
 $ConfigFile = "$InstallDir\config.txt"
 
 # Self-elevate if not running as admin
@@ -30,13 +31,13 @@ try {
     else {
         Write-Host "Config file not found. Proceeding with uninstallation without notifying the backend." -ForegroundColor Yellow
     }
-
+    
     # Stop and remove scheduled task
     if (Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue) {
         Stop-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue
         Unregister-ScheduledTask -TaskName $ServiceName -Confirm:$false | Out-Null
     }
-
+    
     # Stop running agent processes more gracefully
     $agentProcesses = Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%win-agent.ps1%'"
     foreach ($proc in $agentProcesses) {
@@ -56,15 +57,10 @@ try {
             Write-Warning "Could not gracefully stop process $($proc.ProcessId): $_"
         }
     }
-
+    
     # Wait a moment to ensure processes are fully stopped
     Start-Sleep -Seconds 2
-
-    # Remove installation directory
-    if (Test-Path $InstallDir) {
-        Remove-Item -Path $InstallDir -Recurse -Force
-    }
-
+    
     # Notify the backend server to remove the client
     if ($CLIENT_ID -and $BACKEND_URL) {
         try {
@@ -76,7 +72,21 @@ try {
             Write-Warning "Failed to notify backend server: $_"
         }
     }
-
+    
+    # Remove configuration files but keep the scripts directory for ThinWatcher
+    if (Test-Path $ConfigFile) {
+        Remove-Item -Path $ConfigFile -Force
+    }
+    
+    # Remove agent-specific files
+    $agentFiles = @("win-agent.ps1", "dialog-gui.ps1", "agent_log.txt", "selected_user.txt")
+    foreach ($file in $agentFiles) {
+        $filePath = "$InstallDir\$file"
+        if (Test-Path $filePath) {
+            Remove-Item -Path $filePath -Force
+        }
+    }
+    
     Write-Host "Uninstallation completed successfully." -ForegroundColor Green
 }
 catch {

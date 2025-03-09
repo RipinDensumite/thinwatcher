@@ -1,10 +1,11 @@
+# win-agent-install.ps1
 #Requires -RunAsAdministrator
 
 $ErrorActionPreference = "Stop"
 
 # Configuration
 $ServiceName = "WinAgent"
-$InstallDir = "$env:ProgramFiles\WinAgent"
+$InstallDir = "$env:ProgramFiles\ThinWatcher\scripts"
 $AgentScript = "win-agent.ps1"
 $GuiDialog = "dialog-gui.ps1"
 $ConfigFile = "$InstallDir\config.txt"
@@ -17,7 +18,6 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 # Install PsExec if necessary
-# Install PsExec if necessary
 function Ensure-PsExec {
     $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
     
@@ -27,7 +27,7 @@ function Ensure-PsExec {
         Write-Host "Installing PsExec..." -ForegroundColor Cyan
 
         try {
-            # Download PsExec directly (not the entire suite)
+            # Download PsExec directly
             Invoke-WebRequest -Uri $psExecUrl -OutFile $psExecPath -TimeoutSec 60
             
             if (Test-Path $psExecPath) {
@@ -128,9 +128,9 @@ function Test-ThinClientName {
 }
 
 try {
-    # Create installation directory
+    # Create installation directory if it doesn't exist
     if (-not (Test-Path $InstallDir)) {
-        New-Item -Path $InstallDir -ItemType Directory | Out-Null
+        New-Item -Path $InstallDir -ItemType Directory -Force | Out-Null
     }
 
     # Download necessary scripts from GitHub
