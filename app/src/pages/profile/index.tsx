@@ -154,7 +154,7 @@ function ProfilePage() {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-slate-500 to-slate-600 px-6 py-8">
