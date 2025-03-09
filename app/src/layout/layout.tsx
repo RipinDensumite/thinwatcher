@@ -1,5 +1,3 @@
-import type React from "react";
-
 import { useMediaQuery } from "@uidotdev/usehooks";
 import {
   View,
