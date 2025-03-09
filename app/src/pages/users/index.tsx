@@ -310,7 +310,7 @@ function ManageUsersPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <div className="relative">
                               <select
-                                className={`appearance-none w-full bg-transparent border ${
+                                className={`appearance-none w-full bg-transparent border min-w-24 ${
                                   user.role === "admin"
                                     ? "border-slate-200 bg-slate-50 text-slate-700"
                                     : "border-gray-200 bg-gray-50 text-gray-700"
