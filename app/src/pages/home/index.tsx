@@ -1,5 +1,3 @@
-"use client";
-
 import { useContext, useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import Layout from "@/layout/layout";
