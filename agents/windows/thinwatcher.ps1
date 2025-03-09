@@ -46,7 +46,8 @@ function Write-Status {
 }
 
 function Create-ThinWatcherLauncher {
-    # Create the launcher script content
+    # Create the launcher script content with fixed string formatting
+    # Using string replacement instead of string formatting to avoid potential issues
     $launcherContent = @'
 #!/usr/bin/env pwsh
 param (
@@ -57,9 +58,9 @@ param (
 )
 
 $ErrorActionPreference = "Stop"
-$ScriptsDir = "{0}"
-$InstallDir = "{1}"
-$Version = "{2}"
+$ScriptsDir = "SCRIPTS_DIR_PLACEHOLDER"
+$InstallDir = "INSTALL_DIR_PLACEHOLDER"
+$Version = "VERSION_PLACEHOLDER"
 
 function Show-Header {
     $headerWidth = 60
@@ -322,8 +323,13 @@ switch ($Command.ToLower()) {
         Write-Host "Available commands: menu, install, update, uninstall, reconfig, start, stop, version" -ForegroundColor Yellow
     }
 }
-'@ -f $ScriptsDir, $InstallDir, $Version
+'@
 
+    # Replace placeholders with actual values
+    $launcherContent = $launcherContent.Replace("SCRIPTS_DIR_PLACEHOLDER", $ScriptsDir)
+    $launcherContent = $launcherContent.Replace("INSTALL_DIR_PLACEHOLDER", $InstallDir)
+    $launcherContent = $launcherContent.Replace("VERSION_PLACEHOLDER", $Version)
+    
     Set-Content -Path $LauncherScriptPath -Value $launcherContent
 }
 
