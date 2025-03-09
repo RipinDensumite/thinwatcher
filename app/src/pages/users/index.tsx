@@ -234,7 +234,7 @@ function ManageUsersPage() {
           {/* Users table */}
           {loading ? (
             <div className="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-500"></div>
+              <span className="loading loading-spinner loading-xl"></span>
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">

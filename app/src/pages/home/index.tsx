@@ -156,10 +156,7 @@ export default function HomePage() {
   // Loader component
   const Loader = () => (
     <div className="flex justify-center items-center h-64">
-      <div className="relative w-16 h-16">
-        <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-200 rounded-full"></div>
-        <div className="absolute top-0 left-0 w-full h-full border-4 border-t-slate-500 rounded-full animate-spin"></div>
-      </div>
+      <span className="loading loading-spinner loading-xl"></span>
     </div>
   );
 
