@@ -173,7 +173,7 @@ function ManageUsersPage() {
 
   return (
     <Layout>
-      <div className="bg-gray-50 min-h-screen p-6">
+      <div className="p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
