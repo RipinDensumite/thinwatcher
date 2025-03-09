@@ -125,7 +125,7 @@ function ManageUsersPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/api/auth/register`, {
+      const response = await fetch(`${API_URL}/api/admin/users/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,7 +139,9 @@ function ManageUsersPage() {
         throw new Error(errorData.message || "Failed to create user");
       }
 
-      toast.success("User created successfully");
+      const data = await response.json();
+
+      toast.success(data?.result || "User created successfully");
       setNewUser({ username: "", email: "", password: "" });
       setIsCreateModalOpen(false);
       fetchUsers(); // Refresh the user list
@@ -376,9 +378,7 @@ function ManageUsersPage() {
         {isCreateModalOpen && (
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-              <div
-                className="fixed inset-0 bg-gray-500/50 transition-opacity"
-              ></div>
+              <div className="fixed inset-0 bg-gray-500/50 transition-opacity"></div>
 
               <span
                 className="hidden sm:inline-block sm:align-middle sm:h-screen"

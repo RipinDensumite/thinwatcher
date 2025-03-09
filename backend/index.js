@@ -237,13 +237,17 @@ app.post("/api/auth/login", loginValidation, async (req, res) => {
       username
     );
     if (!user) {
-      return res.status(400).json({ message: "Invalid email or password. Please try again." });
+      return res
+        .status(400)
+        .json({ message: "Invalid email or password. Please try again." });
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password. Please try again." });
+      return res
+        .status(400)
+        .json({ message: "Invalid email or password. Please try again." });
     }
 
     // Create JWT token
@@ -384,6 +388,50 @@ app.get("/api/admin/users", auth, adminAuth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+app.post(
+  "/api/admin/users/add",
+  registerValidation,
+  auth,
+  adminAuth,
+  async (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { username, email, password } = req.body;
+
+    try {
+      // Check if user already exists
+      const existingUser = await db.get(
+        "SELECT * FROM users WHERE username = ? OR email = ?",
+        [username, email]
+      );
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      // Create new user
+      await db.run(
+        "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
+        [username, email, hashedPassword, "user"]
+      );
+
+      res.status(201).json({
+        result: username + " added successfully",
+      });
+    } catch (error) {
+      console.error("Add user error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
 
 // Update user role (admin only)
 app.put("/api/admin/users/:id/role", auth, adminAuth, async (req, res) => {
