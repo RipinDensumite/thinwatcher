@@ -64,9 +64,9 @@ $Version = "VERSION_PLACEHOLDER"
 
 function Show-Header {
     $headerWidth = 60
-    Write-Host "`n" + "=" * $headerWidth -ForegroundColor Blue
+    Write-Host "`n" + ("=" * $headerWidth) -ForegroundColor Blue
     Write-Host "ThinWatcher Agent Manager v$Version" -ForegroundColor Cyan
-    Write-Host "=" * $headerWidth -ForegroundColor Blue
+    Write-Host ("=" * $headerWidth) -ForegroundColor Blue
 }
 
 function Show-Menu {
@@ -109,8 +109,8 @@ function Show-Menu {
 }
 
 function Test-WinAgentInstallation {
-    $winAgentDir = "$env:ProgramFiles\WinAgent"
-    if (Test-Path $winAgentDir) {
+    # Fixed: Check for ThinWatcher agent instead of WinAgent
+    if (Test-Path "$ScriptsDir\win-agent.ps1") {
         return "Installed"
     }
     else {
@@ -292,9 +292,8 @@ function Show-Version {
     Write-Host "Installation Directory: $InstallDir" -ForegroundColor White
     
     # Check agent version by checking its files' dates
-    $winAgentDir = "$env:ProgramFiles\WinAgent"
-    if (Test-Path "$winAgentDir\win-agent.ps1") {
-        $fileInfo = Get-Item "$winAgentDir\win-agent.ps1"
+    if (Test-Path "$ScriptsDir\win-agent.ps1") {
+        $fileInfo = Get-Item "$ScriptsDir\win-agent.ps1"
         $lastModified = $fileInfo.LastWriteTime
         Write-Host "Agent Last Updated: $lastModified" -ForegroundColor White
     }
@@ -344,7 +343,7 @@ function Create-PowerShellModule {
         New-Item -Path $modulesPath -ItemType Directory -Force | Out-Null
     }
     
-    # Create the module file
+    # Create the module file - FIXED to call the CMD file instead of PS1 directly
     $moduleContent = @"
 function Invoke-ThinWatcher {
     param(
@@ -352,8 +351,8 @@ function Invoke-ThinWatcher {
         [string[]]`$Arguments
     )
     
-    # Always bypass execution policy when running the launcher
-    powershell.exe -ExecutionPolicy Bypass -File "$LauncherScript" @Arguments
+    # Call the CMD file instead of PS1 directly
+    & "$BinDir\thinwatcher.cmd" @Arguments
 }
 
 New-Alias -Name thinwatcher -Value Invoke-ThinWatcher -Force -Scope Global
