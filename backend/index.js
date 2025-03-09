@@ -143,6 +143,26 @@ const loginValidation = [
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
+const updateUserValidation = [
+  body("username")
+    .optional()
+    .trim()
+    .isLength({ min: 3 })
+    .withMessage("Username must be at least 3 characters"),
+  body("email")
+    .optional()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Please provide a valid email"),
+  body("currentPassword")
+    .notEmpty()
+    .withMessage("Current password is required for verification"),
+  body("newPassword")
+    .optional()
+    .isLength({ min: 6 })
+    .withMessage("New password must be at least 6 characters"),
+];
+
 // AUTH ROUTES
 // Register user
 app.post("/api/auth/register", registerValidation, async (req, res) => {
@@ -375,6 +395,106 @@ app.get("/api/clients/users", async (req, res) => {
     res.json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update user's own profile
+app.put("/api/users/profile", auth, updateUserValidation, async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { username, email, currentPassword, newPassword } = req.body;
+  const userId = req.user.id;
+
+  try {
+    // Get the current user data to verify password
+    const user = await db.get("SELECT * FROM users WHERE id = ?", userId);
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // Check for username uniqueness if being updated
+    if (username && username !== user.username) {
+      const existingUsername = await db.get(
+        "SELECT * FROM users WHERE username = ? AND id != ?",
+        [username, userId]
+      );
+
+      if (existingUsername) {
+        return res.status(400).json({ message: "Username is already taken" });
+      }
+    }
+
+    // Check for email uniqueness if being updated
+    if (email && email !== user.email) {
+      const existingEmail = await db.get(
+        "SELECT * FROM users WHERE email = ? AND id != ?",
+        [email, userId]
+      );
+
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email is already in use" });
+      }
+    }
+
+    // Prepare update fields
+    let updates = [];
+    let params = [];
+
+    if (username) {
+      updates.push("username = ?");
+      params.push(username);
+    }
+
+    if (email) {
+      updates.push("email = ?");
+      params.push(email);
+    }
+
+    if (newPassword) {
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      updates.push("password = ?");
+      params.push(hashedPassword);
+    }
+
+    // Add user ID to params array
+    params.push(userId);
+
+    // Update the user if there are fields to update
+    if (updates.length > 0) {
+      await db.run(
+        `UPDATE users SET ${updates.join(", ")} WHERE id = ?`,
+        params
+      );
+
+      // Retrieve updated user info
+      const updatedUser = await db.get(
+        "SELECT id, username, email, role FROM users WHERE id = ?",
+        userId
+      );
+
+      return res.json({
+        message: "Profile updated successfully",
+        user: updatedUser,
+      });
+    } else {
+      return res.status(400).json({ message: "No fields to update" });
+    }
+  } catch (error) {
+    console.error("Profile update error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
