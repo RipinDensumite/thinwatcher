@@ -75,7 +75,8 @@ function Show-Menu {
     $isWinAgentExist = Test-WinAgentInstallation
     $isWinAgentRunning = Test-ScheduledTask
     
-    Write-Host "Status: $isWinAgentExist | $isWinAgentRunning" -ForegroundColor Yellow
+    # Write-Host "Status: $isWinAgentExist | $isWinAgentRunning" -ForegroundColor Yellow
+    Write-Host "Status: $isWinAgentRunning" -ForegroundColor Yellow
     Write-Host
     Write-Host "Available Commands:" -ForegroundColor White
     Write-Host "  1. install    - Install ThinWatcher Agent"
