@@ -1,137 +1,461 @@
-# URLs for the scripts
-$installScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/win-agent-install.ps1"
-$uninstallScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/win-agent-uninstall.ps1"
-# $reconfigScriptUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/win-agent-reconfig.ps1"
+# ThinWatcher Installation Script
+# This script installs the ThinWatcher agent and creates a global command
+
+# Ensure running as administrator
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "Please run this script as Administrator" -ForegroundColor Red
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`"" -Verb RunAs
+    exit
+}
+
+$ErrorActionPreference = "Stop"
 
 # Configuration
-$ServiceName = "WinAgent"
-$InstallDir = "$env:ProgramFiles\WinAgent"
+$InstallDir = "$env:ProgramFiles\ThinWatcher"
+$BinDir = "$InstallDir\bin"
+$ScriptsDir = "$InstallDir\scripts"
+$LauncherScript = "$BinDir\thinwatcher.ps1"
+$GitHubRepoBaseUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows"
+$Version = "1.0.0"
+$LauncherScriptPath = "$env:TEMP\thinwatcher-launcher.ps1"
 
-# Function to check if the WinAgent folder and files exist
-function Test-WinAgentInstallation {
-    if (Test-Path $InstallDir) {
-        return "WinAgent installed"
+# Required scripts to download
+$RequiredScripts = @(
+    "win-agent.ps1",
+    "dialog-gui.ps1",
+    "win-agent-install.ps1",
+    "win-agent-uninstall.ps1",
+    "win-agent-reconfig.ps1"
+)
+
+function Write-Status {
+    param (
+        [string]$Message,
+        [string]$Type = "Info" # Info, Success, Warning, Error
+    )
+    
+    $color = switch ($Type) {
+        "Info" { "Cyan" }
+        "Success" { "Green" }
+        "Warning" { "Yellow" }
+        "Error" { "Red" }
+        default { "White" }
     }
-    else {
-        return "WinAgent not installed"
+    
+    Write-Host "[$Type] $Message" -ForegroundColor $color
+}
+
+function Create-ThinWatcherLauncher {
+    # Create the launcher script content
+    $launcherContent = @'
+#!/usr/bin/env pwsh
+param (
+    [Parameter(Position = 0)]
+    [string]$Command = "menu",
+    [Parameter(Position = 1, ValueFromRemainingArguments = $true)]
+    [string[]]$Arguments
+)
+
+$ErrorActionPreference = "Stop"
+$ScriptsDir = "{0}"
+$InstallDir = "{1}"
+$Version = "{2}"
+
+function Show-Header {
+    $headerWidth = 60
+    Write-Host "`n" + "=" * $headerWidth -ForegroundColor Blue
+    Write-Host "ThinWatcher Agent Manager v$Version" -ForegroundColor Cyan
+    Write-Host "=" * $headerWidth -ForegroundColor Blue
+}
+
+function Show-Menu {
+    Show-Header
+    
+    # Get WinAgent status
+    $isWinAgentExist = Test-WinAgentInstallation
+    $isWinAgentRunning = Test-ScheduledTask
+    
+    Write-Host "Status: $isWinAgentExist | $isWinAgentRunning" -ForegroundColor Yellow
+    Write-Host
+    Write-Host "Available Commands:" -ForegroundColor White
+    Write-Host "  1. install    - Install ThinWatcher Agent"
+    Write-Host "  2. update     - Update ThinWatcher Agent"
+    Write-Host "  3. uninstall  - Uninstall ThinWatcher Agent"
+    Write-Host "  4. reconfig   - Reconfigure ThinWatcher Agent"
+    Write-Host "  5. start      - Start ThinWatcher Agent"
+    Write-Host "  6. stop       - Stop ThinWatcher Agent"
+    Write-Host "  7. version    - Show ThinWatcher version"
+    Write-Host "  8. exit       - Exit"
+    Write-Host
+    
+    $choice = Read-Host "Enter your choice (1-8)"
+    
+    switch ($choice) {
+        "1" { Install-Agent }
+        "2" { Update-Agent }
+        "3" { Uninstall-Agent }
+        "4" { Reconfig-Agent }
+        "5" { Start-Agent }
+        "6" { Stop-Agent }
+        "7" { Show-Version }
+        "8" { return }
+        default {
+            Write-Host "Invalid choice. Please select a valid option (1-8)." -ForegroundColor Red
+            Pause
+            Show-Menu
+        }
     }
 }
 
-# Function to check if the scheduled task exists and is running
-function Test-ScheduledTask {
-    $task = Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue
+function Test-WinAgentInstallation {
+    $winAgentDir = "$env:ProgramFiles\WinAgent"
+    if (Test-Path $winAgentDir) {
+        return "Installed"
+    }
+    else {
+        return "Not Installed"
+    }
+}
 
+function Test-ScheduledTask {
+    $task = Get-ScheduledTask -TaskName "WinAgent" -ErrorAction SilentlyContinue
+    
     if ($task) {
         $taskState = $task.State
         if ($taskState -eq "Running") {
             return "Running"
         }
         else {
-            return "Not running" 
+            return "Stopped"
         }
     }
     else {
-        return "Not exist on schedule"
+        return "Not Configured"
     }
 }
 
-$isWinAgentExist = Test-WinAgentInstallation
-$isWinAgentRunning = Test-ScheduledTask
-
-# Function to install the agent
 function Install-Agent {
-    Write-Host "Installing ThinWatcher..." -ForegroundColor Cyan
+    Show-Header
+    Write-Host "Installing ThinWatcher Agent..." -ForegroundColor Cyan
+    
     try {
-        Invoke-RestMethod -Uri $installScriptUrl | Invoke-Expression
-        Write-Host "Installation completed successfully." -ForegroundColor Green
+        if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")) {
+            & "$ScriptsDir\win-agent-install.ps1"
+        }
+        else {
+            Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$ScriptsDir\win-agent-install.ps1`"" -Verb RunAs -Wait
+        }
+        Write-Host "Installation process completed." -ForegroundColor Green
     }
     catch {
         Write-Host "Installation failed: $_" -ForegroundColor Red
     }
+    
     Pause
+    Show-Menu
 }
 
-# Function to uninstall the agent
-function Uninstall-Agent {
-    Write-Host "Uninstalling ThinWatcher..." -ForegroundColor Cyan
-    try {
-        Invoke-RestMethod -Uri $uninstallScriptUrl | Invoke-Expression
-        Write-Host "Uninstallation completed successfully." -ForegroundColor Green
-    }
-    catch {
-        Write-Host "Uninstallation failed: $_" -ForegroundColor Red
-    }
-    Pause
-}
-
-# Function to update the agent
 function Update-Agent {
-    Write-Host "Updating ThinWatcher..." -ForegroundColor Cyan
+    Show-Header
+    Write-Host "Updating ThinWatcher Agent..." -ForegroundColor Cyan
+    
     try {
-        Uninstall-Agent
+        if (Test-WinAgentInstallation -eq "Not Installed") {
+            Write-Host "Agent not installed. Please install it first." -ForegroundColor Yellow
+            Pause
+            Show-Menu
+            return
+        }
+        
+        # Uninstall and reinstall
+        Uninstall-Agent -noMenu
         Install-Agent
-        Write-Host "Update completed successfully." -ForegroundColor Green
     }
     catch {
         Write-Host "Update failed: $_" -ForegroundColor Red
     }
+    
+    if (-not $noMenu) {
+        Pause
+        Show-Menu
+    }
+}
+
+function Uninstall-Agent {
+    param([switch]$noMenu)
+    
+    if (-not $noMenu) { Show-Header }
+    Write-Host "Uninstalling ThinWatcher Agent..." -ForegroundColor Cyan
+    
+    try {
+        if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")) {
+            & "$ScriptsDir\win-agent-uninstall.ps1"
+        }
+        else {
+            Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$ScriptsDir\win-agent-uninstall.ps1`"" -Verb RunAs -Wait
+        }
+        Write-Host "Uninstallation completed." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Uninstallation failed: $_" -ForegroundColor Red
+    }
+    
+    if (-not $noMenu) {
+        Pause
+        Show-Menu
+    }
+}
+
+function Reconfig-Agent {
+    Show-Header
+    Write-Host "Reconfiguring ThinWatcher Agent..." -ForegroundColor Cyan
+    
+    try {
+        if (Test-WinAgentInstallation -eq "Not Installed") {
+            Write-Host "Agent not installed. Please install it first." -ForegroundColor Yellow
+            Pause
+            Show-Menu
+            return
+        }
+        
+        if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")) {
+            & "$ScriptsDir\win-agent-reconfig.ps1"
+        }
+        else {
+            Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$ScriptsDir\win-agent-reconfig.ps1`"" -Verb RunAs -Wait
+        }
+        Write-Host "Reconfiguration completed." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Reconfiguration failed: $_" -ForegroundColor Red
+    }
+    
     Pause
+    Show-Menu
 }
 
-# Function to reconfigure the agent
-# function Reconfig-Agent {
-#     Write-Host "Reconfiguring ThinWatcher..." -ForegroundColor Cyan
-#     try {
-#         Invoke-RestMethod -Uri $reconfigScriptUrl | Invoke-Expression
-#         Write-Host "Reconfiguration completed successfully." -ForegroundColor Green
-#     }
-#     catch {
-#         Write-Host "Reconfiguration failed: $_" -ForegroundColor Red
-#     }
-#     Pause
-# }
-
-# Function to display the menu
-function Show-Menu {
-    Clear-Host
-    Write-Host "============================================"
-    Write-Host "ThinWatcher Agent Launcher"
-    Write-Host "Status: $isWinAgentExist | $isWinAgentRunning"
-    Write-Host "============================================"
-    Write-Host "1. Install ThinWatcher Agent"
-    # Write-Host "2. Reconfigure ThinWatcher Agent"
-    Write-Host "2. Update ThinWatcher Agent"
-    Write-Host "3. Uninstall ThinWatcher Agent"
-    Write-Host "4. Exit"
-    Write-Host "============================================"
+function Start-Agent {
+    Show-Header
+    Write-Host "Starting ThinWatcher Agent..." -ForegroundColor Cyan
+    
+    try {
+        if (Test-WinAgentInstallation -eq "Not Installed") {
+            Write-Host "Agent not installed. Please install it first." -ForegroundColor Yellow
+            Pause
+            Show-Menu
+            return
+        }
+        
+        $task = Get-ScheduledTask -TaskName "WinAgent" -ErrorAction SilentlyContinue
+        if ($task) {
+            Start-ScheduledTask -TaskName "WinAgent"
+            Write-Host "Agent started successfully." -ForegroundColor Green
+        }
+        else {
+            Write-Host "WinAgent task not found. Please reinstall the agent." -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Host "Failed to start agent: $_" -ForegroundColor Red
+    }
+    
+    Pause
+    Show-Menu
 }
 
-# Function to pause the script and wait for user input
+function Stop-Agent {
+    Show-Header
+    Write-Host "Stopping ThinWatcher Agent..." -ForegroundColor Cyan
+    
+    try {
+        $task = Get-ScheduledTask -TaskName "WinAgent" -ErrorAction SilentlyContinue
+        if ($task) {
+            Stop-ScheduledTask -TaskName "WinAgent"
+            Write-Host "Agent stopped successfully." -ForegroundColor Green
+        }
+        else {
+            Write-Host "WinAgent task not found." -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Host "Failed to stop agent: $_" -ForegroundColor Red
+    }
+    
+    Pause
+    Show-Menu
+}
+
+function Show-Version {
+    Show-Header
+    Write-Host "ThinWatcher Agent Manager v$Version" -ForegroundColor Cyan
+    Write-Host "Installation Directory: $InstallDir" -ForegroundColor White
+    
+    # Check agent version by checking its files' dates
+    $winAgentDir = "$env:ProgramFiles\WinAgent"
+    if (Test-Path "$winAgentDir\win-agent.ps1") {
+        $fileInfo = Get-Item "$winAgentDir\win-agent.ps1"
+        $lastModified = $fileInfo.LastWriteTime
+        Write-Host "Agent Last Updated: $lastModified" -ForegroundColor White
+    }
+    
+    Pause
+    Show-Menu
+}
+
 function Pause {
     Write-Host "Press any key to continue..." -ForegroundColor Gray
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 
-# Main launcher logic
-while ($true) {
-    Show-Menu
-    $choice = Read-Host "Please select an option (1-5)"
+# Process commands
+switch ($Command.ToLower()) {
+    "menu" { Show-Menu }
+    "install" { Install-Agent }
+    "update" { Update-Agent }
+    "uninstall" { Uninstall-Agent }
+    "reconfig" { Reconfig-Agent }
+    "start" { Start-Agent }
+    "stop" { Stop-Agent }
+    "version" { Show-Version }
+    default {
+        Write-Host "Unknown command: $Command" -ForegroundColor Red
+        Write-Host "Available commands: menu, install, update, uninstall, reconfig, start, stop, version" -ForegroundColor Yellow
+    }
+}
+'@ -f $ScriptsDir, $InstallDir, $Version
 
-    switch ($choice) {
-        1 { Install-Agent }
-        # 2 { Reconfig-Agent }
-        2 { Update-Agent }
-        3 { Uninstall-Agent }
-        4 { 
-            Write-Host "Exiting ThinWatcher Launcher. Goodbye!" -ForegroundColor Yellow
-            exit 
+    Set-Content -Path $LauncherScriptPath -Value $launcherContent
+}
+
+function Create-PowerShellModule {
+    # Create the module to expose the ThinWatcher command
+    $modulesPath = "$env:ProgramFiles\WindowsPowerShell\Modules\ThinWatcher"
+    $modulePath = "$modulesPath\ThinWatcher.psm1"
+    $manifestPath = "$modulesPath\ThinWatcher.psd1"
+    
+    # Create folder if it doesn't exist
+    if (-not (Test-Path $modulesPath)) {
+        New-Item -Path $modulesPath -ItemType Directory -Force | Out-Null
+    }
+    
+    # Create the module file
+    $moduleContent = @"
+function Invoke-ThinWatcher {
+    param(
+        [Parameter(Position = 0, ValueFromRemainingArguments = `$true)]
+        [string[]]`$Arguments
+    )
+    
+    & "$LauncherScript" @Arguments
+}
+
+New-Alias -Name thinwatcher -Value Invoke-ThinWatcher -Force -Scope Global
+
+Export-ModuleMember -Function Invoke-ThinWatcher -Alias thinwatcher
+"@
+    
+    Set-Content -Path $modulePath -Value $moduleContent
+    
+    # Create the module manifest
+    New-ModuleManifest -Path $manifestPath `
+        -ModuleVersion $Version `
+        -Author "ThinWatcher" `
+        -CompanyName "ThinWatcher" `
+        -Description "ThinWatcher Agent Manager" `
+        -PowerShellVersion "5.1" `
+        -RootModule "ThinWatcher.psm1" `
+        -FunctionsToExport @('Invoke-ThinWatcher') `
+        -AliasesToExport @('thinwatcher')
+}
+
+function Add-ToPath {
+    $binPath = $BinDir
+    $envPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
+    
+    if ($envPath -notlike "*$binPath*") {
+        [Environment]::SetEnvironmentVariable("PATH", "$envPath;$binPath", "Machine")
+        Write-Status "Added ThinWatcher to system PATH" -Type "Success"
+    }
+}
+
+function Create-ShortcutFile {
+    # Create a .cmd file in the bin directory for direct invocation
+    $cmdFile = "$BinDir\thinwatcher.cmd"
+    
+    $cmdContent = @"
+@echo off
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$LauncherScript" %*
+"@
+    
+    Set-Content -Path $cmdFile -Value $cmdContent
+}
+
+# Main installation process
+try {
+    Write-Status "Starting ThinWatcher installation..." -Type "Info"
+    
+    # Create directories
+    if (-not (Test-Path $InstallDir)) {
+        New-Item -Path $InstallDir -ItemType Directory -Force | Out-Null
+    }
+    
+    if (-not (Test-Path $BinDir)) {
+        New-Item -Path $BinDir -ItemType Directory -Force | Out-Null
+    }
+    
+    if (-not (Test-Path $ScriptsDir)) {
+        New-Item -Path $ScriptsDir -ItemType Directory -Force | Out-Null
+    }
+    
+    # Create the launcher script
+    Write-Status "Creating launcher script..." -Type "Info"
+    Create-ThinWatcherLauncher
+    
+    # Copy the launcher to the bin directory
+    Copy-Item -Path $LauncherScriptPath -Destination $LauncherScript -Force
+    
+    # Download required scripts
+    Write-Status "Downloading required scripts..." -Type "Info"
+    foreach ($script in $RequiredScripts) {
+        Write-Status "Downloading $script..." -Type "Info"
+        $scriptUrl = "$GitHubRepoBaseUrl/$script"
+        $scriptPath = "$ScriptsDir\$script"
+        
+        try {
+            Invoke-WebRequest -Uri $scriptUrl -OutFile $scriptPath -ErrorAction Stop
+            Write-Status "Downloaded $script successfully" -Type "Success"
         }
-        default {
-            Write-Host "Invalid choice. Please select a valid option (1-5)." -ForegroundColor Red
-            Pause
+        catch {
+            Write-Status "Failed to download $script : $_" -Type "Error"
+            throw "Download failed for $script"
         }
     }
-
-    $isWinAgentExist = Test-WinAgentInstallation
-    $isWinAgentRunning = Test-ScheduledTask
+    
+    # Create PowerShell module for system-wide access
+    Write-Status "Creating PowerShell module..." -Type "Info"
+    Create-PowerShellModule
+    
+    # Create CMD shortcut
+    Write-Status "Creating command shortcut..." -Type "Info"
+    Create-ShortcutFile
+    
+    # Add to PATH
+    Write-Status "Adding ThinWatcher to system PATH..." -Type "Info"
+    Add-ToPath
+    
+    # Clean up
+    Remove-Item -Path $LauncherScriptPath -Force -ErrorAction SilentlyContinue
+    
+    Write-Status "ThinWatcher has been installed successfully!" -Type "Success"
+    Write-Status "You can now run 'thinwatcher' from any PowerShell or Command Prompt window." -Type "Success"
+    
+    # Offer to launch ThinWatcher now
+    $launch = Read-Host "Would you like to launch ThinWatcher now? (y/n)"
+    if ($launch -eq 'y') {
+        & $LauncherScript
+    }
+}
+catch {
+    Write-Status "Installation failed: $_" -Type "Error"
+    exit 1
 }
