@@ -394,47 +394,26 @@ function Unblock-ThinWatcherFiles {
         Unblock-File -Path $_.FullName
     }
     
-    # Create a local security policy for the launcher script
-    try {
-        # Create a certificate for signing
-        $cert = New-SelfSignedCertificate -DnsName "ThinWatcher" -CertStoreLocation "Cert:\CurrentUser\My" -Type CodeSigningCert -Subject "ThinWatcher"
-        
-        # Export the certificate to a file
-        $certPath = "$env:TEMP\ThinWatcher.cer"
-        Export-Certificate -Cert $cert -FilePath $certPath -Force | Out-Null
-        
-        # Import the certificate to the Trusted Publishers store
-        Import-Certificate -FilePath $certPath -CertStoreLocation "Cert:\LocalMachine\TrustedPublisher" | Out-Null
-        
-        # Sign the launcher script and all downloaded scripts
-        Get-ChildItem -Path $InstallDir -Recurse -Filter "*.ps1" | ForEach-Object {
-            Write-Status "Signing file: $($_.FullName)" -Type "Info"
-            Set-AuthenticodeSignature -FilePath $_.FullName -Certificate $cert | Out-Null
-        }
-        
-        # Clean up
-        Remove-Item -Path $certPath -Force -ErrorAction SilentlyContinue
-        
-        Write-Status "All PowerShell scripts have been signed and unblocked" -Type "Success"
-    }
-    catch {
-        Write-Status "Unable to sign scripts, but continuing with installation: $_" -Type "Warning"
-        # Fallback to creating a PowerShell script that bypasses execution policy
-        $bypassWrapperPath = "$BinDir\thinwatcher-bypass.ps1"
-        $bypassContent = @"
+    # Skip code signing attempt and use the bypass approach directly
+    Write-Status "Setting up execution policy bypass for ThinWatcher scripts..." -Type "Info"
+    
+    # Create a PowerShell script that bypasses execution policy
+    $bypassWrapperPath = "$BinDir\thinwatcher-bypass.ps1"
+    $bypassContent = @"
 # This script bypasses execution policy for the ThinWatcher launcher
 powershell.exe -ExecutionPolicy Bypass -File "$LauncherScript" `$args
 "@
-        Set-Content -Path $bypassWrapperPath -Value $bypassContent
-        
-        # Update the CMD file to call the bypass wrapper
-        $cmdFile = "$BinDir\thinwatcher.cmd"
-        $cmdContent = @"
+    Set-Content -Path $bypassWrapperPath -Value $bypassContent
+    
+    # Update the CMD file to call the bypass wrapper
+    $cmdFile = "$BinDir\thinwatcher.cmd"
+    $cmdContent = @"
 @echo off
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$bypassWrapperPath" %*
 "@
-        Set-Content -Path $cmdFile -Value $cmdContent
-    }
+    Set-Content -Path $cmdFile -Value $cmdContent
+    
+    Write-Status "All PowerShell scripts have been unblocked" -Type "Success"
 }
 
 function Add-ToPath {
@@ -488,7 +467,7 @@ try {
         }
     }
     
-    # Unblock and sign files to address execution policy
+    # Unblock and set up execution policy bypass for files
     Write-Status "Addressing execution policy for ThinWatcher scripts..." -Type "Info"
     Unblock-ThinWatcherFiles
     
