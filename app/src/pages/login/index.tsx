@@ -1,7 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate, Navigate, useLocation } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
-import axios from "axios";
 
 interface LocationState {
   from?: {
@@ -39,8 +38,12 @@ const LoginPage = () => {
     // Check if registration is allowed
     const checkRegistrationStatus = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/auth/can-register`);
-        setCanRegister(response.data.canRegister);
+        const response = await fetch(`${API_URL}/api/auth/can-register`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setCanRegister(data.canRegister);
       } catch (err) {
         console.error("Error checking registration status", err);
         setErrorMessage("Unable to check registration status");
