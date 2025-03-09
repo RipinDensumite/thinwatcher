@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
 import Layout from "@/layout/layout";
@@ -153,330 +155,387 @@ export default function HomePage() {
     };
   }, []);
 
-  // const terminateSession = async (clientId: string, sessionId: string) => {
-  //   try {
-  //     const response = await fetch(`${API_URL}/api/terminate`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ clientId, sessionId }),
-  //     });
+  // Loader component
+  const Loader = () => (
+    <div className="flex justify-center items-center h-64">
+      <div className="relative w-16 h-16">
+        <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-200 rounded-full"></div>
+        <div className="absolute top-0 left-0 w-full h-full border-4 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    </div>
+  );
 
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Termination failed:", error);
-  //     setError("Failed to terminate session. Please try again.");
-  //   }
-  // };
+  // Status badge component
+  const StatusBadge = ({ isOnline }: { isOnline: boolean }) =>
+    isOnline ? (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-all duration-300 ease-in-out">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+        </span>
+        Healthy
+      </span>
+    ) : (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 transition-all duration-300 ease-in-out">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
+        </span>
+        Unhealthy
+      </span>
+    );
 
+  // Connection status component
+  const ConnectionStatus = () => (
+    <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out">
+      {isConnected ? (
+        <span className="text-emerald-600 flex items-center gap-2 font-medium">
+          <Wifi className="h-4 w-4" />
+          Connected
+        </span>
+      ) : (
+        <span className="text-red-600 flex items-center gap-2 font-medium">
+          <WifiOff className="h-4 w-4" />
+          Disconnected
+        </span>
+      )}
+    </div>
+  );
+
+  // Error alert component
+  const ErrorAlert = () =>
+    error && (
+      <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-sm mb-6 animate-fadeIn transition-all duration-300 ease-in-out">
+        <div className="flex items-center">
+          <svg
+            className="h-5 w-5 text-red-500 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+
+  // Empty state component
+  const EmptyState = () =>
+    clients.length === 0 &&
+    !error && (
+      <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-100">
+        <Computer className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-4 text-lg font-medium text-gray-900">
+          No clients connected
+        </h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Waiting for thin clients to connect to the system.
+        </p>
+      </div>
+    );
+
+  // Mobile view
   if (isMobile) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center mb-5">
-            <h1 className="text-2xl">ThinClient : {clients.length}</h1>
-            <div className="flex items-center gap-2">
-              {isConnected ? (
-                <span className="text-green-600 flex items-center gap-1">
-                  <Wifi className="h-4 w-4" />
-                  Connected
-                </span>
-              ) : (
-                <span className="text-red-600 flex items-center gap-1">
-                  <WifiOff className="h-4 w-4" />
-                  Disconnected
-                </span>
-              )}
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <div className="flex flex-col space-y-4 mb-6">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-500 p-2 rounded-lg shadow-lg">
+                  <Computer className="h-6 w-6 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-800">ThinClient</h1>
+                <div className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+                  {clients.length}
+                </div>
+              </div>
+              <ConnectionStatus />
             </div>
+
+            <ErrorAlert />
+            <EmptyState />
           </div>
 
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
-
-          {clients.length === 0 && !error && (
-            <div className="text-center py-10">
-              <p className="text-gray-500">No clients connected</p>
-            </div>
-          )}
-
           {!isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {clients.map((client) => (
                 <div
                   key={client.clientId}
-                  className="bg-white rounded-lg shadow-md overflow-hidden"
+                  className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-md"
                 >
                   <div className="p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-xl font-semibold">
-                        {client.clientId}
-                      </h2>
-                      {client.status.isOnline ? (
-                        <span className="select-none inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
-                          <div className="inline-grid *:[grid-area:1/1]">
-                            <div className="status status-success animate-ping"></div>
-                            <div className="status status-success"></div>
-                          </div>
-                          Healthy
-                        </span>
-                      ) : (
-                        <span className="select-none inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-600">
-                          <div className="inline-grid *:[grid-area:1/1]">
-                            <div className="status status-error animate-ping"></div>
-                            <div className="status status-error"></div>
-                          </div>
-                          Unhealthy
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Last Updated:{" "}
-                      {new Date(client.status.lastUpdated).toLocaleString()}
-                    </p>
-                    <div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <h3 className="text-lg font-semibold">
-                          Active Sessions
-                        </h3>
-                        <span className="flex items-center justify-center gap-1 bg-slate-300/60 ring-2 ring-black/40 rounded-4xl px-3 py-1">
-                          <span className="text-sm">
-                            {client.status.users.length}
-                          </span>{" "}
-                          <UserRound className="text-black size-4" />
-                        </span>
+                      <div className="flex items-center gap-2">
+                        <div className="bg-gray-100 p-1.5 rounded-lg">
+                          <Computer className="h-5 w-5 text-gray-700" />
+                        </div>
+                        <h2 className="text-lg font-semibold text-gray-800">
+                          {client.clientId}
+                        </h2>
                       </div>
-                      <ul className="space-y-2">
-                        {client.status.sessions.map((session) => (
-                          <li
-                            key={session.ID}
-                            className="flex justify-between items-center bg-gray-50 p-2 rounded"
+                      <StatusBadge isOnline={client.status.isOnline} />
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <p>
+                        Updated{" "}
+                        {new Date(client.status.lastUpdated).toLocaleString()}
+                      </p>
+                    </div>
+
+                    <div className="mt-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-md font-semibold text-gray-800">
+                            Active Sessions
+                          </h3>
+                          <span className="flex items-center justify-center gap-1 bg-gray-100 rounded-full px-2.5 py-1">
+                            <span className="text-sm font-medium">
+                              {client.status.users.length}
+                            </span>
+                            <UserRound className="text-gray-700 size-4" />
+                          </span>
+                        </div>
+
+                        {user?.role === "admin" && (
+                          <button
+                            onClick={() => deleteClient(client.clientId)}
+                            className="text-red-500 hover:text-red-700 transition-colors duration-200 focus:outline-none"
                           >
-                            <div>
-                              <span className="font-medium mr-2">
-                                {session.User}
-                              </span>
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                  session.State === "Active"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : "bg-gray-100 text-gray-800"
-                                }`}
-                              >
-                                {session.State}
-                              </span>
-                            </div>
-                            {/* {session.State === "Active" && (
-                            <button
-                              onClick={() =>
-                                terminateSession(client.clientId, session.ID)
-                              }
-                              className="px-3 py-1 bg-red-500 text-white text-xs font-medium rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 cursor-pointer"
+                            <Trash2 size={18} />
+                          </button>
+                        )}
+                      </div>
+
+                      {client.status.sessions.length > 0 ? (
+                        <ul className="space-y-2 mt-3">
+                          {client.status.sessions.map((session) => (
+                            <li
+                              key={session.ID}
+                              className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100"
                             >
-                              Terminate
-                            </button>
-                          )} */}
-                          </li>
-                        ))}
-                      </ul>
+                              <div className="flex items-center gap-2">
+                                <UserRound className="h-4 w-4 text-gray-600" />
+                                <span className="font-medium text-gray-800">
+                                  {session.User}
+                                </span>
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                    session.State === "Active"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : "bg-gray-200 text-gray-800"
+                                  }`}
+                                >
+                                  {session.State}
+                                </span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic mt-2">
+                          No active sessions
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="flex justify-center items-center h-64">
-              <span className="loading loading-spinner loading-lg"></span>
-            </div>
+            <Loader />
           )}
         </div>
       </Layout>
     );
   } else {
+    // Desktop view
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center mb-5">
-            <h1 className="text-2xl">ThinClient : {clients.length}</h1>
-            <div className="flex items-center gap-2">
-              {isConnected ? (
-                <span className="text-green-600 flex items-center gap-1">
-                  <Wifi className="h-4 w-4" />
-                  Connected
-                </span>
-              ) : (
-                <span className="text-red-600 flex items-center gap-1">
-                  <WifiOff className="h-4 w-4" />
-                  Disconnected
-                </span>
-              )}
+        <div className="container mx-auto px-6 py-8 max-w-7xl">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-4">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+                <Computer className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">
+                  ThinClient Dashboard
+                </h1>
+                <p className="text-gray-500">
+                  Monitoring {clients.length} connected devices
+                </p>
+              </div>
             </div>
+            <ConnectionStatus />
           </div>
 
-          {/* <div className="flex items-center justify-center gap-5 bg-white border-1 border-gray-200 rounded-2xl w-fit px-4 py-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              x="0px"
-              y="0px"
-              className="size-24"
-              viewBox="0 0 30 30"
-            >
-              <path d="M12 16L3 16 3 23.75 12 24.988zM12 5L3 6.25 3 14 12 14zM14 4.75L14 14 27 14 27 3zM14 16L14 25.25 27 27 27 16z"></path>
-            </svg>
-            <h1 className="text-7xl font-mono">{clients.length}</h1>
-          </div> */}
-
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
-
-          {clients.length === 0 && !error && (
-            <div className="text-center py-10">
-              <p className="text-gray-500">No clients connected</p>
-            </div>
-          )}
+          <ErrorAlert />
+          <EmptyState />
 
           {!isLoading ? (
-            <div className="my-3">
-              <table className="w-full border-collapse border border-gray-200 bg-white text-left text-sm text-gray-500">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 font-medium text-gray-900"
-                    >
-                      Name
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 font-medium text-gray-900"
-                    >
-                      Last Update
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 font-medium text-gray-900"
-                    >
-                      Session
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 font-medium text-gray-900"
-                    >
-                      Status
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-4 font-medium text-gray-900"
-                    ></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 border-t border-gray-100">
-                  {clients.map((client) => (
-                    <>
-                      <tr key={client.clientId} className="hover:bg-gray-50">
-                        <th className="px-6 py-4 font-medium text-gray-900 flex items-center gap-1">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            x="0px"
-                            y="0px"
-                            className="size-4"
-                            viewBox="0 0 30 30"
-                          >
-                            <path d="M12 16L3 16 3 23.75 12 24.988zM12 5L3 6.25 3 14 12 14zM14 4.75L14 14 27 14 27 3zM14 16L14 25.25 27 27 27 16z"></path>
-                          </svg>
-                          {client.clientId}
-                        </th>
-                        <td className="px-6 py-4">
-                          <p className="text-sm text-gray-600">
-                            {new Date(
-                              client.status.lastUpdated
-                            ).toLocaleString()}
-                          </p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="flex items-center gap-1">
-                            <span className="text-sm">
-                              {client.status.users.length}
-                            </span>{" "}
-                            <UserRound className="text-black size-4" />
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {client.status.isOnline ? (
-                            <span className="select-none inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
-                              <div className="inline-grid *:[grid-area:1/1]">
-                                <div className="status status-success animate-ping"></div>
-                                <div className="status status-success"></div>
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-100">
+                      <th className="px-6 py-4 font-semibold text-gray-700">
+                        Client
+                      </th>
+                      <th className="px-6 py-4 font-semibold text-gray-700">
+                        Last Update
+                      </th>
+                      <th className="px-6 py-4 font-semibold text-gray-700">
+                        Sessions
+                      </th>
+                      <th className="px-6 py-4 font-semibold text-gray-700">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 font-semibold text-gray-700 text-right">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clients.map((client, index) => (
+                      <>
+                        <tr
+                          key={client.clientId}
+                          className={`hover:bg-gray-50 transition-colors duration-150 ${
+                            index !== clients.length - 1
+                              ? "border-b border-gray-100"
+                              : ""
+                          }`}
+                        >
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-blue-100 p-2 rounded-lg">
+                                <Computer className="h-5 w-5 text-blue-700" />
                               </div>
-                              Healthy
-                            </span>
-                          ) : (
-                            <span className="select-none inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-600">
-                              <div className="inline-grid *:[grid-area:1/1]">
-                                <div className="status status-error animate-ping"></div>
-                                <div className="status status-error"></div>
-                              </div>
-                              Unhealthy
-                            </span>
-                          )}
-                        </td>
-                        <td className="flex justify-end gap-4 px-6 py-4 font-medium">
-                          {user?.role === "admin" && (
-                            <button
-                              onClick={() => deleteClient(client.clientId)}
-                              className="cursor-pointer"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-
-                      {/* Session List */}
-                      {client.status.sessions.length > 0 && (
-                        <h1 className="px-6 py-3 text-md">Session</h1>
-                      )}
-                      {client.status.sessions.map((session) => (
-                        <tr key={session.ID} className="bg-gray-100">
-                          <td className="px-6 py-4 font-medium text-gray-900 flex items-center gap-1">
-                            <Computer size={17} /> {session.User}{" "}
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                session.State === "Active"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {session.State}
-                            </span>
+                              <span className="font-medium text-gray-800">
+                                {client.clientId}
+                              </span>
+                            </div>
                           </td>
-                          <td className="px-6 py-4"></td>
-                          <td className="px-6 py-4"></td>
-                          <td className="px-6 py-4"></td>
-                          <td className="flex justify-end gap-4 px-6 py-4 font-medium">
-                            {/* {session.State === "Active" && (
-                            <button className="px-2 py-1 w-fit bg-red-500 text-white rounded-md cursor-pointer">
-                              Terminate
-                            </button>
-                          )} */}
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <svg
+                                className="h-4 w-4 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              <span className="text-sm text-gray-600">
+                                {new Date(
+                                  client.status.lastUpdated
+                                ).toLocaleString()}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-1 rounded-full">
+                                {client.status.users.length}
+                              </span>
+                              <UserRound className="text-gray-600 size-4" />
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <StatusBadge isOnline={client.status.isOnline} />
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            {user?.role === "admin" && (
+                              <button
+                                onClick={() => deleteClient(client.clientId)}
+                                className="inline-flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors duration-200 focus:outline-none bg-red-50 hover:bg-red-100 rounded-lg px-3 py-1.5"
+                              >
+                                <Trash2 size={16} />
+                                <span className="text-sm font-medium">
+                                  Delete
+                                </span>
+                              </button>
+                            )}
                           </td>
                         </tr>
-                      ))}
-                    </>
-                  ))}
-                </tbody>
-              </table>
+
+                        {/* Session List */}
+                        {client.status.sessions.length > 0 && (
+                          <>
+                            {client.status.sessions.map(
+                              (session, sessionIndex) => (
+                                <tr
+                                  key={session.ID}
+                                  className={`bg-gray-50 hover:bg-gray-100 transition-colors duration-150 ${
+                                    sessionIndex !==
+                                    client.status.sessions.length - 1
+                                      ? "border-b border-gray-100"
+                                      : ""
+                                  }`}
+                                >
+                                  <td className="px-6 py-3 pl-12">
+                                    <div className="flex items-center gap-2">
+                                      <UserRound
+                                        size={16}
+                                        className="text-gray-500"
+                                      />
+                                      <span className="font-medium text-gray-700">
+                                        {session.User}
+                                      </span>
+                                      <span
+                                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                          session.State === "Active"
+                                            ? "bg-blue-100 text-blue-800"
+                                            : "bg-gray-200 text-gray-700"
+                                        }`}
+                                      >
+                                        {session.State}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-3"></td>
+                                  <td className="px-6 py-3"></td>
+                                  <td className="px-6 py-3"></td>
+                                  <td className="px-6 py-3"></td>
+                                </tr>
+                              )
+                            )}
+                          </>
+                        )}
+                      </>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : (
-            <div className="flex justify-center items-center h-64">
-              <span className="loading loading-spinner loading-lg"></span>
-            </div>
+            <Loader />
           )}
         </div>
       </Layout>
