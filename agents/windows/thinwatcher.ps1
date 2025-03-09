@@ -352,7 +352,8 @@ function Invoke-ThinWatcher {
         [string[]]`$Arguments
     )
     
-    & "$LauncherScript" @Arguments
+    # Always bypass execution policy when running the launcher
+    powershell.exe -ExecutionPolicy Bypass -File "$LauncherScript" @Arguments
 }
 
 New-Alias -Name thinwatcher -Value Invoke-ThinWatcher -Force -Scope Global
@@ -374,16 +375,6 @@ Export-ModuleMember -Function Invoke-ThinWatcher -Alias thinwatcher
         -AliasesToExport @('thinwatcher')
 }
 
-function Add-ToPath {
-    $binPath = $BinDir
-    $envPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
-    
-    if ($envPath -notlike "*$binPath*") {
-        [Environment]::SetEnvironmentVariable("PATH", "$envPath;$binPath", "Machine")
-        Write-Status "Added ThinWatcher to system PATH" -Type "Success"
-    }
-}
-
 function Create-ShortcutFile {
     # Create a .cmd file in the bin directory for direct invocation
     $cmdFile = "$BinDir\thinwatcher.cmd"
@@ -394,6 +385,66 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$LauncherScript" %*
 "@
     
     Set-Content -Path $cmdFile -Value $cmdContent
+}
+
+function Unblock-ThinWatcherFiles {
+    # Unblock all PowerShell scripts in the installation directory
+    Get-ChildItem -Path $InstallDir -Recurse -Filter "*.ps1" | ForEach-Object {
+        Write-Status "Unblocking file: $($_.FullName)" -Type "Info"
+        Unblock-File -Path $_.FullName
+    }
+    
+    # Create a local security policy for the launcher script
+    try {
+        # Create a certificate for signing
+        $cert = New-SelfSignedCertificate -DnsName "ThinWatcher" -CertStoreLocation "Cert:\CurrentUser\My" -Type CodeSigningCert -Subject "ThinWatcher"
+        
+        # Export the certificate to a file
+        $certPath = "$env:TEMP\ThinWatcher.cer"
+        Export-Certificate -Cert $cert -FilePath $certPath -Force | Out-Null
+        
+        # Import the certificate to the Trusted Publishers store
+        Import-Certificate -FilePath $certPath -CertStoreLocation "Cert:\LocalMachine\TrustedPublisher" | Out-Null
+        
+        # Sign the launcher script and all downloaded scripts
+        Get-ChildItem -Path $InstallDir -Recurse -Filter "*.ps1" | ForEach-Object {
+            Write-Status "Signing file: $($_.FullName)" -Type "Info"
+            Set-AuthenticodeSignature -FilePath $_.FullName -Certificate $cert | Out-Null
+        }
+        
+        # Clean up
+        Remove-Item -Path $certPath -Force -ErrorAction SilentlyContinue
+        
+        Write-Status "All PowerShell scripts have been signed and unblocked" -Type "Success"
+    }
+    catch {
+        Write-Status "Unable to sign scripts, but continuing with installation: $_" -Type "Warning"
+        # Fallback to creating a PowerShell script that bypasses execution policy
+        $bypassWrapperPath = "$BinDir\thinwatcher-bypass.ps1"
+        $bypassContent = @"
+# This script bypasses execution policy for the ThinWatcher launcher
+powershell.exe -ExecutionPolicy Bypass -File "$LauncherScript" `$args
+"@
+        Set-Content -Path $bypassWrapperPath -Value $bypassContent
+        
+        # Update the CMD file to call the bypass wrapper
+        $cmdFile = "$BinDir\thinwatcher.cmd"
+        $cmdContent = @"
+@echo off
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$bypassWrapperPath" %*
+"@
+        Set-Content -Path $cmdFile -Value $cmdContent
+    }
+}
+
+function Add-ToPath {
+    $binPath = $BinDir
+    $envPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
+    
+    if ($envPath -notlike "*$binPath*") {
+        [Environment]::SetEnvironmentVariable("PATH", "$envPath;$binPath", "Machine")
+        Write-Status "Added ThinWatcher to system PATH" -Type "Success"
+    }
 }
 
 # Main installation process
@@ -437,6 +488,10 @@ try {
         }
     }
     
+    # Unblock and sign files to address execution policy
+    Write-Status "Addressing execution policy for ThinWatcher scripts..." -Type "Info"
+    Unblock-ThinWatcherFiles
+    
     # Create PowerShell module for system-wide access
     Write-Status "Creating PowerShell module..." -Type "Info"
     Create-PowerShellModule
@@ -458,7 +513,8 @@ try {
     # Offer to launch ThinWatcher now
     $launch = Read-Host "Would you like to launch ThinWatcher now? (y/n)"
     if ($launch -eq 'y') {
-        & $LauncherScript
+        # Launch with execution policy bypass
+        powershell.exe -ExecutionPolicy Bypass -File $LauncherScript
     }
 }
 catch {
