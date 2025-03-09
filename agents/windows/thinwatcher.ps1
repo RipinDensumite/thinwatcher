@@ -47,7 +47,6 @@ function Write-Status {
 
 function Create-ThinWatcherLauncher {
     # Create the launcher script content with fixed string formatting
-    # Using string replacement instead of string formatting to avoid potential issues
     $launcherContent = @'
 #!/usr/bin/env pwsh
 param (
@@ -109,7 +108,6 @@ function Show-Menu {
 }
 
 function Test-WinAgentInstallation {
-    # Fixed: Check for ThinWatcher agent instead of WinAgent
     if (Test-Path "$ScriptsDir\win-agent.ps1") {
         return "Installed"
     }
