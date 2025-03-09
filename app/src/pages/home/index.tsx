@@ -472,7 +472,7 @@ export default function HomePage() {
                             {user?.role === "admin" && (
                               <button
                                 onClick={() => deleteClient(client.clientId)}
-                                className="inline-flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors duration-200 focus:outline-none bg-red-50 hover:bg-red-100 rounded-lg px-3 py-1.5"
+                                className="cursor-pointer inline-flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors duration-200 focus:outline-none bg-red-50 hover:bg-red-100 rounded-lg px-3 py-1.5"
                               >
                                 <Trash2 size={16} />
                                 <span className="text-sm font-medium">
