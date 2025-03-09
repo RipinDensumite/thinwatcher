@@ -80,7 +80,7 @@ function Show-Menu {
     Write-Host "Available Commands:" -ForegroundColor White
     Write-Host "  1. install    - Install ThinWatcher Agent"
     Write-Host "  2. update     - Update ThinWatcher Agent"
-    Write-Host "  3. uninstall  - Uninstall ThinWatcher Agent"
+    Write-Host "  3. uninstall  - Uninstall ThinWatcher"
     Write-Host "  4. reconfig   - Reconfigure ThinWatcher Agent"
     Write-Host "  5. start      - Start ThinWatcher Agent"
     Write-Host "  6. stop       - Stop ThinWatcher Agent"
@@ -108,6 +108,7 @@ function Show-Menu {
 }
 
 function Test-WinAgentInstallation {
+    # Check if the win-agent.ps1 script exists in the scripts directory
     if (Test-Path "$ScriptsDir\win-agent.ps1") {
         return "Installed"
     }
@@ -239,13 +240,16 @@ function Start-Agent {
     Write-Host "Starting ThinWatcher Agent..." -ForegroundColor Cyan
     
     try {
-        if (Test-WinAgentInstallation -eq "Not Installed") {
+        # Check if the agent is installed
+        $installationStatus = Test-WinAgentInstallation
+        if ($installationStatus -eq "Not Installed") {
             Write-Host "Agent not installed. Please install it first." -ForegroundColor Yellow
             Pause
             Show-Menu
             return
         }
         
+        # Check if the scheduled task exists
         $task = Get-ScheduledTask -TaskName "WinAgent" -ErrorAction SilentlyContinue
         if ($task) {
             Start-ScheduledTask -TaskName "WinAgent"

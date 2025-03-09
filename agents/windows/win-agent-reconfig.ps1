@@ -153,21 +153,24 @@ HEARTBEAT_INTERVAL=$HEARTBEAT_INTERVAL
 CLIENT_ID=$CLIENT_ID
 "@
     
-    # Stop the service
+    # Stop the service if it exists
     if (Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue) {
-        Stop-ScheduledTask -TaskName $ServiceName
+        Stop-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue
+        Write-Host "Stopped the WinAgent scheduled task." -ForegroundColor Green
+    } else {
+        Write-Host "WinAgent scheduled task not found. Skipping stop operation." -ForegroundColor Yellow
     }
     
     # Update the config file
     Set-Content -Path $ConfigFile -Value $configContent
     Write-Host "Configuration updated at $ConfigFile" -ForegroundColor Green
     
-    # Restart the service
+    # Restart the service if it exists
     if (Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue) {
         Start-ScheduledTask -TaskName $ServiceName
-        Write-Host "Agent restarted with new configuration." -ForegroundColor Green
+        Write-Host "Restarted the WinAgent scheduled task with new configuration." -ForegroundColor Green
     } else {
-        Write-Warning "WinAgent task not found. You may need to reinstall the agent."
+        Write-Host "WinAgent scheduled task not found. You may need to reinstall the agent." -ForegroundColor Yellow
     }
     
     Write-Host "Reconfiguration completed successfully." -ForegroundColor Green
