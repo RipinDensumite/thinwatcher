@@ -83,7 +83,7 @@ try {
     foreach ($file in $agentFiles) {
         $filePath = "$InstallDir\$file"
         if (Test-Path $filePath) {
-            Remove-Item -Path $filePath -Force
+            Remove-Item -Path $InstallDir -Recurse -Force
         }
     }
     

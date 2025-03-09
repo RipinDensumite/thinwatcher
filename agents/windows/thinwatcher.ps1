@@ -196,6 +196,7 @@ function Uninstall-Agent {
             Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$ScriptsDir\win-agent-uninstall.ps1`"" -Verb RunAs -Wait
         }
         Write-Host "Uninstallation completed." -ForegroundColor Green
+        exit 0
     }
     catch {
         Write-Host "Uninstallation failed: $_" -ForegroundColor Red
