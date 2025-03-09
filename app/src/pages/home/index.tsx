@@ -158,7 +158,7 @@ export default function HomePage() {
     <div className="flex justify-center items-center h-64">
       <div className="relative w-16 h-16">
         <div className="absolute top-0 left-0 w-full h-full border-4 border-gray-200 rounded-full"></div>
-        <div className="absolute top-0 left-0 w-full h-full border-4 border-t-blue-500 rounded-full animate-spin"></div>
+        <div className="absolute top-0 left-0 w-full h-full border-4 border-t-slate-500 rounded-full animate-spin"></div>
       </div>
     </div>
   );
@@ -246,11 +246,11 @@ export default function HomePage() {
           <div className="flex flex-col space-y-4 mb-6">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="bg-blue-500 p-2 rounded-lg shadow-lg">
+                <div className="bg-slate-500 p-2 rounded-lg shadow-lg">
                   <Computer className="h-6 w-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-800">ThinClient</h1>
-                <div className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+                <div className="bg-slate-100 text-slate-800 text-xs font-semibold px-2.5 py-1 rounded-full">
                   {clients.length}
                 </div>
               </div>
@@ -340,7 +340,7 @@ export default function HomePage() {
                                 <span
                                   className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                                     session.State === "Active"
-                                      ? "bg-blue-100 text-blue-800"
+                                      ? "bg-slate-100 text-slate-800"
                                       : "bg-gray-200 text-gray-800"
                                   }`}
                                 >
@@ -373,7 +373,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 py-8 max-w-7xl">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+              <div className="bg-gradient-to-r from-slate-500 to-slate-600 p-3 rounded-xl shadow-lg">
                 <Computer className="h-7 w-7 text-white" />
               </div>
               <div>
@@ -427,8 +427,8 @@ export default function HomePage() {
                         >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="bg-blue-100 p-2 rounded-lg">
-                                <Computer className="h-5 w-5 text-blue-700" />
+                              <div className="bg-slate-100 p-2 rounded-lg">
+                                <Computer className="h-5 w-5 text-slate-700" />
                               </div>
                               <span className="font-medium text-gray-800">
                                 {client.clientId}
@@ -509,7 +509,7 @@ export default function HomePage() {
                                       <span
                                         className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                                           session.State === "Active"
-                                            ? "bg-blue-100 text-blue-800"
+                                            ? "bg-slate-100 text-slate-800"
                                             : "bg-gray-200 text-gray-700"
                                         }`}
                                       >

@@ -10,9 +10,9 @@ export default function AgentsPage() {
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header with gradient background */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-10 text-white">
+          <div className="bg-gradient-to-r from-slate-600 to-slate-700 px-8 py-10 text-white">
             <h1 className="text-4xl font-bold tracking-tight">Agents</h1>
-            <p className="mt-2 text-blue-100">Lightweight monitoring solution for thin clients</p>
+            <p className="mt-2 text-slate-100">Lightweight monitoring solution for thin clients</p>
           </div>
 
           {/* Navigation Tabs */}
@@ -22,8 +22,8 @@ export default function AgentsPage() {
                 onClick={() => setActiveTab("install")}
                 className={`py-4 px-6 font-medium text-sm border-b-2 transition-colors duration-200 ease-in-out ${
                   activeTab === "install"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-slate-600 text-slate-600"
+                    : "cursor-pointer border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 Installation
@@ -32,8 +32,8 @@ export default function AgentsPage() {
                 onClick={() => setActiveTab("usage")}
                 className={`py-4 px-6 font-medium text-sm border-b-2 transition-colors duration-200 ease-in-out ${
                   activeTab === "usage"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-slate-600 text-slate-600"
+                    : "cursor-pointer border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 Usage
@@ -42,8 +42,8 @@ export default function AgentsPage() {
                 onClick={() => setActiveTab("troubleshoot")}
                 className={`py-4 px-6 font-medium text-sm border-b-2 transition-colors duration-200 ease-in-out ${
                   activeTab === "troubleshoot"
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-slate-600 text-slate-600"
+                    : "cursor-pointer border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 Troubleshooting
@@ -56,10 +56,10 @@ export default function AgentsPage() {
             {/* Introduction - Always visible */}
             <section className="mb-8">
               <div className="flex items-start">
-                <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                <div className="flex-shrink-0 bg-slate-100 rounded-lg p-3">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8 text-blue-600"
+                    className="h-8 w-8 text-slate-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -88,7 +88,7 @@ export default function AgentsPage() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 mr-2 text-blue-600"
+                    className="h-6 w-6 mr-2 text-slate-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -108,7 +108,7 @@ export default function AgentsPage() {
                 <ol className="space-y-6 mb-6">
                   <li className="bg-gray-50 rounded-lg p-4 shadow-sm">
                     <div className="flex">
-                      <span className="flex-shrink-0 bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                      <span className="flex-shrink-0 bg-slate-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
                         1
                       </span>
                       <div className="ml-4">
@@ -123,7 +123,7 @@ export default function AgentsPage() {
 
                   <li className="bg-gray-50 rounded-lg p-4 shadow-sm">
                     <div className="flex">
-                      <span className="flex-shrink-0 bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                      <span className="flex-shrink-0 bg-slate-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
                         2
                       </span>
                       <div className="ml-4 w-full">
@@ -165,7 +165,7 @@ export default function AgentsPage() {
 
                   <li className="bg-gray-50 rounded-lg p-4 shadow-sm">
                     <div className="flex">
-                      <span className="flex-shrink-0 bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                      <span className="flex-shrink-0 bg-slate-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
                         3
                       </span>
                       <div className="ml-4">
@@ -175,7 +175,7 @@ export default function AgentsPage() {
                             <p className="font-medium text-gray-800">Backend URL</p>
                             <p className="text-gray-600 text-sm mt-1">
                               The URL of the backend server where the agent will send data (e.g.,{" "}
-                              <code className="bg-gray-100 px-1 py-0.5 rounded text-blue-600">
+                              <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
                                 https://your-backend-url.com
                               </code>
                               )
@@ -186,7 +186,7 @@ export default function AgentsPage() {
                             <p className="font-medium text-gray-800">Heartbeat Interval</p>
                             <p className="text-gray-600 text-sm mt-1">
                               The time interval in seconds at which the agent sends a "heartbeat" signal (e.g.,{" "}
-                              <code className="bg-gray-100 px-1 py-0.5 rounded text-blue-600">5</code>)
+                              <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">5</code>)
                             </p>
                           </div>
 
@@ -194,7 +194,7 @@ export default function AgentsPage() {
                             <p className="font-medium text-gray-800">Client ID</p>
                             <p className="text-gray-600 text-sm mt-1">
                               A unique identifier for this thin client (e.g.,{" "}
-                              <code className="bg-gray-100 px-1 py-0.5 rounded text-blue-600">THINCLIENT-01</code>)
+                              <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">THINCLIENT-01</code>)
                             </p>
                           </div>
                         </div>
@@ -204,7 +204,7 @@ export default function AgentsPage() {
 
                   <li className="bg-gray-50 rounded-lg p-4 shadow-sm">
                     <div className="flex">
-                      <span className="flex-shrink-0 bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                      <span className="flex-shrink-0 bg-slate-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
                         4
                       </span>
                       <div className="ml-4">
@@ -226,7 +226,7 @@ export default function AgentsPage() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 mr-2 text-blue-600"
+                    className="h-6 w-6 mr-2 text-slate-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -240,8 +240,8 @@ export default function AgentsPage() {
                   </svg>
                   Using WinAgent
                 </h2>
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
-                  <p className="text-blue-700">
+                <div className="bg-slate-50 border-l-4 border-slate-500 p-4 mb-6 rounded-r-lg">
+                  <p className="text-slate-700">
                     After installation, WinAgent will automatically start monitoring the thin client and sending
                     heartbeat signals to the backend server.
                   </p>
@@ -297,7 +297,7 @@ export default function AgentsPage() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 mr-2 text-blue-600"
+                    className="h-6 w-6 mr-2 text-slate-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -329,7 +329,7 @@ export default function AgentsPage() {
                       icon: (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-blue-600"
+                          className="h-5 w-5 text-slate-600"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -350,7 +350,7 @@ export default function AgentsPage() {
                       icon: (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-blue-600"
+                          className="h-5 w-5 text-slate-600"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -370,7 +370,7 @@ export default function AgentsPage() {
                       icon: (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-blue-600"
+                          className="h-5 w-5 text-slate-600"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -391,7 +391,7 @@ export default function AgentsPage() {
                       icon: (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-blue-600"
+                          className="h-5 w-5 text-slate-600"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -411,7 +411,7 @@ export default function AgentsPage() {
                       icon: (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-blue-600"
+                          className="h-5 w-5 text-slate-600"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -430,7 +430,7 @@ export default function AgentsPage() {
                       key={index}
                       className="flex bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <div className="flex-shrink-0 bg-blue-50 rounded-full p-2 h-fit">{item.icon}</div>
+                      <div className="flex-shrink-0 bg-slate-50 rounded-full p-2 h-fit">{item.icon}</div>
                       <div className="ml-4">
                         <h3 className="font-medium text-gray-800">{item.title}</h3>
                         <p className="text-gray-600 text-sm mt-1">{item.description}</p>
@@ -441,10 +441,10 @@ export default function AgentsPage() {
 
                 {/* <div className="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 bg-blue-100 rounded-full p-2">
+                    <div className="flex-shrink-0 bg-slate-100 rounded-full p-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 text-blue-600"
+                        className="h-6 w-6 text-slate-600"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -462,7 +462,7 @@ export default function AgentsPage() {
                   <div className="mt-4 flex space-x-4">
                     <a
                       // href="#"
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -482,7 +482,7 @@ export default function AgentsPage() {
                     </a>
                     <a
                       href="#"
-                      className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
