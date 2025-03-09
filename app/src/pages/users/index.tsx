@@ -377,7 +377,7 @@ function ManageUsersPage() {
         {/* Create User Modal */}
         {isCreateModalOpen && (
           <div className="fixed inset-0 z-10 overflow-y-auto">
-            <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div className="fixed inset-0 bg-gray-500/50 transition-opacity"></div>
 
               <span
@@ -542,7 +542,7 @@ function ManageUsersPage() {
         {/* Delete Confirmation Modal */}
         {isDeleteModalOpen && (
           <div className="fixed inset-0 z-10 overflow-y-auto">
-            <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div
                 className="fixed inset-0 bg-gray-500/50 transition-opacity"
                 onClick={() => setIsDeleteModalOpen(false)}
