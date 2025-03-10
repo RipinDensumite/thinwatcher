@@ -16,7 +16,7 @@ $BinDir = "$InstallDir\bin"
 $ScriptsDir = "$InstallDir\scripts"
 $LauncherScript = "$BinDir\thinwatcher.ps1"
 $GitHubRepoBaseUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows"
-$Version = "1.0.0"
+$Version = "1.0.0-alpha"
 $LauncherScriptPath = "$env:TEMP\thinwatcher-launcher.ps1"
 
 # Required scripts to download
