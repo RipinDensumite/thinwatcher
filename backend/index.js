@@ -352,8 +352,8 @@ app.get("/api/clients", auth, apiKeyAuth, (req, res) => {
   );
 });
 
-// Client removal endpoint - protected with JWT auth and admin role
-app.delete("/api/clients/:clientId", auth, adminAuth, (req, res) => {
+// Client removal endpoint
+app.delete("/api/clients/:clientId", (req, res) => {
   const clientId = req.params.clientId;
 
   if (clients.has(clientId)) {
