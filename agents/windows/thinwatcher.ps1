@@ -80,28 +80,28 @@ function Show-Menu {
     Write-Host
     Write-Host "Available Commands:" -ForegroundColor White
     Write-Host "  1. install    - Install ThinWatcher Agent"
-    Write-Host "  2. update     - Update ThinWatcher Agent"
-    Write-Host "  3. uninstall  - Uninstall ThinWatcher"
-    Write-Host "  4. reconfig   - Reconfigure ThinWatcher Agent"
-    Write-Host "  5. start      - Start ThinWatcher Agent"
-    Write-Host "  6. stop       - Stop ThinWatcher Agent"
-    Write-Host "  7. version    - Show ThinWatcher version"
-    Write-Host "  8. exit       - Exit"
+    # Write-Host "  2. update     - Update ThinWatcher Agent"
+    Write-Host "  2. uninstall  - Uninstall ThinWatcher"
+    Write-Host "  3. reconfig   - Reconfigure ThinWatcher Agent"
+    Write-Host "  4. start      - Start ThinWatcher Agent"
+    Write-Host "  5. stop       - Stop ThinWatcher Agent"
+    Write-Host "  6. version    - Show ThinWatcher version"
+    Write-Host "  7. exit       - Exit"
     Write-Host
     
     $choice = Read-Host "Enter your choice (1-8)"
     
     switch ($choice) {
         "1" { Install-Agent }
-        "2" { Update-Agent }
-        "3" { Uninstall-Agent }
-        "4" { Reconfig-Agent }
-        "5" { Start-Agent }
-        "6" { Stop-Agent }
-        "7" { Show-Version }
-        "8" { return }
+        # "2" { Update-Agent }
+        "2" { Uninstall-Agent }
+        "3" { Reconfig-Agent }
+        "4" { Start-Agent }
+        "5" { Stop-Agent }
+        "6" { Show-Version }
+        "7" { return }
         default {
-            Write-Host "Invalid choice. Please select a valid option (1-8)." -ForegroundColor Red
+            Write-Host "Invalid choice. Please select a valid option (1-7)." -ForegroundColor Red
             Pause
             Show-Menu
         }
@@ -156,31 +156,31 @@ function Install-Agent {
     Show-Menu
 }
 
-function Update-Agent {
-    Show-Header
-    Write-Host "Updating ThinWatcher Agent..." -ForegroundColor Cyan
+# function Update-Agent {
+#     Show-Header
+#     Write-Host "Updating ThinWatcher Agent..." -ForegroundColor Cyan
     
-    try {
-        if (Test-WinAgentInstallation -eq "Not Installed") {
-            Write-Host "Agent not installed. Please install it first." -ForegroundColor Yellow
-            Pause
-            Show-Menu
-            return
-        }
+#     try {
+#         if (Test-WinAgentInstallation -eq "Not Installed") {
+#             Write-Host "Agent not installed. Please install it first." -ForegroundColor Yellow
+#             Pause
+#             Show-Menu
+#             return
+#         }
         
-        # Uninstall and reinstall
-        Uninstall-Agent -noMenu
-        Install-Agent
-    }
-    catch {
-        Write-Host "Update failed: $_" -ForegroundColor Red
-    }
+#         # Uninstall and reinstall
+#         Uninstall-Agent -noMenu
+#         Install-Agent
+#     }
+#     catch {
+#         Write-Host "Update failed: $_" -ForegroundColor Red
+#     }
     
-    if (-not $noMenu) {
-        Pause
-        Show-Menu
-    }
-}
+#     if (-not $noMenu) {
+#         Pause
+#         Show-Menu
+#     }
+# }
 
 function Uninstall-Agent {
     param([switch]$noMenu)
@@ -315,7 +315,7 @@ function Pause {
 switch ($Command.ToLower()) {
     "menu" { Show-Menu }
     "install" { Install-Agent }
-    "update" { Update-Agent }
+    # "update" { Update-Agent }
     "uninstall" { Uninstall-Agent }
     "reconfig" { Reconfig-Agent }
     "start" { Start-Agent }
