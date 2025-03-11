@@ -45,7 +45,7 @@ function Write-Status {
     Write-Host "[$Type] $Message" -ForegroundColor $color
 }
 
-function Create-ThinWatcherLauncher {
+function New-ThinWatcherLauncher {
     # Create the launcher script content with fixed string formatting
     $launcherContent = @'
 #!/usr/bin/env pwsh
@@ -336,7 +336,7 @@ switch ($Command.ToLower()) {
     Set-Content -Path $LauncherScriptPath -Value $launcherContent
 }
 
-function Create-PowerShellModule {
+function New-PowerShellModule {
     # Create the module to expose the ThinWatcher command
     $modulesPath = "$env:ProgramFiles\WindowsPowerShell\Modules\ThinWatcher"
     $modulePath = "$modulesPath\ThinWatcher.psm1"
@@ -378,7 +378,7 @@ Export-ModuleMember -Function Invoke-ThinWatcher -Alias thinwatcher
         -AliasesToExport @('thinwatcher')
 }
 
-function Create-ShortcutFile {
+function New-ShortcutFile {
     # Create a .cmd file in the bin directory for direct invocation
     $cmdFile = "$BinDir\thinwatcher.cmd"
     
@@ -448,7 +448,7 @@ try {
     
     # Create the launcher script
     Write-Status "Creating launcher script..." -Type "Info"
-    Create-ThinWatcherLauncher
+    New-ThinWatcherLauncher
     
     # Copy the launcher to the bin directory
     Copy-Item -Path $LauncherScriptPath -Destination $LauncherScript -Force
@@ -476,11 +476,11 @@ try {
     
     # Create PowerShell module for system-wide access
     Write-Status "Creating PowerShell module..." -Type "Info"
-    Create-PowerShellModule
+    New-PowerShellModule
     
     # Create CMD shortcut
     Write-Status "Creating command shortcut..." -Type "Info"
-    Create-ShortcutFile
+    New-ShortcutFile
     
     # Add to PATH
     Write-Status "Adding ThinWatcher to system PATH..." -Type "Info"
