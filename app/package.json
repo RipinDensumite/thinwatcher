@@ -1,0 +1,44 @@
+{
+  "name": "thinwatcher",
+  "private": true,
+  "version": "1.0.0-alpha",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "devhost": "vite --host",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "previewhost": "vite preview --host",
+    "generate-pwa-assets": "pwa-assets-generator --preset minimal public/logo.svg"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.0.1",
+    "@uidotdev/usehooks": "^2.4.1",
+    "daisyui": "^5.0.0",
+    "lucide-react": "^0.474.0",
+    "motion": "^12.4.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router": "^7.1.5",
+    "socket.io-client": "^4.8.1",
+    "sonner": "^2.0.1",
+    "tailwindcss": "^4.0.1",
+    "vite-tsconfig-paths": "^5.1.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vite-pwa/assets-generator": "^0.2.6",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "typescript": "~5.6.2",
+    "typescript-eslint": "^8.18.2",
+    "vite": "^6.0.5",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}
