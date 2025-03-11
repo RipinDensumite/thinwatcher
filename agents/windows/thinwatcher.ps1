@@ -45,6 +45,54 @@ function Write-Status {
     Write-Host "[$Type] $Message" -ForegroundColor $color
 }
 
+# Clean up function
+function Clear-ErrorInstallation {
+    $ServiceName = "WinAgent"
+    
+    try {
+        # Stop and remove scheduled task
+        if (Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue) {
+            Stop-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue
+            Unregister-ScheduledTask -TaskName $ServiceName -Confirm:$false | Out-Null
+        }
+    
+        # Stop running agent processes forcefully
+        $agentProcesses = Get-Process | Where-Object { $_.Path -like "*win-agent.ps1*" }
+        foreach ($proc in $agentProcesses) {
+            try {
+                Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+            }
+            catch {
+                Write-Warning "Could not stop process $($proc.Id): $_"
+            }
+        }
+
+        # Change working directory to prevent lock
+        Set-Location C:\Windows\Temp
+
+        # Wait for processes to release locks
+        Start-Sleep -Seconds 2
+
+        # Remove ThinWatcher folder completely
+        if (Test-Path "$env:ProgramFiles\ThinWatcher") {
+            Remove-Item -Path "$env:ProgramFiles\ThinWatcher" -Recurse -Force -ErrorAction SilentlyContinue
+        }
+
+        # Verify deletion and retry if necessary
+        Start-Sleep -Seconds 1
+        if (Test-Path "$env:ProgramFiles\ThinWatcher") {
+            Remove-Item -Path "$env:ProgramFiles\ThinWatcher" -Recurse -Force
+        }
+
+        Write-Host "Clean up completed successfully." -ForegroundColor Green
+        exit 0
+    }
+    catch {
+        Write-Host "Clean up failed: $_" -ForegroundColor Red
+        exit 1
+    }
+}
+
 function New-ThinWatcherLauncher {
     # Create the launcher script content with fixed string formatting
     $launcherContent = @'
@@ -500,6 +548,8 @@ try {
     }
 }
 catch {
+    Clear-ErrorInstallation
+
     Write-Status "Installation failed: $_" -Type "Error"
     exit 1
 }
