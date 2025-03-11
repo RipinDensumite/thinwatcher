@@ -187,7 +187,7 @@ function ProfilePage() {
                   Current Information
                 </h3>
                 <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex items-center bg-amber-400">
+                  <div className="flex items-center">
                     <User className="size-4 min-w-fit min-h-fit text-slate-500 mr-2" />
                     <span className="text-sm text-slate-500 mr-2">
                       Username:
