@@ -51,9 +51,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {isOpen && (
               <motion.div
                 className="absolute top-full left-0 w-full bg-white shadow-md rounded-b-lg z-20 overflow-hidden"
-                initial={{ opacity: 0, height: 0, y: -10 }}
-                animate={{ opacity: 1, height: "auto", y: 0 }}
-                exit={{ opacity: 0, height: 0, y: -10 }}
+                initial={{ height: 0, y: -10 }}
+                animate={{ height: "auto", y: 0 }}
+                exit={{ height: 0, y: -10 }}
                 transition={{
                   duration: 0.3,
                   ease: [0.04, 0.62, 0.23, 0.98],
@@ -69,7 +69,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     className="flex items-center gap-3 px-2 py-2"
                     initial={{ x: -20 }}
                     animate={{ x: 0 }}
-                    transition={{ delay: 0.15, duration: 0.3 }}
+                    transition={{
+                      duration: 0.3,
+                      ease: [0.04, 0.62, 0.23, 0.98],
+                    }}
                   >
                     <motion.div
                       className="bg-gradient-to-r from-slate-500 to-stone-500 rounded-full p-1"
@@ -83,7 +86,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         className="font-medium text-slate-900"
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.2 }}
                       >
                         {user?.username}
                       </motion.p>
@@ -91,7 +93,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         className="text-xs text-slate-500"
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.25, duration: 0.2 }}
                       >
                         {user?.role}
                       </motion.p>
@@ -285,9 +286,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 {isOpen && (
                   <motion.div
                     className="absolute bottom-full left-0 w-full bg-white rounded-lg shadow-lg mb-2 overflow-hidden"
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
                     transition={{ duration: 0.2 }}
                   >
                     <motion.ul className="py-1">
