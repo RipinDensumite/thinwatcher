@@ -128,6 +128,12 @@ function Test-ThinClientName {
 }
 
 try {
+    # Check if agent is installed
+    if ((Test-Path $ConfigFile)) {
+        Write-Host "ThinWatcher agent is already installed. Abort installation" -ForegroundColor Red
+        exit 1
+    }
+
     # Create installation directory if it doesn't exist
     if (-not (Test-Path $InstallDir)) {
         New-Item -Path $InstallDir -ItemType Directory -Force | Out-Null
