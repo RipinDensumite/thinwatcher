@@ -182,7 +182,7 @@ export default function HomePage() {
 
   // Connection status component
   const ConnectionStatus = () => (
-    <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out">
+    <div className="flex items-center min-w-fit w-full sm:w-fit gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out">
       {isConnected ? (
         <span className="text-emerald-600 flex items-center gap-2 font-medium">
           <Wifi className="h-4 w-4" />
@@ -240,14 +240,14 @@ export default function HomePage() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-6 max-w-4xl overflow-x-auto">
-          <div className="flex flex-col space-y-4 mb-6">
+          <div className="flex flex-col space-y-4 mb-6 min-w-fit">
             <div className="flex flex-col gap-5 sm:flex-row sm:gap-0 justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="bg-slate-500 p-2 rounded-lg shadow-lg">
                   <Computer className="h-6 w-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-800">ThinClient</h1>
-                <div className="bg-slate-100 text-slate-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+                <div className="bg-slate-500 text-white text-xs font-semibold px-2.5 py-1 rounded-md">
                   {clients.length}
                 </div>
               </div>
