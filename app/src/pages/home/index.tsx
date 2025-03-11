@@ -25,78 +25,6 @@ interface Client {
 
 const API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
-const dummyClients: Client[] = [
-  {
-    clientId: "DESKTOP-001",
-    status: {
-      isOnline: true,
-      users: ["john.doe", "jane.smith"],
-      sessions: [
-        {
-          ID: "sess-001",
-          User: "john.doe",
-          State: "Active",
-        },
-        {
-          ID: "sess-002",
-          User: "jane.smith",
-          State: "Idle",
-        },
-      ],
-      lastUpdated: new Date(),
-    },
-  },
-  {
-    clientId: "LAPTOP-002",
-    status: {
-      isOnline: false,
-      users: [],
-      sessions: [],
-      lastUpdated: new Date(Date.now() - 3600000), // 1 hour ago
-    },
-  },
-  {
-    clientId: "WORKSTATION-003",
-    status: {
-      isOnline: true,
-      users: ["admin.user"],
-      sessions: [
-        {
-          ID: "sess-003",
-          User: "admin.user",
-          State: "Active",
-        },
-      ],
-      lastUpdated: new Date(),
-    },
-  },
-  {
-    clientId: "TERMINAL-004",
-    status: {
-      isOnline: true,
-      users: ["guest.user", "temp.user", "support.tech"],
-      sessions: [
-        {
-          ID: "sess-004",
-          User: "guest.user",
-          State: "Active",
-        },
-        {
-          ID: "sess-005",
-          User: "temp.user",
-          State: "Idle",
-        },
-        {
-          ID: "sess-006",
-          User: "support.tech",
-          State: "Active",
-        },
-      ],
-      lastUpdated: new Date(),
-    },
-  },
-];
-
 export default function HomePage() {
   const isMobile = useMediaQuery("only screen and (max-width : 768px)");
   const [clients, setClients] = useState<Client[]>([]);
@@ -188,8 +116,7 @@ export default function HomePage() {
         clientId,
         status,
       }));
-      // setClients(formattedData);
-      setClients(dummyClients);
+      setClients(formattedData);
     });
 
     // Updates
