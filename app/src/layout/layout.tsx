@@ -286,9 +286,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 {isOpen && (
                   <motion.div
                     className="absolute bottom-full left-0 w-full bg-white rounded-lg shadow-lg mb-2 overflow-hidden"
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                    initial={{ opacity: 0, y: -10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: "auto" }}
+                    exit={{ opacity: 0, y: -10, height: 0 }}
                     transition={{ duration: 0.2 }}
                   >
                     <motion.ul className="py-1">
