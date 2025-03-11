@@ -124,7 +124,7 @@ function Get-SessionData {
     return $sessionList
 }
 
-function Is-ProcessRunning {
+function Get-ProcessRunning {
     param (
         [System.Diagnostics.Process]$process
     )
@@ -142,7 +142,7 @@ function Is-ProcessRunning {
     }
 }
 
-function Launch-DialogInUserContext {
+function Start-DialogInUserContext {
     param (
         [string]$sessionId,
         [string]$username
@@ -200,7 +200,7 @@ function Send-Heartbeat {
             foreach ($session in $activeSessions) {
                 if ($session.User -ne "SYSTEM") {
                     # Launch dialog in user session
-                    $dialogLaunched = Launch-DialogInUserContext -sessionId $session.ID -username $session.User
+                    $dialogLaunched = Start-DialogInUserContext -sessionId $session.ID -username $session.User
                     if ($dialogLaunched) {
                         Write-Log "Dialog successfully launched for user $($session.User)"
                         break
@@ -249,7 +249,7 @@ function Send-Heartbeat {
     }
 }
 
-function Check-Termination {
+function Get-Termination {
     # Throttle termination checks - don't need to check as often as heartbeat
     $currentTime = Get-Date
     $timeSinceLastCheck = $currentTime - $lastTerminationCheckTime
@@ -273,7 +273,7 @@ function Check-Termination {
 }
 
 # Install PsExec if necessary
-function Ensure-PsExec {
+function Get-PsExec {
     $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
     
     if (-not (Test-Path $psExecPath)) {
@@ -317,7 +317,7 @@ function Ensure-PsExec {
 Write-Log "Win-Agent starting..."
 
 # Ensure PsExec is available
-if (-not (Ensure-PsExec)) {
+if (-not (Get-PsExec)) {
     Write-Log "ERROR: Could not ensure PsExec is available. GUI functionality may not work."
 }
 
@@ -330,7 +330,7 @@ while ($true) {
     
     # Perform operations
     Send-Heartbeat
-    Check-Termination
+    Get-Termination
     
     # Calculate how long operations took
     $processingTime = $stopwatch.ElapsedMilliseconds

@@ -18,7 +18,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 # Install PsExec if necessary
-function Ensure-PsExec {
+function Get-PsExec {
     $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
     
     if (-not (Test-Path $psExecPath)) {
@@ -173,7 +173,7 @@ CLIENT_ID=$CLIENT_ID
     Set-Content -Path $ConfigFile -Value $configContent
     Write-Host "Configuration file created at $ConfigFile" -ForegroundColor Green
 
-    if (-not (Ensure-PsExec)) {
+    if (-not (Get-PsExec)) {
         Write-Host "ERROR: Could not ensure PsExec is available. GUI functionality may not work."
     }
 
