@@ -143,7 +143,9 @@ function ProfilePage() {
       });
     } catch (error) {
       console.error(error);
-      setErrorMessage(error instanceof Error ? error.message : "Failed to update profile");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to update profile"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -180,22 +182,22 @@ function ProfilePage() {
 
             {/* Current User Information */}
             {user && (
-              <div className="mb-8 bg-slate-50 p-4 rounded-lg border border-slate-200">
+              <div className="mb-8 bg-slate-50 p-4 rounded-lg border border-slate-200  overflow-auto">
                 <h3 className="font-medium text-slate-700 mb-3">
                   Current Information
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center">
-                    <User className="w-4 h-4 text-slate-500 mr-2" />
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex items-center bg-amber-400">
+                    <User className="size-4 min-w-fit min-h-fit text-slate-500 mr-2" />
                     <span className="text-sm text-slate-500 mr-2">
                       Username:
                     </span>
-                    <span className="font-medium">{user.username}</span>
+                    <span className="font-medium text-sm">{user.username}</span>
                   </div>
                   <div className="flex items-center">
-                    <Mail className="w-4 h-4 text-slate-500 mr-2" />
+                    <Mail className="size-4 min-w-fit min-h-fit text-slate-500 mr-2" />
                     <span className="text-sm text-slate-500 mr-2">Email:</span>
-                    <span className="font-medium">{user.email}</span>
+                    <span className="font-medium text-sm">{user.email}</span>
                   </div>
                 </div>
               </div>
