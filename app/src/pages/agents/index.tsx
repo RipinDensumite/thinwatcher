@@ -1,9 +1,10 @@
-import Layout from "@/layout/layout"
-import { useState } from "react"
+import Layout from "@/layout/layout";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function AgentsPage() {
-  const [activeTab, setActiveTab] = useState("install")
+  const [activeTab, setActiveTab] = useState("install");
+  const [isCopied, setIsCopied] = useState(false);
 
   return (
     <Layout>
@@ -12,7 +13,9 @@ export default function AgentsPage() {
           {/* Header with gradient background */}
           <div className="bg-gradient-to-r from-slate-600 to-slate-700 px-8 py-10 text-white">
             <h1 className="text-4xl font-bold tracking-tight">Agents</h1>
-            <p className="mt-2 text-slate-100">Lightweight monitoring solution for thin clients</p>
+            <p className="mt-2 text-slate-100">
+              Lightweight monitoring solution for thin clients
+            </p>
           </div>
 
           {/* Navigation Tabs */}
@@ -73,10 +76,14 @@ export default function AgentsPage() {
                   </svg>
                 </div>
                 <div className="ml-5">
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">What is WinAgent?</h2>
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">
+                    What is WinAgent?
+                  </h2>
                   <p className="text-gray-600 leading-relaxed">
-                    WinAgent is a lightweight agent designed to monitor and manage thin clients in your network. It
-                    sends heartbeat signals to a backend server and allows you to monitor client sessions remotely.
+                    WinAgent is a lightweight agent designed to monitor and
+                    manage thin clients in your network. It sends heartbeat
+                    signals to a backend server and allows you to monitor client
+                    sessions remotely.
                   </p>
                 </div>
               </div>
@@ -112,10 +119,12 @@ export default function AgentsPage() {
                         1
                       </span>
                       <div className="ml-4">
-                        <p className="text-gray-700 font-medium">Open PowerShell as Administrator</p>
+                        <p className="text-gray-700 font-medium">
+                          Open PowerShell as Administrator
+                        </p>
                         <p className="text-gray-600 mt-1 text-sm">
-                          Search for "PowerShell" in the Start menu, right-click on it, and select "Run as
-                          Administrator".
+                          Search for "PowerShell" in the Start menu, right-click
+                          on it, and select "Run as Administrator".
                         </p>
                       </div>
                     </div>
@@ -127,7 +136,9 @@ export default function AgentsPage() {
                         2
                       </span>
                       <div className="ml-4 w-full">
-                        <p className="text-gray-700 font-medium">Run the installation command</p>
+                        <p className="text-gray-700 font-medium">
+                          Run the installation command
+                        </p>
                         <div className="mt-3 bg-gray-800 rounded-lg p-4 group relative">
                           <code className="text-gray-100 text-sm font-mono break-all">
                             powershell -c "irm
@@ -135,12 +146,18 @@ export default function AgentsPage() {
                             | iex"
                           </code>
                           <button
-                            className="absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="cursor-pointer tooltip absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                            data-tip={
+                              isCopied ? "Copied!" : "Copy to clipboard"
+                            }
                             onClick={() => {
                               navigator.clipboard.writeText(
-                                'powershell -c "irm https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/thinwatcher.ps1 | iex"',
-                              )
-                              toast.success("Command copied! Paste it in PowerShell to install.");
+                                'powershell -c "irm https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/thinwatcher.ps1 | iex"'
+                              );
+                              setIsCopied(true);
+                              toast.success(
+                                "Command copied! Paste it in PowerShell to install."
+                              );
                             }}
                           >
                             <svg
@@ -159,6 +176,9 @@ export default function AgentsPage() {
                             </svg>
                           </button>
                         </div>
+                        <p className="text-gray-600 mt-2 text-sm">
+                          This command will install the ThinWatcher launcher.
+                        </p>
                       </div>
                     </div>
                   </li>
@@ -169,35 +189,22 @@ export default function AgentsPage() {
                         3
                       </span>
                       <div className="ml-4">
-                        <p className="text-gray-700 font-medium">Provide the required information</p>
-                        <div className="mt-3 space-y-4">
-                          <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <p className="font-medium text-gray-800">Backend URL</p>
-                            <p className="text-gray-600 text-sm mt-1">
-                              The URL of the backend server where the agent will send data (e.g.,{" "}
-                              <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
-                                https://your-backend-url.com
-                              </code>
-                              )
-                            </p>
-                          </div>
-
-                          <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <p className="font-medium text-gray-800">Heartbeat Interval</p>
-                            <p className="text-gray-600 text-sm mt-1">
-                              The time interval in seconds at which the agent sends a "heartbeat" signal (e.g.,{" "}
-                              <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">5</code>)
-                            </p>
-                          </div>
-
-                          <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <p className="font-medium text-gray-800">Client ID</p>
-                            <p className="text-gray-600 text-sm mt-1">
-                              A unique identifier for this thin client (e.g.,{" "}
-                              <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">THINCLIENT-01</code>)
-                            </p>
-                          </div>
-                        </div>
+                        <p className="text-gray-700 font-medium">
+                          Run the ThinWatcher launcher
+                        </p>
+                        <p className="text-gray-600 mt-1 text-sm">
+                          After installation, you'll be asked if you want to run
+                          the launcher. Enter{" "}
+                          <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                            y
+                          </code>{" "}
+                          to proceed. Alternatively, you can run it manually by
+                          typing{" "}
+                          <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                            thinwatcher.cmd
+                          </code>{" "}
+                          in the command prompt.
+                        </p>
                       </div>
                     </div>
                   </li>
@@ -208,10 +215,86 @@ export default function AgentsPage() {
                         4
                       </span>
                       <div className="ml-4">
-                        <p className="text-gray-700 font-medium">Automatic startup</p>
+                        <p className="text-gray-700 font-medium">
+                          Start the installation
+                        </p>
                         <p className="text-gray-600 mt-1 text-sm">
-                          Once the installation is complete, the agent will start automatically and persist across
-                          reboots.
+                          Choose selection number 1 to start the installation.
+                          If no configuration file exists, the launcher will run
+                          the installation process. Follow the prompts to set up
+                          your agent.
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+
+                  <li className="bg-gray-50 rounded-lg p-4 shadow-sm">
+                    <div className="flex">
+                      <span className="flex-shrink-0 bg-slate-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                        5
+                      </span>
+                      <div className="ml-4">
+                        <p className="text-gray-700 font-medium">
+                          Provide the required information
+                        </p>
+                        <div className="mt-3 space-y-4">
+                          <div className="bg-white p-4 rounded-lg border border-gray-200">
+                            <p className="font-medium text-gray-800">
+                              Backend URL
+                            </p>
+                            <p className="text-gray-600 text-sm mt-1">
+                              The URL of the backend server where the agent will
+                              send data (e.g.,{" "}
+                              <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                                https://your-backend-url.com
+                              </code>
+                              )
+                            </p>
+                          </div>
+
+                          <div className="bg-white p-4 rounded-lg border border-gray-200">
+                            <p className="font-medium text-gray-800">
+                              Heartbeat Interval
+                            </p>
+                            <p className="text-gray-600 text-sm mt-1">
+                              The time interval in seconds at which the agent
+                              sends a "heartbeat" signal (e.g.,{" "}
+                              <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                                5
+                              </code>
+                              )
+                            </p>
+                          </div>
+
+                          <div className="bg-white p-4 rounded-lg border border-gray-200">
+                            <p className="font-medium text-gray-800">
+                              Client ID
+                            </p>
+                            <p className="text-gray-600 text-sm mt-1">
+                              A unique identifier for this thin client (e.g.,{" "}
+                              <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                                THINCLIENT-01
+                              </code>
+                              )
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+
+                  <li className="bg-gray-50 rounded-lg p-4 shadow-sm">
+                    <div className="flex">
+                      <span className="flex-shrink-0 bg-slate-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                        6
+                      </span>
+                      <div className="ml-4">
+                        <p className="text-gray-700 font-medium">
+                          Installation complete
+                        </p>
+                        <p className="text-gray-600 mt-1 text-sm">
+                          Once the installation is complete, the agent will
+                          start automatically and persist across reboots.
                         </p>
                       </div>
                     </div>
@@ -242,13 +325,16 @@ export default function AgentsPage() {
                 </h2>
                 <div className="bg-slate-50 border-l-4 border-slate-500 p-4 mb-6 rounded-r-lg">
                   <p className="text-slate-700">
-                    After installation, WinAgent will automatically start monitoring the thin client and sending
-                    heartbeat signals to the backend server.
+                    After installation, WinAgent will automatically start
+                    monitoring the thin client and sending heartbeat signals to
+                    the backend server.
                   </p>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Monitoring Features</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Monitoring Features
+                  </h3>
                   <ul className="space-y-3">
                     <li className="flex items-start">
                       <svg
@@ -258,9 +344,16 @@ export default function AgentsPage() {
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
-                      <span className="text-gray-600">Real-time client status monitoring</span>
+                      <span className="text-gray-600">
+                        Real-time client status monitoring
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <svg
@@ -270,9 +363,16 @@ export default function AgentsPage() {
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
-                      <span className="text-gray-600">Automatic heartbeat signals</span>
+                      <span className="text-gray-600">
+                        Automatic heartbeat signals
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <svg
@@ -282,9 +382,16 @@ export default function AgentsPage() {
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
-                      <span className="text-gray-600">Session tracking and management</span>
+                      <span className="text-gray-600">
+                        Session tracking and management
+                      </span>
                     </li>
                   </ul>
                 </div>
@@ -318,14 +425,16 @@ export default function AgentsPage() {
                   Troubleshooting
                 </h2>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  If you encounter any issues during installation or usage, try the following solutions:
+                  If you encounter any issues during installation or usage, try
+                  the following solutions:
                 </p>
 
                 <div className="space-y-4">
                   {[
                     {
                       title: "Administrator Privileges",
-                      description: "Ensure you are running PowerShell as Administrator.",
+                      description:
+                        "Ensure you are running PowerShell as Administrator.",
                       icon: (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -366,7 +475,8 @@ export default function AgentsPage() {
                     },
                     {
                       title: "Backend URL",
-                      description: "Verify that the backend URL is correct and accessible.",
+                      description:
+                        "Verify that the backend URL is correct and accessible.",
                       icon: (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -385,9 +495,9 @@ export default function AgentsPage() {
                       ),
                     },
                     {
-                      title: "Task Scheduler",
+                      title: "Launcher Issues",
                       description:
-                        'If the agent fails to start, check the Task Scheduler for the "WinAgent" task and ensure it is running.',
+                        "If the launcher doesn't start automatically, try running it manually by typing 'thinwatcher.cmd' in the command prompt.",
                       icon: (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -407,7 +517,8 @@ export default function AgentsPage() {
                     },
                     {
                       title: "Contact Support",
-                      description: "Contact the developer for further assistance if the issue persists.",
+                      description:
+                        "Contact the developer for further assistance if the issue persists.",
                       icon: (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -430,84 +541,25 @@ export default function AgentsPage() {
                       key={index}
                       className="flex bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <div className="flex-shrink-0 bg-slate-50 rounded-full p-2 h-fit">{item.icon}</div>
+                      <div className="flex-shrink-0 bg-slate-50 rounded-full p-2 h-fit">
+                        {item.icon}
+                      </div>
                       <div className="ml-4">
-                        <h3 className="font-medium text-gray-800">{item.title}</h3>
-                        <p className="text-gray-600 text-sm mt-1">{item.description}</p>
+                        <h3 className="font-medium text-gray-800">
+                          {item.title}
+                        </h3>
+                        <p className="text-gray-600 text-sm mt-1">
+                          {item.description}
+                        </p>
                       </div>
                     </div>
                   ))}
                 </div>
-
-                {/* <div className="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 bg-slate-100 rounded-full p-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 text-slate-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="ml-3 text-lg font-medium text-gray-900">Need more help?</h3>
-                  </div>
-                  <div className="mt-4 flex space-x-4">
-                    <a
-                      // href="#"
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                        />
-                      </svg>
-                      ariffindensumite@gmail.com
-                    </a>
-                    <a
-                      href="#"
-                      className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      Documentation
-                    </a>
-                  </div>
-                </div> */}
               </section>
             )}
           </div>
         </div>
       </div>
     </Layout>
-  )
+  );
 }
-
