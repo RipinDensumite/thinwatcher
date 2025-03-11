@@ -110,6 +110,7 @@ $InstallDir = "INSTALL_DIR_PLACEHOLDER"
 $Version = "VERSION_PLACEHOLDER"
 
 function Show-Header {
+    clear
     $headerWidth = 60
     Write-Host ("=" * $headerWidth) -ForegroundColor Blue
     Write-Host "ThinWatcher Agent Manager v$Version" -ForegroundColor Cyan
