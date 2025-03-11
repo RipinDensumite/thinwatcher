@@ -438,35 +438,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$LauncherScript" %*
     Set-Content -Path $cmdFile -Value $cmdContent
 }
 
-function Unblock-ThinWatcherFiles {
-    # Unblock all PowerShell scripts in the installation directory
-    Get-ChildItem -Path $InstallDir -Recurse -Filter "*.ps1" | ForEach-Object {
-        Write-Status "Unblocking file: $($_.FullName)" -Type "Info"
-        Unblock-File -Path $_.FullName
-    }
-    
-    # Skip code signing attempt and use the bypass approach directly
-    Write-Status "Setting up execution policy bypass for ThinWatcher scripts..." -Type "Info"
-    
-    # Create a PowerShell script that bypasses execution policy
-    $bypassWrapperPath = "$BinDir\thinwatcher-bypass.ps1"
-    $bypassContent = @"
-# This script bypasses execution policy for the ThinWatcher launcher
-powershell.exe -ExecutionPolicy Bypass -File "$LauncherScript" `$args
-"@
-    Set-Content -Path $bypassWrapperPath -Value $bypassContent
-    
-    # Update the CMD file to call the bypass wrapper
-    $cmdFile = "$BinDir\thinwatcher.cmd"
-    $cmdContent = @"
-@echo off
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$bypassWrapperPath" %*
-"@
-    Set-Content -Path $cmdFile -Value $cmdContent
-    
-    Write-Status "All PowerShell scripts have been unblocked" -Type "Success"
-}
-
 function Add-ToPath {
     $binPath = $BinDir
     $envPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
@@ -517,10 +488,6 @@ try {
             throw "Download failed for $script"
         }
     }
-    
-    # Unblock and set up execution policy bypass for files
-    Write-Status "Addressing execution policy for ThinWatcher scripts..." -Type "Info"
-    Unblock-ThinWatcherFiles
     
     # Create PowerShell module for system-wide access
     Write-Status "Creating PowerShell module..." -Type "Info"
