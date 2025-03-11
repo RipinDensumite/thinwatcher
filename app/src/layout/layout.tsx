@@ -147,7 +147,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <ul className="flex justify-around items-center py-2">
             <li
               onClick={() => navigate("/")}
-              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+              className={`select-none flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
                 isActive("/")
                   ? "text-slate-600 bg-slate-50"
                   : "cursor-pointer text-slate-500 hover:bg-slate-50"
@@ -161,7 +161,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </li>
             <li
               onClick={() => navigate("/agents")}
-              className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+              className={`select-none flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
                 isActive("/agents")
                   ? "text-slate-600 bg-slate-50"
                   : "cursor-pointer text-slate-500 hover:bg-slate-50"
@@ -176,7 +176,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {user?.role === "admin" && (
               <li
                 onClick={() => navigate("/users")}
-                className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+                className={`select-none flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
                   isActive("/users")
                     ? "text-slate-600 bg-slate-50"
                     : "cursor-pointer text-slate-500 hover:bg-slate-50"
