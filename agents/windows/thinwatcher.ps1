@@ -261,13 +261,6 @@ function Reconfig-Agent {
     Write-Host "Reconfiguring ThinWatcher Agent..." -ForegroundColor Cyan
     
     try {
-        if (Test-WinAgentInstallation -eq "Not Installed") {
-            Write-Host "Agent not installed. Please install it first." -ForegroundColor Yellow
-            Pause
-            Show-Menu
-            return
-        }
-        
         if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")) {
             & "$ScriptsDir\win-agent-reconfig.ps1"
         }
