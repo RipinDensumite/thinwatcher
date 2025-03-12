@@ -269,12 +269,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="relative">
               <div
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-slate-50 transition-all"
+                className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-slate-100 transition-all"
               >
                 <div className="bg-gradient-to-r from-slate-500 to-stone-500 rounded-full p-1">
                   <CircleUserRound size={28} className="text-white" />
                 </div>
-                <div className="flex-1">
+                <div className="select-none flex-1">
                   <p className="font-medium text-slate-900 truncate">
                     {user?.username}
                   </p>
@@ -285,7 +285,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <AnimatePresence>
                 {isOpen && (
                   <motion.div
-                    className="absolute bottom-full left-0 w-full bg-white rounded-lg shadow-lg mb-2 overflow-hidden"
+                    className="absolute bottom-full left-0 w-full bg-white rounded-lg mb-2 overflow-hidden"
                     initial={{ opacity: 0, y: -10, height: 0 }}
                     animate={{ opacity: 1, y: 0, height: "auto" }}
                     exit={{ opacity: 0, y: -10, height: 0 }}
@@ -302,7 +302,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                           className="cursor-pointer flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors rounded-lg"
                         >
                           <Settings size={16} className="text-slate-500" />
-                          <span>Profile</span>
+                          <span className="select-none">Profile</span>
                         </a>
                       </motion.li>
                       <motion.li
@@ -315,7 +315,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                           className="cursor-pointer flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 transition-colors rounded-lg"
                         >
                           <LogOut size={16} />
-                          <span>Logout</span>
+                          <span className="select-none">Logout</span>
                         </a>
                       </motion.li>
                     </motion.ul>
