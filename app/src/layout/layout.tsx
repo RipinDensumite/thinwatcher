@@ -7,6 +7,7 @@ import {
   User,
   CircleUserRound,
   Settings,
+  ChevronLeft,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
@@ -209,56 +210,75 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <li>
                 <button
                   onClick={() => navigate("/")}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  className={`w-full px-4 py-3 rounded-lg transition-all ${
                     isActive("/")
                       ? "bg-gradient-to-r from-slate-100 to-stone-100/80 text-slate-600 font-medium"
                       : "cursor-pointer text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  <View
-                    size={18}
-                    className={
-                      isActive("/") ? "text-slate-600" : "text-slate-500"
-                    }
-                  />
-                  <span>Watchers</span>
+                  <motion.div
+                    animate={{ x: isActive("/") ? 5 : 0 }}
+                    className="flex items-center gap-3"
+                  >
+                    <View
+                      size={18}
+                      className={
+                        isActive("/") ? "text-slate-600" : "text-slate-500"
+                      }
+                    />
+                    <span>Watchers</span>
+                  </motion.div>
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => navigate("/agents")}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  className={`w-full px-4 py-3 rounded-lg transition-all ${
                     isActive("/agents")
                       ? "bg-gradient-to-r from-slate-100 to-stone-100/80 text-slate-600 font-medium"
                       : "cursor-pointer text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  <Router
-                    size={18}
-                    className={
-                      isActive("/agents") ? "text-slate-600" : "text-slate-500"
-                    }
-                  />
-                  <span>Agents</span>
+                  <motion.div
+                    animate={{ x: isActive("/agents") ? 5 : 0 }}
+                    className="flex items-center gap-3"
+                  >
+                    <Router
+                      size={18}
+                      className={
+                        isActive("/agents")
+                          ? "text-slate-600"
+                          : "text-slate-500"
+                      }
+                    />
+                    <span>Agents</span>
+                  </motion.div>
                 </button>
               </li>
               {user?.role === "admin" && (
                 <li>
                   <button
                     onClick={() => navigate("/users")}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                    className={`w-full px-4 py-3 rounded-lg transition-all ${
                       isActive("/users")
                         ? "bg-gradient-to-r from-slate-100 to-stone-100/80 text-slate-600 font-medium"
                         : "cursor-pointer text-slate-600 hover:bg-slate-50"
                     }`}
                   >
-                    <User
-                      size={18}
-                      className={
-                        isActive("/users") ? "text-slate-600" : "text-slate-500"
-                      }
-                    />
-                    <span>Users</span>
+                    <motion.div
+                      animate={{ x: isActive("/users") ? 5 : 0 }}
+                      className="flex items-center gap-3"
+                    >
+                      <User
+                        size={18}
+                        className={
+                          isActive("/users")
+                            ? "text-slate-600"
+                            : "text-slate-500"
+                        }
+                      />
+                      <span>Users</span>
+                    </motion.div>
                   </button>
                 </li>
               )}
@@ -280,6 +300,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </p>
                   <p className="text-xs text-slate-500">{user?.role}</p>
                 </div>
+                <motion.div
+                  animate={{ rotate: isOpen ? 90 : 0 }}
+                  transition={{ duration: 0.2, type: "tween" }}
+                >
+                  <ChevronLeft size={20} className="text-slate-900" />
+                </motion.div>
               </div>
 
               <AnimatePresence>
