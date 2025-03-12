@@ -151,13 +151,23 @@ export default function AgentsPage() {
                               isCopied ? "Copied!" : "Copy to clipboard"
                             }
                             onClick={() => {
-                              navigator.clipboard.writeText(
-                                'powershell -c "irm https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/thinwatcher.ps1 | iex"'
-                              );
-                              setIsCopied(true);
-                              toast.success(
-                                "Command copied! Paste it in PowerShell to install."
-                              );
+                              try {
+                                navigator.clipboard.writeText(
+                                  'powershell -c "irm https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/thinwatcher.ps1 | iex"'
+                                );
+                                setIsCopied(true);
+                                toast.success(
+                                  "Command copied! Paste it in PowerShell to install."
+                                );
+                                setTimeout(() => {
+                                  setIsCopied(false);
+                                }, 3000);
+                              } catch (error) {
+                                console.error(error);
+                                toast.error(
+                                  "Failed to copy command to clipboard. Make sure you connected as https"
+                                );
+                              }
                             }}
                           >
                             <svg
