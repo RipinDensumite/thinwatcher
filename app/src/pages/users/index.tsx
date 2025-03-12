@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import Layout from "@/layout/layout";
 import { toast } from "sonner";
 import { AuthContext } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "motion/react";
@@ -173,7 +172,6 @@ function ManageUsersPage() {
   );
 
   return (
-    <Layout>
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -628,7 +626,6 @@ function ManageUsersPage() {
           )}
         </AnimatePresence>
       </div>
-    </Layout>
   );
 }
 

@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import { io, type Socket } from "socket.io-client";
-import Layout from "@/layout/layout";
 import { UserRound, WifiOff, Wifi, Trash2, Computer } from "lucide-react";
 import { useMediaQuery } from "@uidotdev/usehooks";
 import { AuthContext } from "@/context/AuthContext";
@@ -238,7 +237,6 @@ export default function HomePage() {
   // Mobile view
   if (isMobile) {
     return (
-      <Layout>
         <div className="container mx-auto px-4 py-6 max-w-4xl overflow-x-auto">
           <div className="flex flex-col space-y-4 mb-6 min-w-fit">
             <div className="flex flex-col gap-5 sm:flex-row sm:gap-0 justify-between items-center">
@@ -361,12 +359,10 @@ export default function HomePage() {
             <Loader />
           )}
         </div>
-      </Layout>
     );
   } else {
     // Desktop view
     return (
-      <Layout>
         <div className="container mx-auto px-6 py-8 max-w-7xl">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-4">
@@ -533,7 +529,6 @@ export default function HomePage() {
             <Loader />
           )}
         </div>
-      </Layout>
     );
   }
 }

@@ -1,4 +1,3 @@
-import Layout from "@/layout/layout";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -7,7 +6,6 @@ export default function AgentsPage() {
   const [isCopied, setIsCopied] = useState(false);
 
   return (
-    <Layout>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header with gradient background */}
@@ -570,6 +568,5 @@ export default function AgentsPage() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 }

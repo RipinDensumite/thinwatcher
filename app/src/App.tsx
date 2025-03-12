@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster, toast } from "sonner";
 import ProfilePage from "./pages/profile";
 import BackendCheckerRoute from "./components/BackendCheckerRoute";
+import Layout from "./layout/layout";
 
 interface TitleProps {
   title: string;
@@ -60,6 +61,18 @@ function App() {
     };
   }, [isOnline, wasOffline]);
 
+  const ProtectedPageWithLayout = ({
+    element,
+    requireAdmin = false,
+  }: {
+    element: React.ReactNode;
+    requireAdmin?: boolean;
+  }) => (
+    <ProtectedRoute requireAdmin={requireAdmin}>
+      <Layout>{element}</Layout>
+    </ProtectedRoute>
+  );
+
   return (
     <AuthProvider>
       <BackendCheckerRoute>
@@ -82,44 +95,43 @@ function App() {
               </Title>
             }
           />
-          {/* Protected routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route
-              path="/"
-              element={
-                <Title title="Watchers">
-                  <HomePage />
-                </Title>
-              }
-            />
-            <Route
-              path="/agents"
-              element={
-                <Title title="Agents">
-                  <AgentsPage />
-                </Title>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <Title title="Profile">
-                  <ProfilePage />
-                </Title>
-              }
-            />
-          </Route>
-          Admin routes
-          <Route element={<ProtectedRoute requireAdmin={true} />}>
-            <Route
-              path="/users"
-              element={
-                <Title title="Users">
-                  <ManageUsersPage />
-                </Title>
-              }
-            />
-          </Route>
+
+          {/* Protected routes with shared layout */}
+          <Route
+            path="/"
+            element={
+              <Title title="Watchers">
+                <ProtectedPageWithLayout element={<HomePage />} />
+              </Title>
+            }
+          />
+          <Route
+            path="/agents"
+            element={
+              <Title title="Agents">
+                <ProtectedPageWithLayout element={<AgentsPage />} />
+              </Title>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <Title title="Profile">
+                <ProtectedPageWithLayout element={<ProfilePage />} />
+              </Title>
+            }
+          />
+
+          {/* Admin routes with shared layout */}
+          <Route
+            path="/users"
+            element={
+              <Title title="Users">
+                <ProtectedPageWithLayout element={<ManageUsersPage />} requireAdmin={true} />
+              </Title>
+            }
+          />
+
           {/* Catch-all route for 404 */}
           <Route
             path="*"

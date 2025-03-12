@@ -1,5 +1,4 @@
 import { useContext, useState, useEffect } from "react";
-import Layout from "@/layout/layout";
 import { User, Mail, Lock, KeyRound } from "lucide-react";
 import { AuthContext } from "@/context/AuthContext";
 
@@ -155,7 +154,6 @@ function ProfilePage() {
     formData.username || formData.email || formData.newPassword ? true : false;
 
   return (
-    <Layout>
       <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Header */}
@@ -390,7 +388,6 @@ function ProfilePage() {
           </div>
         </div>
       </div>
-    </Layout>
   );
 }
 
