@@ -95,11 +95,15 @@ const LoginPage = () => {
           <h1 className="absolute left-5 top-5 z-10 text-white text-2xl font-bold">
             ThinWatcher
           </h1>
-          <img
+          <div className="absolute inset-0 bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00091d_1px)] bg-[size:20px_20px]"></div>
+          <div className="relative h-full w-full bg-slate-950">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,#3e3e3e,transparent)]"></div>
+          </div>
+          {/* <img
             src="https://cdn.pixabay.com/photo/2021/07/15/08/43/abstract-6467846_1280.png"
             alt="Login visual"
             className="h-full w-full object-cover"
-          />
+          /> */}
           <div className="absolute inset-0 bg-black/20" />
         </div>
         <div className="relative z-10 flex h-full flex-col justify-end p-8 text-white">
