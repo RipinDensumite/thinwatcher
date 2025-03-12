@@ -157,7 +157,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 size={20}
                 className={isActive("/") ? "text-slate-600" : ""}
               />
-              <span className="text-xs font-medium">Watchers</span>
+              <span className="select-none text-xs font-medium">Watchers</span>
             </li>
             <li
               onClick={() => navigate("/agents")}
@@ -171,7 +171,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 size={20}
                 className={isActive("/agents") ? "text-slate-600" : ""}
               />
-              <span className="text-xs font-medium">Agents</span>
+              <span className="select-none text-xs font-medium">Agents</span>
             </li>
             {user?.role === "admin" && (
               <li
@@ -186,7 +186,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   size={20}
                   className={isActive("/users") ? "text-slate-600" : ""}
                 />
-                <span className="text-xs font-medium">Users</span>
+                <span className="select-none text-xs font-medium">Users</span>
               </li>
             )}
           </ul>
