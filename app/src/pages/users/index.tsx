@@ -312,9 +312,9 @@ function ManageUsersPage() {
                             <div className="relative">
                               <select
                                 className={`appearance-none w-full bg-transparent border min-w-24 ${
-                                  user.role === "admin"
-                                    ? "border-slate-200 bg-slate-50 text-slate-700"
-                                    : "border-gray-200 bg-gray-50 text-gray-700"
+                                  user.username === currentAdminUsername
+                                    ? "cursor-not-allowed border-slate-200 bg-slate-50 text-slate-700"
+                                    : "cursor-pointer border-gray-200 bg-gray-50 text-gray-700"
                                 } rounded-md py-1.5 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-sm font-medium`}
                                 value={user.role}
                                 onChange={(e) =>
