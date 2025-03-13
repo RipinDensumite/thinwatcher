@@ -113,7 +113,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     whileHover={{ x: 5 }}
                   >
                     <a
-                      onClick={() => navigate("/profile")}
+                      onClick={() => {
+                        navigate("/profile");
+                        setIsOpen(false);
+                      }}
                       className="cursor-pointer flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors"
                     >
                       <Settings size={18} className="text-slate-500" />
@@ -146,7 +149,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Bottom Navigation Bar */}
         <nav className="fixed bottom-0 left-0 w-full bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] rounded-t-xl">
           <ul className="flex justify-around items-center py-2">
-            <li
+            <motion.li
+              animate={{ y: isActive("/") ? -5 : 0 }}
+              transition={{ duration: 0.1 }}
               onClick={() => navigate("/")}
               className={`select-none flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
                 isActive("/")
@@ -159,8 +164,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 className={isActive("/") ? "text-slate-600" : ""}
               />
               <span className="select-none text-xs font-medium">Watchers</span>
-            </li>
-            <li
+            </motion.li>
+            <motion.li
+              animate={{ y: isActive("/agents") ? -5 : 0 }}
+              transition={{ duration: 0.1 }}
               onClick={() => navigate("/agents")}
               className={`select-none flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
                 isActive("/agents")
@@ -173,9 +180,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 className={isActive("/agents") ? "text-slate-600" : ""}
               />
               <span className="select-none text-xs font-medium">Agents</span>
-            </li>
+            </motion.li>
             {user?.role === "admin" && (
-              <li
+              <motion.li
+                animate={{ y: isActive("/users") ? -5 : 0 }}
+                transition={{ duration: 0.1 }}
                 onClick={() => navigate("/users")}
                 className={`select-none flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
                   isActive("/users")
@@ -188,7 +197,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   className={isActive("/users") ? "text-slate-600" : ""}
                 />
                 <span className="select-none text-xs font-medium">Users</span>
-              </li>
+              </motion.li>
             )}
           </ul>
         </nav>
