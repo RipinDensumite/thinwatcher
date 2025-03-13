@@ -14,7 +14,7 @@ services:
   backend:
     image: ghcr.io/ripindensumite/thinwatcher-backend:latest
     ports:
-      - "5000:5000"
+      - "5000:3001"
     volumes:
       - ./backend:/app
     environment:
