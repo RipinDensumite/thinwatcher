@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   frontend:
-    build: ./app
+    image: ghcr.io/ripindensumite/thinwatcher-frontend:latest
     ports:
       - "5173:80"
     depends_on:
@@ -12,7 +12,7 @@ services:
       - VITE_API_KEY=${VITE_API_KEY}
   
   backend:
-    build: ./backend
+    image: ghcr.io/ripindensumite/thinwatcher-backend:latest
     ports:
       - "5000:5000"
     volumes:
