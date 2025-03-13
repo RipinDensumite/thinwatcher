@@ -34,6 +34,9 @@ jobs:
           context: ./app
           push: true
           tags: ghcr.io/${{ steps.lowercase_username.outputs.lowercase }}/thinwatcher-frontend:latest
+          build-args: |
+            VITE_BACKEND_API_URL=${{ secrets.VITE_BACKEND_API_URL }}
+            VITE_API_KEY=${{ secrets.VITE_API_KEY }}
 
       - name: Build and push backend image
         uses: docker/build-push-action@v4
