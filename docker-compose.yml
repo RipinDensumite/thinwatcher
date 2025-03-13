@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./app
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_BACKEND_API_URL=${VITE_BACKEND_API_URL}
+      - VITE_API_KEY=${VITE_API_KEY}
+  
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PORT=${PORT}
+      - OFFLINE_TIMEOUT=${OFFLINE_TIMEOUT}
+      - CLEANUP_INTERVAL=${CLEANUP_INTERVAL}
+      - CORS_ORIGIN_PROD=${CORS_ORIGIN_PROD}
+      - CORS_ORIGIN_DEV=${CORS_ORIGIN_DEV}
+      - API_KEY=${API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=${NODE_ENV}
