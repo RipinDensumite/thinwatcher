@@ -12,6 +12,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Convert username to lowercase
+        id: lowercase_username
+        uses: Entepotenz/change-string-case-action-min-dependencies@v1
+        with:
+          string: ${{ github.actor }}
+
       - name: Login to GHCR
         uses: docker/login-action@v2
         with:
@@ -24,11 +30,11 @@ jobs:
         with:
           context: ./app
           push: true
-          tags: ghcr.io/${{ github.actor }}/frontend:latest
+          tags: ghcr.io/${{ steps.lowercase_username.outputs.lowercase }}/frontend:latest
 
       - name: Build and push backend image
         uses: docker/build-push-action@v4
         with:
           context: ./backend
           push: true
-          tags: ghcr.io/${{ github.actor }}/backend:latest
+          tags: ghcr.io/${{ steps.lowercase_username.outputs.lowercase }}/backend:latest
