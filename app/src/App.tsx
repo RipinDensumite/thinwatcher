@@ -73,6 +73,14 @@ function App() {
     </ProtectedRoute>
   );
 
+  if (!import.meta.env.VITE_BACKEND_API_URL) {
+    return <h1>Missing backend api url</h1>;
+  }
+
+  if (!import.meta.env.VITE_API_KEY) {
+    return <h1>Missing backend api key</h1>;
+  }
+
   return (
     <AuthProvider>
       <BackendCheckerRoute>
@@ -127,7 +135,10 @@ function App() {
             path="/users"
             element={
               <Title title="Users">
-                <ProtectedPageWithLayout element={<ManageUsersPage />} requireAdmin={true} />
+                <ProtectedPageWithLayout
+                  element={<ManageUsersPage />}
+                  requireAdmin={true}
+                />
               </Title>
             }
           />
