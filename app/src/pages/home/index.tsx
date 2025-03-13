@@ -335,8 +335,8 @@ export default function HomePage() {
                                 <span
                                   className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                                     session.State === "Active"
-                                      ? "bg-slate-100 text-slate-800"
-                                      : "bg-gray-200 text-gray-800"
+                                     ? "bg-blue-100 text-blue-800"
+                                            : "bg-gray-200 text-gray-700"
                                   }`}
                                 >
                                   {session.State}
