@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
-import process from "process";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -45,10 +44,4 @@ export default defineConfig({
       },
     }),
   ],
-  define: {
-    "process.env.VITE_BACKEND_API_URL": JSON.stringify(
-      process.env.VITE_BACKEND_API_URL
-    ),
-    "process.env.VITE_API_KEY": JSON.stringify(process.env.VITE_API_KEY),
-  },
 });
