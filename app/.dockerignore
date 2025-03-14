@@ -1,1 +1,6 @@
 node_modules/
+dist/
+build/
+README.md
+package-lock.json
+yarn.lock

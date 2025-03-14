@@ -1,1 +1,11 @@
 node_modules/
+npm-debug.log
+.git
+README.md
+LICENSE
+.vscode
+coverage
+.env
+.editorconfig
+.aws
+dist
