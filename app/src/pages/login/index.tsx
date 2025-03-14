@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate, Navigate, useLocation } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
+import { APP_CONFIG } from "@/utils/appconfig";
 
 interface LocationState {
   from?: {
@@ -8,7 +9,7 @@ interface LocationState {
   };
 }
 
-const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+const API_URL = APP_CONFIG.BACKEND_API_URL;
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");

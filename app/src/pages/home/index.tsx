@@ -3,6 +3,7 @@ import { io, type Socket } from "socket.io-client";
 import { UserRound, WifiOff, Wifi, Trash2, Computer } from "lucide-react";
 import { useMediaQuery } from "@uidotdev/usehooks";
 import { AuthContext } from "@/context/AuthContext";
+import { APP_CONFIG } from "@/utils/appconfig";
 
 interface Session {
   ID: string;
@@ -22,7 +23,8 @@ interface Client {
   status: ClientStatus;
 }
 
-const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+const API_URL = APP_CONFIG.BACKEND_API_URL;
+const API_KEY = APP_CONFIG.API_KEY;
 
 export default function HomePage() {
   const isMobile = useMediaQuery("only screen and (max-width : 768px)");
@@ -40,7 +42,7 @@ export default function HomePage() {
       try {
         const response = await fetch(`${API_URL}/api/clients`, {
           headers: {
-            "x-api-key": import.meta.env.VITE_API_KEY,
+            "x-api-key": API_KEY,
             Authorization: `Bearer ${token}`,
           },
         });
@@ -67,7 +69,7 @@ export default function HomePage() {
       const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
         method: "DELETE",
         headers: {
-          "x-api-key": import.meta.env.VITE_API_KEY,
+          "x-api-key": API_KEY,
           Authorization: `Bearer ${token}`,
         },
       });
@@ -89,7 +91,7 @@ export default function HomePage() {
       reconnectionAttempts: 5,
       withCredentials: true,
       query: {
-        apiKey: import.meta.env.VITE_API_KEY,
+        apiKey: API_KEY,
       },
     });
 

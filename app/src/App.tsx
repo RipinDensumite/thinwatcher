@@ -12,6 +12,7 @@ import { Toaster, toast } from "sonner";
 import ProfilePage from "./pages/profile";
 import BackendCheckerRoute from "./components/BackendCheckerRoute";
 import Layout from "./layout/layout";
+import { APP_CONFIG } from "./utils/appconfig";
 
 interface TitleProps {
   title: string;
@@ -73,11 +74,11 @@ function App() {
     </ProtectedRoute>
   );
 
-  if (!import.meta.env.VITE_BACKEND_API_URL) {
+  if (!APP_CONFIG.BACKEND_API_URL) {
     return <h1>Missing backend api url</h1>;
   }
 
-  if (!import.meta.env.VITE_API_KEY) {
+  if (!APP_CONFIG.API_KEY) {
     return <h1>Missing backend api key</h1>;
   }
 

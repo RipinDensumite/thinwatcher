@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import PageLoadingComponent from "./PageLoadingComponent";
+import { APP_CONFIG } from "@/utils/appconfig";
 
 interface BackendCheckerRouteProps {
   children?: React.ReactNode;
 }
 
-const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+const API_URL = APP_CONFIG.BACKEND_API_URL;
 
 const NoConnectionView = () => {
   return (

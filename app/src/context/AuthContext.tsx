@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/context/AuthContext.tsx
+import { APP_CONFIG } from "@/utils/appconfig";
 import { createContext, useState, useEffect, ReactNode } from "react";
 
 // Define types for our context data
@@ -56,7 +57,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [error, setError] = useState<string | null>(null);
   const [canRegister, setCanRegister] = useState<boolean>(false);
 
-  const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+  const API_URL = APP_CONFIG.BACKEND_API_URL;
 
   // Check registration status
   const checkRegistrationStatus = async () => {

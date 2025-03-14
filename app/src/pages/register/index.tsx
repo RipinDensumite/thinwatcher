@@ -10,8 +10,9 @@ import {
   Lock,
   KeyRound,
 } from "lucide-react";
+import { APP_CONFIG } from "@/utils/appconfig";
 
-const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+const API_URL = APP_CONFIG.BACKEND_API_URL;
 
 const RegisterPage = () => {
   const navigate = useNavigate();

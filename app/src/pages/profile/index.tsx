@@ -1,8 +1,9 @@
 import { useContext, useState, useEffect } from "react";
 import { User, Mail, Lock, KeyRound } from "lucide-react";
 import { AuthContext } from "@/context/AuthContext";
+import { APP_CONFIG } from "@/utils/appconfig";
 
-const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+const API_URL = APP_CONFIG.BACKEND_API_URL;
 
 function ProfilePage() {
   const [formData, setFormData] = useState({

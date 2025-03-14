@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { toast } from "sonner";
 import { AuthContext } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "motion/react";
+import { APP_CONFIG } from "@/utils/appconfig";
 
 interface User {
   id: number;
@@ -11,7 +12,7 @@ interface User {
   created_at: string;
 }
 
-const API_URL = import.meta.env.VITE_BACKEND_API_URL;
+const API_URL = APP_CONFIG.BACKEND_API_URL;
 
 function ManageUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
