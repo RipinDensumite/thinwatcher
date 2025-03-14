@@ -2,12 +2,6 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Define ARGs before build
-ARG VITE_BACKEND_API_URL
-ENV VITE_BACKEND_API_URL=$VITE_BACKEND_API_URL
-ARG VITE_API_KEY
-ENV VITE_API_KEY=$VITE_API_KEY
-
 COPY package*.json ./
 RUN npm ci
 COPY . .
