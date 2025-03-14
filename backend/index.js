@@ -50,9 +50,18 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key"; // JWT secre
 // Database setup
 let db;
 async function setupDatabase() {
-  // Open the database
+  // Define the database directory path
+  const dbDir = path.join(__dirname, "data");
+  
+  // Create the directory if it doesn't exist
+  if (!require('fs').existsSync(dbDir)) {
+    require('fs').mkdirSync(dbDir, { recursive: true });
+    console.log(`Created database directory: ${dbDir}`);
+  }
+  
+  // Open the database in the newly created directory
   db = await open({
-    filename: path.join(__dirname, "database.db"),
+    filename: path.join(dbDir, "database.db"),
     driver: sqlite3.Database,
   });
 
