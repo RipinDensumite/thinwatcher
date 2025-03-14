@@ -41,8 +41,8 @@ app.use(
 const clients = new Map();
 
 // Configuration from environment variables
-const OFFLINE_TIMEOUT = parseInt(process.env.OFFLINE_TIMEOUT, 10);
-const CLEANUP_INTERVAL = parseInt(process.env.CLEANUP_INTERVAL, 10);
+const OFFLINE_TIMEOUT = parseInt(20000, 10);
+const CLEANUP_INTERVAL = parseInt(10000, 10);
 const PORT = process.env.PORT || 3001; // Fallback to 3001 if PORT is not set
 const API_KEY = process.env.API_KEY; // Load API key from environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key"; // JWT secret for authentication
