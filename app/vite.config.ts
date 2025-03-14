@@ -44,8 +44,4 @@ export default defineConfig({
       },
     }),
   ],
-  define: {
-    __VITE_BACKEND_API_URL__: process.env.VITE_BACKEND_API_URL || "",
-    __VITE_API_KEY__: process.env.VITE_API_KEY || "",
-  },
 });
