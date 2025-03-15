@@ -15,6 +15,7 @@ services:
       - "5000:3001"
     volumes:
       - ./backend:/app
+      - ./data:/app/data
     environment:
       - PORT=${PORT}
       - OFFLINE_TIMEOUT=${OFFLINE_TIMEOUT}
