@@ -150,11 +150,23 @@ try {
     $BACKEND_URL = Read-Host "Backend URL (e.g., https://backend-url.com)"
     $HEARTBEAT_INTERVAL = Read-Host "Heartbeat Interval in seconds (e.g., 5)"
     $CLIENT_ID = Read-Host "Client ID (e.g., THINCLIENT-02)"
+    $ENABLE_DIALOG = Read-Host "Enable Dialog (true/false) [false]"
+
+    # Set default value for dialog if empty
+    if ([string]::IsNullOrWhiteSpace($ENABLE_DIALOG)) {
+        $ENABLE_DIALOG = "false"
+    }
 
     # Validate Heartbeat Interval
     if (-not ($HEARTBEAT_INTERVAL -match '^\d+$')) {
         Write-Host "Heartbeat Interval must be a number. Exiting." -ForegroundColor Red
         exit 1
+    }
+
+    # Validate Dialog Enabled
+    if (-not ($ENABLE_DIALOG -match '^(true|false)$')) {
+        Write-Host "Enable Dialog must be 'true' or 'false'. Defaulting to false." -ForegroundColor Yellow
+        $ENABLE_DIALOG = "false"
     }
 
     # Test backend connection
@@ -174,6 +186,7 @@ try {
 BACKEND_URL=$BACKEND_URL
 HEARTBEAT_INTERVAL=$HEARTBEAT_INTERVAL
 CLIENT_ID=$CLIENT_ID
+ENABLE_DIALOG=$ENABLE_DIALOG
 "@
 
     Set-Content -Path $ConfigFile -Value $configContent

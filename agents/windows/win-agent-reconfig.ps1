@@ -101,6 +101,8 @@ try {
     Write-Host "Backend URL: $currentBackendUrl" -ForegroundColor White
     Write-Host "Heartbeat Interval: $currentHeartbeatInterval seconds" -ForegroundColor White
     Write-Host "Client ID: $currentClientId" -ForegroundColor White
+    $currentEnableDialog = if ($config.ContainsKey("ENABLE_DIALOG")) { $config["ENABLE_DIALOG"] } else { "false" }
+    Write-Host "Dialog Enabled: $currentEnableDialog" -ForegroundColor White
     Write-Host ""
     
     # Ask for new configuration
@@ -108,15 +110,23 @@ try {
     $tempBackendUrl = Read-Host "Backend URL [$currentBackendUrl]"
     $tempHeartbeatInterval = Read-Host "Heartbeat Interval in seconds [$currentHeartbeatInterval]"
     $tempClientId = Read-Host "Client ID [$currentClientId]"
+    $tempEnableDialog = Read-Host "Enable Dialog (true/false) [$currentEnableDialog]"
     
     # Use current values if no new values provided
     $BACKEND_URL = if ([string]::IsNullOrWhiteSpace($tempBackendUrl)) { $currentBackendUrl } else { $tempBackendUrl }
     $HEARTBEAT_INTERVAL = if ([string]::IsNullOrWhiteSpace($tempHeartbeatInterval)) { $currentHeartbeatInterval } else { $tempHeartbeatInterval }
     $CLIENT_ID = if ([string]::IsNullOrWhiteSpace($tempClientId)) { $currentClientId } else { $tempClientId }
+    $ENABLE_DIALOG = if ([string]::IsNullOrWhiteSpace($tempEnableDialog)) { $currentEnableDialog } else { $tempEnableDialog }
     
     # Validate Heartbeat Interval
     if (-not ($HEARTBEAT_INTERVAL -match '^\d+$')) {
         Write-Host "Heartbeat Interval must be a number. Exiting." -ForegroundColor Red
+        exit 1
+    }
+    
+    # Validate Dialog Enabled
+    if (-not ($ENABLE_DIALOG -match '^(true|false)$')) {
+        Write-Host "Enable Dialog must be 'true' or 'false'. Exiting." -ForegroundColor Red
         exit 1
     }
     
@@ -151,13 +161,15 @@ try {
 BACKEND_URL=$BACKEND_URL
 HEARTBEAT_INTERVAL=$HEARTBEAT_INTERVAL
 CLIENT_ID=$CLIENT_ID
+ENABLE_DIALOG=$ENABLE_DIALOG
 "@
     
     # Stop the service if it exists
     if (Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue) {
         Stop-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue
         Write-Host "Stopped the WinAgent scheduled task." -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "WinAgent scheduled task not found. Skipping stop operation." -ForegroundColor Yellow
     }
     
@@ -169,7 +181,8 @@ CLIENT_ID=$CLIENT_ID
     if (Get-ScheduledTask -TaskName $ServiceName -ErrorAction SilentlyContinue) {
         Start-ScheduledTask -TaskName $ServiceName
         Write-Host "Restarted the WinAgent scheduled task with new configuration." -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "WinAgent scheduled task not found. You may need to reinstall the agent." -ForegroundColor Yellow
     }
     

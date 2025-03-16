@@ -134,11 +134,11 @@ function Show-Menu {
     Write-Host "  3. reconfig   - Reconfigure ThinWatcher Agent"
     Write-Host "  4. start      - Start ThinWatcher Agent"
     Write-Host "  5. stop       - Stop ThinWatcher Agent"
-    #Write-Host "  6. version    - Show ThinWatcher version"
-    Write-Host "  6. exit       - Exit"
+    Write-Host "  6. dialog     - Enable/Disable User Dialog"
+    Write-Host "  7. exit       - Exit"
     Write-Host
     
-    $choice = Read-Host "Enter your choice (1-6)"
+    $choice = Read-Host "Enter your choice (1-7)"
     
     switch ($choice) {
         "1" { Install-Agent }
@@ -147,14 +147,119 @@ function Show-Menu {
         "3" { Reconfig-Agent }
         "4" { Start-Agent }
         "5" { Stop-Agent }
-        #"6" { Show-Version }
-        "6" { return }
+        "6" { Toggle-Dialog }
+        "7" { return }
         default {
             Write-Host "Invalid choice. Please select a valid option (1-7)." -ForegroundColor Red
             Pause
             Show-Menu
         }
     }
+}
+
+function Toggle-Dialog {
+    Show-Header
+    Write-Host "Enable/Disable User Dialog" -ForegroundColor Cyan
+    
+    try {
+        # Check if agent is installed
+        if (Test-WinAgentInstallation -eq "Not Installed") {
+            Write-Host "Agent not installed. Please install it first." -ForegroundColor Yellow
+            Pause
+            Show-Menu
+            return
+        }
+        
+        # Read current configuration
+        $configFile = "$ScriptsDir\config.txt"
+        $config = @{}
+        if (Test-Path $configFile) {
+            Get-Content $configFile | ForEach-Object {
+                if ($_ -match '^\s*([^=]+)\s*=\s*(.+)\s*$') {
+                    $key = $matches[1].Trim()
+                    $value = $matches[2].Trim()
+                    $config[$key] = $value
+                }
+            }
+        }
+        else {
+            Write-Host "Configuration file not found. Please reinstall the agent." -ForegroundColor Red
+            Pause
+            Show-Menu
+            return
+        }
+        
+        # Get the current dialog setting
+        $currentSetting = if ($config.ContainsKey("ENABLE_DIALOG")) { $config["ENABLE_DIALOG"].ToLower() } else { "false" }
+        Write-Host "Current Dialog Setting: $currentSetting" -ForegroundColor White
+        
+        # Ask for new setting
+        $options = @("Enable", "Disable")
+        Write-Host ""
+        Write-Host "Options:" -ForegroundColor White
+        Write-Host "  1. Enable dialog"
+        Write-Host "  2. Disable dialog"
+        Write-Host ""
+        
+        $choice = Read-Host "Enter your choice (1-2)"
+        
+        $newSetting = switch ($choice) {
+            "1" { "true" }
+            "2" { "false" }
+            default { 
+                Write-Host "Invalid choice. No changes made." -ForegroundColor Red
+                Pause
+                Show-Menu
+                return
+            }
+        }
+        
+        # Update the config file
+        $config["ENABLE_DIALOG"] = $newSetting
+        
+        # Save the config back to file
+        $configContent = ""
+        foreach ($key in $config.Keys) {
+            $configContent += "$key=$($config[$key])`n"
+        }
+        
+        # Need admin rights to update the file
+        if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")) {
+            Set-Content -Path $configFile -Value $configContent
+        }
+        else {
+            # Create a temp file with the new content
+            $tempFile = [System.IO.Path]::GetTempFileName()
+            Set-Content -Path $tempFile -Value $configContent
+            
+            # Use PowerShell as admin to copy the file
+            Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -Command `"Copy-Item -Path '$tempFile' -Destination '$configFile' -Force`"" -Verb RunAs -Wait
+            
+            # Clean up temp file
+            Remove-Item -Path $tempFile -Force -ErrorAction SilentlyContinue
+        }
+        
+        Write-Host "Dialog has been $($newSetting -eq 'true' ? 'enabled' : 'disabled'). Restarting agent to apply changes." -ForegroundColor Green
+        
+        # Restart the agent if it's running
+        $task = Get-ScheduledTask -TaskName "WinAgent" -ErrorAction SilentlyContinue
+        if ($task -and $task.State -eq "Running") {
+            if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")) {
+                Stop-ScheduledTask -TaskName "WinAgent"
+                Start-ScheduledTask -TaskName "WinAgent"
+            }
+            else {
+                Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -Command `"Stop-ScheduledTask -TaskName 'WinAgent'; Start-ScheduledTask -TaskName 'WinAgent'`"" -Verb RunAs -Wait
+            }
+            Write-Host "Agent restarted successfully." -ForegroundColor Green
+        }
+    }
+    catch {
+        Write-Host "Error toggling dialog setting: $_" -ForegroundColor Red
+    }
+    
+    Pause
+    Show-Menu
 }
 
 function Test-WinAgentInstallation {
@@ -362,10 +467,11 @@ switch ($Command.ToLower()) {
     "reconfig" { Reconfig-Agent }
     "start" { Start-Agent }
     "stop" { Stop-Agent }
+    "dialog" { Toggle-Dialog }
     "version" { Show-Version }
     default {
         Write-Host "Unknown command: $Command" -ForegroundColor Red
-        Write-Host "Available commands: menu, install, update, uninstall, reconfig, start, stop, version" -ForegroundColor Yellow
+        Write-Host "Available commands: menu, install, update, uninstall, reconfig, start, stop, dialog, version" -ForegroundColor Yellow
     }
 }
 '@

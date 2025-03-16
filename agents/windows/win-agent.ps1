@@ -26,6 +26,7 @@ $config = Read-Config
 $CLIENT_ID = $config["CLIENT_ID"]
 $BACKEND_URL = $config["BACKEND_URL"]
 $HEARTBEAT_INTERVAL = [int]$config["HEARTBEAT_INTERVAL"]
+$ENABLE_DIALOG = if ($config.ContainsKey("ENABLE_DIALOG")) { [bool]::Parse($config["ENABLE_DIALOG"]) } else { $false } # Default to false
 
 # Validate required configuration
 if (-not $CLIENT_ID -or -not $BACKEND_URL -or -not $HEARTBEAT_INTERVAL) {
@@ -38,6 +39,7 @@ Write-Host "Configuration loaded:"
 Write-Host "Backend URL: $BACKEND_URL"
 Write-Host "Heartbeat Interval: $HEARTBEAT_INTERVAL seconds"
 Write-Host "Client ID: $CLIENT_ID"
+Write-Host "Dialog Enabled: $ENABLE_DIALOG"
 
 $OS_TYPE = "Windows"
 $dialogPath = "$directoryPath\dialog-gui.ps1"
@@ -193,8 +195,8 @@ function Send-Heartbeat {
         $activeSessions = $sessions | Where-Object { $_.State -eq "Active" }
         $activeUsers = $activeSessions | Select-Object -ExpandProperty User
         
-        # Manage GUI dialog for active sessions
-        if ($activeSessions.Count -gt 0 -and -not $lastActiveSession) {
+        # Manage GUI dialog for active sessions - only if dialog is enabled
+        if ($ENABLE_DIALOG -and $activeSessions.Count -gt 0 -and -not $lastActiveSession) {
             Write-Log "Detected new active session(s): $($activeUsers -join ', ')"
             
             foreach ($session in $activeSessions) {
