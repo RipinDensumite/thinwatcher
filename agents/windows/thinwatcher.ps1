@@ -239,7 +239,7 @@ function Toggle-Dialog {
             Remove-Item -Path $tempFile -Force -ErrorAction SilentlyContinue
         }
         
-        Write-Host "Dialog has been $($newSetting -eq 'true' ? 'enabled' : 'disabled'). Restarting agent to apply changes." -ForegroundColor Green
+        Write-Host "Dialog has been $(if ($newSetting -eq 'true') { 'enabled' } else { 'disabled' }). Restarting agent to apply changes." -ForegroundColor Green
         
         # Restart the agent if it's running
         $task = Get-ScheduledTask -TaskName "WinAgent" -ErrorAction SilentlyContinue
