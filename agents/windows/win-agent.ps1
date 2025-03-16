@@ -2,31 +2,27 @@ $directoryPath = $PSScriptRoot
 $configFile = "$directoryPath\config.txt"
 
 function Read-Config {
-    $config = @{}
-    if (Test-Path $configFile) {
-        Get-Content $configFile | Foreach-Object {
-            if ($_ -match '^\s*([^=]+)\s*=\s*(.+)\s*$') {
-                $key = $matches[1].Trim()
-                $value = $matches[2].Trim()
-                $config[$key] = $value
-            }
-        }
-    }
-    else {
+    if (-not (Test-Path $configFile)) {
         Write-Error "Configuration file not found: $configFile"
         exit 1
     }
+    
+    $config = @{}
+    Get-Content $configFile | Where-Object { $_ -match '^\s*([^=]+)\s*=\s*(.+)\s*$' } | ForEach-Object {
+        $config[$matches[1].Trim()] = $matches[2].Trim()
+    }
+    
     return $config
 }
 
-# Read configuration only once at startup
+# Read configuration once at startup
 $config = Read-Config
 
-# Assign configuration values to variables
+# Assign configuration values
 $CLIENT_ID = $config["CLIENT_ID"]
 $BACKEND_URL = $config["BACKEND_URL"]
 $HEARTBEAT_INTERVAL = [int]$config["HEARTBEAT_INTERVAL"]
-$ENABLE_DIALOG = if ($config.ContainsKey("ENABLE_DIALOG")) { [bool]::Parse($config["ENABLE_DIALOG"]) } else { $false } # Default to false
+$ENABLE_DIALOG = if ($config.ContainsKey("ENABLE_DIALOG")) { [bool]::Parse($config["ENABLE_DIALOG"]) } else { $false }
 
 # Validate required configuration
 if (-not $CLIENT_ID -or -not $BACKEND_URL -or -not $HEARTBEAT_INTERVAL) {
@@ -34,26 +30,26 @@ if (-not $CLIENT_ID -or -not $BACKEND_URL -or -not $HEARTBEAT_INTERVAL) {
     exit 1
 }
 
-# Output configuration values for verification
-Write-Host "Configuration loaded:"
-Write-Host "Backend URL: $BACKEND_URL"
-Write-Host "Heartbeat Interval: $HEARTBEAT_INTERVAL seconds"
-Write-Host "Client ID: $CLIENT_ID"
-Write-Host "Dialog Enabled: $ENABLE_DIALOG"
-
+# Constants
 $OS_TYPE = "Windows"
 $dialogPath = "$directoryPath\dialog-gui.ps1"
+$logPath = "$directoryPath\agent_log.txt"
+$selectedUserPath = "$directoryPath\selected_user.txt"
+$vbsPath = "$directoryPath\launcher.vbs"
 $lastHeartbeatTime = [DateTime]::MinValue
 $lastTerminationCheckTime = [DateTime]::MinValue
 $lastActiveSession = $false
-$activeGuiProcess = $null
 
-# Set up logging
-$logPath = "$directoryPath\agent_log.txt"
+# More efficient state mapping using hashtable
+$stateMap = @{
+    "Activ" = "Active"
+    "Conn"  = "Connected"
+    "Disc"  = "Disconnected"
+    "Liste" = "Listen"
+}
+
 function Write-Log {
-    param(
-        [string]$Message
-    )
+    param([string]$Message)
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logMessage = "$timestamp - $Message"
     Add-Content -Path $logPath -Value $logMessage
@@ -61,87 +57,38 @@ function Write-Log {
 }
 
 function Get-SessionData {
-    $raw = query session
     $sessionList = @()
-
-    # State normalization mapping
-    $stateMap = @{
-        "Activ" = "Active"
-        "Conn"  = "Connected"
-        "Disc"  = "Disconnected"
-        "Liste" = "Listen"
-    }
-
-    # Process header to find column positions
-    $headerLine = $raw | Select-Object -First 1
-    $columns = @()
-
-    $columnOrder = @("SESSIONNAME", "USERNAME", "ID", "STATE")
-    foreach ($col in $columnOrder) {
-        $index = $headerLine.IndexOf($col)
-        if ($index -ne -1) {
-            $columns += @{
-                Name  = $col
-                Start = $index
-                End   = $index + $col.Length
-            }
+    $raw = query session
+    
+    # Extract column positions from header
+    $headerLine = $raw[0]
+    $sessionNamePos = $headerLine.IndexOf("SESSIONNAME")
+    $userPos = $headerLine.IndexOf("USERNAME")
+    $idPos = $headerLine.IndexOf("ID")
+    $statePos = $headerLine.IndexOf("STATE")
+    
+    # Process data rows
+    for ($i = 1; $i -lt $raw.Count; $i++) {
+        $line = $raw[$i].PadRight(80)
+        
+        $id = $line.Substring($idPos, 10).Trim()
+        # Skip if ID is not numeric
+        if ($id -notmatch '^\d+$') { continue }
+        
+        $user = $line.Substring($userPos, $idPos - $userPos).Trim()
+        if (-not $user) { $user = "SYSTEM" }
+        
+        $state = $line.Substring($statePos, 10).Trim()
+        if ($stateMap.ContainsKey($state)) { $state = $stateMap[$state] }
+        
+        $sessionList += [PSCustomObject]@{
+            ID = $id
+            User = $user
+            State = $state
         }
     }
-
-    # Process session lines
-    $raw | Select-Object -Skip 1 | ForEach-Object {
-        $line = $_.PadRight(80)
-        $session = [PSCustomObject]@{
-            ID    = $null
-            User  = "SYSTEM"
-            State = $null
-        }
-
-        foreach ($col in $columns) {
-            $value = $line.Substring($col.Start, $col.End - $col.Start).Trim()
-            
-            switch ($col.Name) {
-                "USERNAME" { 
-                    if ($value) { $session.User = $value } 
-                }
-                "ID" { 
-                    $session.ID = $value 
-                }
-                "STATE" { 
-                    if ($stateMap.ContainsKey($value)) {
-                        $session.State = $stateMap[$value]
-                    }
-                    else {
-                        $session.State = $value
-                    }
-                }
-            }
-        }
-
-        if ($session.ID -match '^\d+$') {
-            $sessionList += $session
-        }
-    }
-
+    
     return $sessionList
-}
-
-function Get-ProcessRunning {
-    param (
-        [System.Diagnostics.Process]$process
-    )
-    
-    if (-not $process) { return $false }
-    
-    try {
-        if ($process.HasExited) {
-            return $false
-        }
-        return $true
-    }
-    catch {
-        return $false
-    }
 }
 
 function Start-DialogInUserContext {
@@ -150,70 +97,51 @@ function Start-DialogInUserContext {
         [string]$username
     )
     
-    Write-Log "Attempting to launch dialog in session $sessionId for user $username"
+    Write-Log "Launching dialog in session $sessionId for user $username"
     
     try {
-        # Create a temporary VBS script that will launch our PowerShell dialog
-        $vbsPath = "$directoryPath\launcher.vbs"
         $psLaunchCmd = "powershell.exe -ExecutionPolicy Bypass -WindowStyle Normal -File `"$dialogPath`""
-        
-        $vbsContent = @"
-Set objShell = CreateObject("WScript.Shell")
-objShell.Run "$psLaunchCmd", 1, False
-"@
-        
+        $vbsContent = "Set objShell = CreateObject(`"WScript.Shell`")`nobjShell.Run `"$psLaunchCmd`", 1, False"
         Set-Content -Path $vbsPath -Value $vbsContent -Force
         
-        # Use PsExec to run the VBS script in the user's context
-        $result = & psexec -i $sessionId -d -s cscript.exe "$vbsPath" 2>&1
-        
-        # Remove the temporary VBS script
+        & psexec -i $sessionId -d -s cscript.exe "$vbsPath" | Out-Null
         Remove-Item -Path $vbsPath -Force -ErrorAction SilentlyContinue
-        
-        Write-Log "Dialog launch attempt result: $result"
         return $true
     }
     catch {
-        Write-Log "Failed to launch dialog in user context: $($_.Exception.Message)"
+        Write-Log "Dialog launch failed: $($_.Exception.Message)"
         return $false
     }
 }
 
 function Send-Heartbeat {
-    # Throttle heartbeat requests to avoid overwhelming the backend
     $currentTime = Get-Date
-    $heartbeatInterval = [TimeSpan]::FromSeconds($HEARTBEAT_INTERVAL)
-    $timeSinceLastHeartbeat = $currentTime - $lastHeartbeatTime
-    
-    if ($timeSinceLastHeartbeat.TotalSeconds -lt $HEARTBEAT_INTERVAL) {
+    if (($currentTime - $lastHeartbeatTime).TotalSeconds -lt $HEARTBEAT_INTERVAL) {
         return
     }
     
     try {
-        # Get session data once - reuse for both GUI check and heartbeat
+        # Get session data once
         $sessions = Get-SessionData
         $activeSessions = $sessions | Where-Object { $_.State -eq "Active" }
         $activeUsers = $activeSessions | Select-Object -ExpandProperty User
         
-        # Manage GUI dialog for active sessions - only if dialog is enabled
+        # Handle dialog if enabled and active session detected
         if ($ENABLE_DIALOG -and $activeSessions.Count -gt 0 -and -not $lastActiveSession) {
-            Write-Log "Detected new active session(s): $($activeUsers -join ', ')"
+            Write-Log "Active session(s) detected: $($activeUsers -join ', ')"
             
             foreach ($session in $activeSessions) {
                 if ($session.User -ne "SYSTEM") {
-                    # Launch dialog in user session
-                    $dialogLaunched = Start-DialogInUserContext -sessionId $session.ID -username $session.User
-                    if ($dialogLaunched) {
-                        Write-Log "Dialog successfully launched for user $($session.User)"
+                    if (Start-DialogInUserContext -sessionId $session.ID -username $session.User) {
                         break
                     }
                 }
             }
             
-            $lastActiveSession = $true
+            $script:lastActiveSession = $true
         }
         elseif ($activeSessions.Count -eq 0) {
-            $lastActiveSession = $false
+            $script:lastActiveSession = $false
         }
 
         # Prepare heartbeat data
@@ -224,27 +152,21 @@ function Send-Heartbeat {
             sessions = $sessions
         }
         
-        # Check if a user was selected (from the dialog)
-        $selectedUserPath = "$directoryPath\selected_user.txt"
+        # Check for selected user
         if (Test-Path $selectedUserPath) {
-            $selectedUser = Get-Content $selectedUserPath -Raw
-            if ($selectedUser) {
-                $body.selectedUser = $selectedUser.Trim()
-                Write-Log "Including selected user in heartbeat: $($body.selectedUser)"
-                # Remove the file after reading to prevent reusing the selection
-                Remove-Item $selectedUserPath -Force
-            }
+            $body.selectedUser = (Get-Content $selectedUserPath -Raw).Trim()
+            Remove-Item $selectedUserPath -Force
         }
 
-        # Send heartbeat in a non-blocking way
-        $jsonBody = ($body | ConvertTo-Json -Depth 4)
-        $task = Invoke-RestMethod -Uri "$BACKEND_URL/api/status" -Method Post `
+        # Send heartbeat
+        $jsonBody = ($body | ConvertTo-Json -Depth 2 -Compress)
+        Invoke-RestMethod -Uri "$BACKEND_URL/api/status" -Method Post `
             -ContentType "application/json" `
             -Body $jsonBody `
             -TimeoutSec 5 `
             -ErrorAction SilentlyContinue
             
-        $lastHeartbeatTime = $currentTime
+        $script:lastHeartbeatTime = $currentTime
     }
     catch {
         Write-Log "Status update failed: $($_.Exception.Message)"
@@ -252,92 +174,78 @@ function Send-Heartbeat {
 }
 
 function Get-Termination {
-    # Throttle termination checks - don't need to check as often as heartbeat
     $currentTime = Get-Date
-    $timeSinceLastCheck = $currentTime - $lastTerminationCheckTime
-    
-    # Check termination less frequently (e.g., every 5 seconds) to reduce API calls
-    if ($timeSinceLastCheck.TotalSeconds -lt 5) {
+    if (($currentTime - $lastTerminationCheckTime).TotalSeconds -lt 5) {
         return
     }
     
     try {
         $command = Invoke-RestMethod -Uri "$BACKEND_URL/api/terminate/$CLIENT_ID" -TimeoutSec 3 -ErrorAction SilentlyContinue
         if ($command.action -eq 'logoff') {
-            Write-Log "Received logoff command for session $($command.sessionId)"
+            Write-Log "Logoff command for session $($command.sessionId)"
             & logoff $command.sessionId
         }
-        $lastTerminationCheckTime = $currentTime
+        $script:lastTerminationCheckTime = $currentTime
     }
     catch {
-        Write-Log "Termination check failed: $($_.Exception.Message)"
+        # Silently handle failed termination checks
     }
 }
 
-# Install PsExec if necessary
+# Ensure PsExec is available - run only once at startup
 function Get-PsExec {
     $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
     
-    if (-not (Test-Path $psExecPath)) {
-        Write-Log "PsExec not found. Attempting to download Sysinternals Suite..."
-        
+    if (Test-Path $psExecPath) { return $true }
+    
+    Write-Log "PsExec not found. Downloading Sysinternals Suite..."
+    
+    try {
         $tempZip = "$env:TEMP\SysinternalsSuite.zip"
         $tempDir = "$env:TEMP\SysinternalsSuite"
         
-        try {
-            # Download Sysinternals Suite
-            Invoke-WebRequest -Uri "https://download.sysinternals.com/files/SysinternalsSuite.zip" -OutFile $tempZip
-            
-            # Create temp directory
-            if (-not (Test-Path $tempDir)) {
-                New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
-            }
-            
-            # Extract zip file
-            Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
-            
-            # Copy PsExec to System32
-            Copy-Item -Path "$tempDir\PsExec.exe" -Destination $psExecPath -Force
-            
-            # Clean up
-            Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            
-            Write-Log "PsExec installed successfully."
-            return $true
-        }
-        catch {
-            Write-Log "Failed to install PsExec: $($_.Exception.Message)"
-            return $false
-        }
+        # Download and extract
+        Invoke-WebRequest -Uri "https://download.sysinternals.com/files/SysinternalsSuite.zip" -OutFile $tempZip
+        if (-not (Test-Path $tempDir)) { New-Item -Path $tempDir -ItemType Directory -Force | Out-Null }
+        Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
+        
+        # Copy PsExec to System32
+        Copy-Item -Path "$tempDir\PsExec.exe" -Destination $psExecPath -Force
+        
+        # Clean up
+        Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+        
+        Write-Log "PsExec installed successfully."
+        return $true
     }
-    
-    return $true
+    catch {
+        Write-Log "Failed to install PsExec: $($_.Exception.Message)"
+        return $false
+    }
 }
 
 # Main script
 Write-Log "Win-Agent starting..."
 
-# Ensure PsExec is available
-if (-not (Get-PsExec)) {
-    Write-Log "ERROR: Could not ensure PsExec is available. GUI functionality may not work."
+# Log minimal configuration info
+Write-Log "Configuration: Backend: $BACKEND_URL, Interval: $HEARTBEAT_INTERVAL, Dialog: $ENABLE_DIALOG"
+
+# Ensure PsExec is available if dialog is enabled
+if ($ENABLE_DIALOG) {
+    Get-PsExec | Out-Null
 }
 
-# Use a more efficient main loop with non-blocking sleep
+# Main loop with efficient sleep timing
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 while ($true) {
-    # Reset stopwatch at beginning of each loop
-    $stopwatch.Reset()
-    $stopwatch.Start()
+    $stopwatch.Restart()
     
-    # Perform operations
     Send-Heartbeat
     Get-Termination
     
-    # Calculate how long operations took
-    $processingTime = $stopwatch.ElapsedMilliseconds
-    
-    # Calculate sleep time to maintain interval
-    $sleepTime = [Math]::Max(1, ($HEARTBEAT_INTERVAL * 1000) - $processingTime)
+    # Sleep for remaining time in the interval
+    $elapsed = $stopwatch.ElapsedMilliseconds
+    $sleepTime = [Math]::Max(1, ($HEARTBEAT_INTERVAL * 1000) - $elapsed)
     Start-Sleep -Milliseconds $sleepTime
 }
