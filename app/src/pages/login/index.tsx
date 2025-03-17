@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigate, Navigate, useLocation } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
 import { APP_CONFIG } from "@/utils/appconfig";
+import { motion, AnimatePresence } from "motion/react";
 
 interface LocationState {
   from?: {
@@ -18,7 +19,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isBtnLoading, setIsBtnLoading] = useState(false);
   const [canRegister, setCanRegister] = useState(false);
-  const { login, error, isAuthenticated } = useContext(AuthContext);
+  const { login, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = location.state as LocationState;
@@ -69,9 +70,18 @@ const LoginPage = () => {
       await login(username, password);
       // Redirect to the page they were trying to access or home page
       navigate(from, { replace: true });
-    } catch (err) {
+    } catch (err: unknown) {
       // Error is already set in the context
       console.error("Login failed:", err);
+
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : typeof err === "object" && err !== null && "message" in err
+          ? (err as { message: string }).message
+          : "Login failed";
+
+      setErrorMessage(errorMessage || "Login failed");
       setIsBtnLoading(false);
     }
   };
@@ -128,24 +138,32 @@ const LoginPage = () => {
             </p>
           </div>
 
-          {(error || errorMessage) && (
-            <div role="alert" className="alert alert-error alert-outline">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 shrink-0 stroke-current"
-                fill="none"
-                viewBox="0 0 24 24"
+          <AnimatePresence>
+            {errorMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                role="alert"
+                className="alert alert-error alert-outline"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>{errorMessage || error}</span>
-            </div>
-          )}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 shrink-0 stroke-current"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>{errorMessage}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <form onSubmit={handleSubmit}>
             <div className="mb-1">
