@@ -7,7 +7,7 @@ import {
   User,
   CircleUserRound,
   Settings,
-  ChevronLeft,
+  ChevronDown,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router";
 import { AuthContext } from "@/context/AuthContext";
@@ -310,10 +310,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <p className="text-xs text-slate-500">{user?.role}</p>
                 </div>
                 <motion.div
-                  animate={{ rotate: isOpen ? 90 : 0 }}
+                  animate={{ rotate: isOpen ? 180 : 0 }}
                   transition={{ duration: 0.2, type: "tween" }}
                 >
-                  <ChevronLeft size={20} className="text-slate-900" />
+                  <ChevronDown size={20} className="text-slate-900" />
                 </motion.div>
               </div>
 
