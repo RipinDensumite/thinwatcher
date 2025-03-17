@@ -13,6 +13,7 @@ import ProfilePage from "./pages/profile";
 import BackendCheckerRoute from "./components/BackendCheckerRoute";
 import Layout from "./layout/layout";
 import { APP_CONFIG } from "./utils/appconfig";
+import { TriangleAlert } from "lucide-react";
 
 interface TitleProps {
   title: string;
@@ -74,12 +75,43 @@ function App() {
     </ProtectedRoute>
   );
 
-  if (!APP_CONFIG.BACKEND_API_URL) {
-    return <h1>Missing backend api url</h1>;
-  }
-
-  if (!APP_CONFIG.API_KEY) {
-    return <h1>Missing backend api key</h1>;
+  if (!APP_CONFIG.BACKEND_API_URL || !APP_CONFIG.API_KEY) {
+    return (
+      <section className="flex flex-col items-center justify-center min-h-[100dvh] bg-gradient-to-br from-slate-50 to-slate-200 p-6">
+        <div className="max-w-md w-full">
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-gray-800">Configuration Error</h2>
+            <p className="text-gray-600 mt-1">Missing critical application settings</p>
+          </div>
+  
+          <div className="flex flex-col gap-3 p-6 rounded-xl bg-white border border-slate-200 shadow-lg">
+            {!APP_CONFIG.BACKEND_API_URL && (
+              <div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg">
+                <TriangleAlert size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-red-700">Missing Backend API URL</p>
+                  <p className="text-sm text-red-600 mt-1">Please set the VITE_BACKEND_API_URL in your environment configuration.</p>
+                </div>
+              </div>
+            )}
+            
+            {!APP_CONFIG.API_KEY && (
+              <div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg">
+                <TriangleAlert size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-red-700">Missing API Key</p>
+                  <p className="text-sm text-red-600 mt-1">Please set the VITE_API_KEY in your environment configuration.</p>
+                </div>
+              </div>
+            )}
+            
+            <div className="mt-2 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-700">Check your <code className="bg-blue-100 px-1 py-0.5 rounded">.env</code> file or contact your administrator for assistance.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
