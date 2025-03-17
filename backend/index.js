@@ -1,5 +1,47 @@
 require("dotenv").config();
 
+function validateEnvironmentVariables() {
+  const requiredEnvVars = [
+    "PORT",
+    "CORS_ORIGIN_PROD",
+    "CORS_ORIGIN_DEV",
+    "API_KEY",
+    "JWT_SECRET",
+  ];
+
+  const missingVars = requiredEnvVars.filter(
+    (varName) => !process.env[varName]
+  );
+
+  if (missingVars.length > 0) {
+    console.error(
+      "⚠️ ENVIRONMENT ERROR: Missing required environment variables:"
+    );
+    missingVars.forEach((varName) => {
+      console.error(`   - ${varName}`);
+    });
+    console.error(
+      "Please check your .env file. See .env.example for required variables."
+    );
+
+    // Exit with error code if in production, otherwise continue with warnings
+    if (process.env.NODE_ENV === "production") {
+      console.error(
+        "Exiting process due to missing environment variables in production mode."
+      );
+      process.exit(1);
+    } else {
+      console.warn(
+        "⚠️ Running in development mode with missing environment variables."
+      );
+    }
+  } else {
+    console.log("✅ All required environment variables are present");
+  }
+}
+
+validateEnvironmentVariables();
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -52,13 +94,13 @@ let db;
 async function setupDatabase() {
   // Define the database directory path
   const dbDir = path.join(__dirname, "data");
-  
+
   // Create the directory if it doesn't exist
-  if (!require('fs').existsSync(dbDir)) {
-    require('fs').mkdirSync(dbDir, { recursive: true });
+  if (!require("fs").existsSync(dbDir)) {
+    require("fs").mkdirSync(dbDir, { recursive: true });
     console.log(`Created database directory: ${dbDir}`);
   }
-  
+
   // Open the database in the newly created directory
   db = await open({
     filename: path.join(dbDir, "database.db"),
