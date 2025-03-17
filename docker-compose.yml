@@ -14,12 +14,9 @@ services:
     ports:
       - "5000:3001"
     volumes:
-      - ./backend:/app
       - ./data:/app/data
     environment:
       - PORT=${PORT}
-      - OFFLINE_TIMEOUT=${OFFLINE_TIMEOUT}
-      - CLEANUP_INTERVAL=${CLEANUP_INTERVAL}
       - CORS_ORIGIN_PROD=${CORS_ORIGIN_PROD}
       - CORS_ORIGIN_DEV=${CORS_ORIGIN_DEV}
       - API_KEY=${API_KEY}
