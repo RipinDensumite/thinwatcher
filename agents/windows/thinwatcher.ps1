@@ -160,18 +160,16 @@ function Show-Menu {
 function Toggle-Dialog {
     Show-Header
     Write-Host "Enable/Disable User Dialog" -ForegroundColor Cyan
-    
+    $configFile = "$ScriptsDir\config.txt"
+
     try {
         # Check if agent is installed
-        if (Test-WinAgentInstallation -eq "Not Installed") {
-            Write-Host "Agent not installed. Please install it first." -ForegroundColor Yellow
-            Pause
-            Show-Menu
-            return
+        if (-not (Test-Path $ConfigFile)) {
+            Write-Host "ThinWatcher agent is not installed. Please install it first." -ForegroundColor Red
+            exit 1
         }
         
         # Read current configuration
-        $configFile = "$ScriptsDir\config.txt"
         $config = @{}
         if (Test-Path $configFile) {
             Get-Content $configFile | ForEach-Object {
