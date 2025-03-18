@@ -98,12 +98,16 @@ export default function HomePage() {
 
     // Connection event handlers
     newSocket.on("connect", () => {
-      setIsConnected(true);
+      if (!isConnected) {
+        setIsConnected(true);
+      }
       setError(null);
     });
 
     newSocket.on("disconnect", () => {
-      setIsConnected(false);
+      if (isConnected) {
+        setIsConnected(false);
+      }
       setError("Connection lost. Attempting to reconnect...");
     });
 
