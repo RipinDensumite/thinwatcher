@@ -98,16 +98,12 @@ export default function HomePage() {
 
     // Connection event handlers
     newSocket.on("connect", () => {
-      if (!isConnected) {
-        setIsConnected(true);
-      }
+      setIsConnected(true);
       setError(null);
     });
 
     newSocket.on("disconnect", () => {
-      if (isConnected) {
-        setIsConnected(false);
-      }
+      setIsConnected(false);
       setError("Connection lost. Attempting to reconnect...");
     });
 
@@ -189,29 +185,17 @@ export default function HomePage() {
   // Connection status component
   const ConnectionStatus = () => (
     <div className="flex items-center min-w-fit w-full sm:w-fit gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out">
-      <AnimatePresence>
-        {isConnected ? (
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="text-emerald-600 flex items-center gap-2 font-medium"
-          >
-            <Wifi className="h-4 w-4" />
-            Connected
-          </motion.span>
-        ) : (
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="text-red-600 flex items-center gap-2 font-medium"
-          >
-            <WifiOff className="h-4 w-4" />
-            Disconnected
-          </motion.span>
-        )}
-      </AnimatePresence>
+      {isConnected ? (
+        <span className="text-emerald-600 flex items-center gap-2 font-medium">
+          <Wifi className="h-4 w-4" />
+          Connected
+        </span>
+      ) : (
+        <span className="text-red-600 flex items-center gap-2 font-medium">
+          <WifiOff className="h-4 w-4" />
+          Disconnected
+        </span>
+      )}
     </div>
   );
 
