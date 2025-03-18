@@ -1,3 +1,14 @@
+# win-agent-install.ps1
+#Requires -RunAsAdministrator
+
+$ErrorActionPreference = "Stop"
+
+# Self-elevate if not running as admin
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`"" -Verb RunAs
+    exit
+}
+
 $directoryPath = $PSScriptRoot
 $configFile = "$directoryPath\config.txt"
 
