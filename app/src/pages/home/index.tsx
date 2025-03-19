@@ -64,7 +64,7 @@ export default function HomePage() {
     };
 
     fetchInitialData();
-  }, []);
+  }, [token]);
 
   const deleteClient = async (clientId: string) => {
     try {
