@@ -42,17 +42,17 @@ ThinWatcher consists of three main components:
 ### Setting up the Backend
 
 1. Navigate to the backend directory:
-   ```
+   ```bash
    cd backend
    ```
 
 2. Create a `.env` file based on the example:
-   ```
+   ```bash
    cp .env.example .env
    ```
 
 3. Edit the `.env` file to include your configuration:
-   ```
+   ```env
    PORT=3001
    CORS_ORIGIN_PROD=https://your-production-domain.com
    CORS_ORIGIN_DEV=http://localhost:5173
@@ -61,7 +61,7 @@ ThinWatcher consists of three main components:
    ```
 
 4. Install dependencies and start the server:
-   ```
+   ```bash
    npm install
    npm start
    ```
@@ -69,29 +69,29 @@ ThinWatcher consists of three main components:
 ### Setting up the Frontend
 
 1. Navigate to the app directory:
-   ```
+   ```bash
    cd app
    ```
 
 2. Create a `.env` file based on the example:
-   ```
+   ```bash
    cp .env.example .env
    ```
 
 3. Edit the `.env` file to include your configuration:
-   ```
+   ```env
    VITE_BACKEND_API_URL=http://localhost:3001
    VITE_API_KEY=your_secure_api_key
    ```
 
 4. Install dependencies and start the development server:
-   ```
+   ```bash
    npm install
    npm run dev
    ```
 
 5. For production build:
-   ```
+   ```bash
    npm run build
    ```
 
@@ -99,7 +99,7 @@ ThinWatcher consists of three main components:
 
 You can use Docker to run both frontend and backend:
 
-```
+```bash
 docker-compose up -d
 ```
 
