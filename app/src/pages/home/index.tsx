@@ -4,6 +4,7 @@ import { UserRound, WifiOff, Wifi, Trash2, Computer } from "lucide-react";
 import { useMediaQuery } from "@uidotdev/usehooks";
 import { AuthContext } from "@/context/AuthContext";
 import { APP_CONFIG } from "@/utils/appconfig";
+import { motion, AnimatePresence } from "motion/react";
 
 interface Session {
   ID: string;
@@ -32,6 +33,8 @@ export default function HomePage() {
   const [, setSocket] = useState<Socket | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { user, token } = useContext(AuthContext);
@@ -80,6 +83,9 @@ export default function HomePage() {
     } catch (error) {
       console.error("Failed to delete client:", error);
       setError("Failed to delete client. Please try again.");
+    } finally {
+      setClientToDelete(null);
+      setIsDeleteModalOpen(false);
     }
   };
 
@@ -236,131 +242,219 @@ export default function HomePage() {
       </div>
     );
 
-  // Mobile view
-  if (isMobile) {
-    return (
-      <div className="container mx-auto px-4 py-6 max-w-4xl overflow-x-auto">
-        <div className="flex flex-col space-y-4 mb-6 min-w-fit">
-          <div className="flex flex-col gap-5 sm:flex-row sm:gap-0 justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="bg-slate-500 p-2 rounded-lg shadow-lg">
-                <Computer className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-gray-800">ThinClient</h1>
-              <div className="bg-slate-500 text-white text-xs font-semibold px-2.5 py-1 rounded-md">
-                {clients.length}
-              </div>
-            </div>
-            <ConnectionStatus />
-          </div>
+  const DeleteModal = () => (
+    <AnimatePresence>
+      {isDeleteModalOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-10 overflow-y-auto"
+        >
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity"></div>
 
-          <ErrorAlert />
-          <EmptyState />
-        </div>
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
 
-        {!isLoading ? (
-          <div className="grid grid-cols-1 gap-4">
-            {clients.map((client) => (
-              <div
-                key={client.clientId}
-                className="bg-white rounded-xl shadow-sm overflow-auto min-w-fit border border-gray-100 transition-all duration-300 hover:shadow-md"
-              >
-                <div className="p-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="bg-gray-100 p-1.5 rounded-lg">
-                        <Computer className="h-5 w-5 text-gray-700" />
-                      </div>
-                      <h2 className="text-lg font-semibold text-gray-800">
-                        {client.clientId}
-                      </h2>
-                    </div>
-                    <StatusBadge isOnline={client.status.isOnline} />
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
                     <svg
-                      className="h-4 w-4"
+                      className="h-6 w-6 text-red-600"
+                      xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
+                      aria-hidden="true"
                     >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                       />
                     </svg>
-                    <p>
-                      Updated{" "}
-                      {new Date(client.status.lastUpdated).toLocaleString()}
-                    </p>
                   </div>
-
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-md font-semibold text-gray-800">
-                          Active Sessions
-                        </h3>
-                        <span className="flex items-center justify-center gap-1 bg-gray-100 rounded-full px-2.5 py-1">
-                          <span className="text-sm font-medium">
-                            {client.status.users.length}
-                          </span>
-                          <UserRound className="text-gray-700 size-4" />
-                        </span>
-                      </div>
-
-                      {user?.role === "admin" && (
-                        <button
-                          onClick={() => deleteClient(client.clientId)}
-                          className="text-red-500 hover:text-red-700 transition-colors duration-200 focus:outline-none"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      )}
-                    </div>
-
-                    {client.status.sessions.length > 0 ? (
-                      <ul className="space-y-2 mt-3">
-                        {client.status.sessions.map((session) => (
-                          <li
-                            key={session.ID}
-                            className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100"
-                          >
-                            <div className="flex items-center gap-2">
-                              <UserRound className="h-4 w-4 text-gray-600" />
-                              <span className="font-medium text-gray-800">
-                                {session.User}
-                              </span>
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                  session.State === "Active"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : "bg-gray-200 text-gray-700"
-                                }`}
-                              >
-                                {session.State}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-gray-500 italic mt-2">
-                        No active sessions
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3
+                      className="text-lg leading-6 font-medium text-gray-900"
+                      id="modal-title"
+                    >
+                      Confirm Deletion
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Are you sure you want to delete client "{clientToDelete}
+                        "? This action cannot be undone.
                       </p>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="cursor-pointer w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={() => deleteClient(clientToDelete as string)}
+                >
+                  Delete
+                </button>
+                <button
+                  type="button"
+                  className="cursor-pointer mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setClientToDelete(null);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
-        ) : (
-          <Loader />
-        )}
-      </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  // Mobile view
+  if (isMobile) {
+    return (
+      <>
+        <div className="container mx-auto px-4 py-6 max-w-4xl overflow-x-auto">
+          <div className="flex flex-col space-y-4 mb-6 min-w-fit">
+            <div className="flex flex-col gap-5 sm:flex-row sm:gap-0 justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="bg-slate-500 p-2 rounded-lg shadow-lg">
+                  <Computer className="h-6 w-6 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-800">ThinClient</h1>
+                <div className="bg-slate-500 text-white text-xs font-semibold px-2.5 py-1 rounded-md">
+                  {clients.length}
+                </div>
+              </div>
+              <ConnectionStatus />
+            </div>
+
+            <ErrorAlert />
+            <EmptyState />
+          </div>
+
+          {!isLoading ? (
+            <div className="grid grid-cols-1 gap-4">
+              {clients.map((client) => (
+                <div
+                  key={client.clientId}
+                  className="bg-white rounded-xl shadow-sm overflow-auto min-w-fit border border-gray-100 transition-all duration-300 hover:shadow-md"
+                >
+                  <div className="p-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="bg-gray-100 p-1.5 rounded-lg">
+                          <Computer className="h-5 w-5 text-gray-700" />
+                        </div>
+                        <h2 className="text-lg font-semibold text-gray-800">
+                          {client.clientId}
+                        </h2>
+                      </div>
+                      <StatusBadge isOnline={client.status.isOnline} />
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <p>
+                        Updated{" "}
+                        {new Date(client.status.lastUpdated).toLocaleString()}
+                      </p>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-md font-semibold text-gray-800">
+                            Active Sessions
+                          </h3>
+                          <span className="flex items-center justify-center gap-1 bg-gray-100 rounded-full px-2.5 py-1">
+                            <span className="text-sm font-medium">
+                              {client.status.users.length}
+                            </span>
+                            <UserRound className="text-gray-700 size-4" />
+                          </span>
+                        </div>
+
+                        {user?.role === "admin" && (
+                          <button
+                            onClick={() => {
+                              setClientToDelete(client.clientId);
+                              setIsDeleteModalOpen(true);
+                            }}
+                            className="text-red-500 hover:text-red-700 transition-colors duration-200 focus:outline-none"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        )}
+                      </div>
+
+                      {client.status.sessions.length > 0 ? (
+                        <ul className="space-y-2 mt-3">
+                          {client.status.sessions.map((session) => (
+                            <li
+                              key={session.ID}
+                              className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100"
+                            >
+                              <div className="flex items-center gap-2">
+                                <UserRound className="h-4 w-4 text-gray-600" />
+                                <span className="font-medium text-gray-800">
+                                  {session.User}
+                                </span>
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                    session.State === "Active"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : "bg-gray-200 text-gray-700"
+                                  }`}
+                                >
+                                  {session.State}
+                                </span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic mt-2">
+                          No active sessions
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Loader />
+          )}
+        </div>
+
+        <DeleteModal />
+      </>
     );
   } else {
     // Desktop view
@@ -387,146 +481,153 @@ export default function HomePage() {
         <EmptyState />
 
         {!isLoading ? (
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
-                    <th className="px-6 py-4 font-semibold text-gray-700">
-                      Client
-                    </th>
-                    <th className="px-6 py-4 font-semibold text-gray-700">
-                      Last Update
-                    </th>
-                    <th className="px-6 py-4 font-semibold text-gray-700">
-                      Sessions
-                    </th>
-                    <th className="px-6 py-4 font-semibold text-gray-700">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 font-semibold text-gray-700 text-right">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clients.map((client, index) => (
-                    <>
-                      <tr
-                        key={client.clientId}
-                        className={`hover:bg-gray-50 transition-colors duration-150 ${
-                          index !== clients.length - 1
-                            ? "border-b border-gray-100"
-                            : ""
-                        }`}
-                      >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="bg-slate-100 p-2 rounded-lg">
-                              <Computer className="h-5 w-5 text-slate-700" />
-                            </div>
-                            <span className="font-medium text-gray-800">
-                              {client.clientId}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <svg
-                              className="h-4 w-4 text-gray-400"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            <span className="text-sm text-gray-600">
-                              {new Date(
-                                client.status.lastUpdated
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-1 rounded-full">
-                              {client.status.users.length}
-                            </span>
-                            <UserRound className="text-gray-600 size-4" />
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <StatusBadge isOnline={client.status.isOnline} />
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          {user?.role === "admin" && (
-                            <button
-                              onClick={() => deleteClient(client.clientId)}
-                              className="cursor-pointer inline-flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors duration-200 focus:outline-none bg-red-50 hover:bg-red-100 rounded-lg px-3 py-1.5"
-                            >
-                              <Trash2 size={16} />
-                              <span className="text-sm font-medium">
-                                Delete
+          <>
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-100">
+                      <th className="px-6 py-4 font-semibold text-gray-700">
+                        Client
+                      </th>
+                      <th className="px-6 py-4 font-semibold text-gray-700">
+                        Last Update
+                      </th>
+                      <th className="px-6 py-4 font-semibold text-gray-700">
+                        Sessions
+                      </th>
+                      <th className="px-6 py-4 font-semibold text-gray-700">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 font-semibold text-gray-700 text-right">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clients.map((client, index) => (
+                      <>
+                        <tr
+                          key={client.clientId}
+                          className={`hover:bg-gray-50 transition-colors duration-150 ${
+                            index !== clients.length - 1
+                              ? "border-b border-gray-100"
+                              : ""
+                          }`}
+                        >
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-slate-100 p-2 rounded-lg">
+                                <Computer className="h-5 w-5 text-slate-700" />
+                              </div>
+                              <span className="font-medium text-gray-800">
+                                {client.clientId}
                               </span>
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-
-                      {/* Session List */}
-                      {client.status.sessions.length > 0 && (
-                        <>
-                          {client.status.sessions.map(
-                            (session, sessionIndex) => (
-                              <tr
-                                key={session.ID}
-                                className={`bg-gray-50 hover:bg-gray-100 transition-colors duration-150 ${
-                                  sessionIndex !==
-                                  client.status.sessions.length - 1
-                                    ? "border-b border-gray-100"
-                                    : ""
-                                }`}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <svg
+                                className="h-4 w-4 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
                               >
-                                <td className="px-6 py-3 pl-12">
-                                  <div className="flex items-center gap-2">
-                                    <UserRound
-                                      size={16}
-                                      className="text-gray-500"
-                                    />
-                                    <span className="font-medium text-gray-700">
-                                      {session.User}
-                                    </span>
-                                    <span
-                                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                        session.State === "Active"
-                                          ? "bg-blue-100 text-blue-800"
-                                          : "bg-gray-200 text-gray-700"
-                                      }`}
-                                    >
-                                      {session.State}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-3"></td>
-                                <td className="px-6 py-3"></td>
-                                <td className="px-6 py-3"></td>
-                                <td className="px-6 py-3"></td>
-                              </tr>
-                            )
-                          )}
-                        </>
-                      )}
-                    </>
-                  ))}
-                </tbody>
-              </table>
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              <span className="text-sm text-gray-600">
+                                {new Date(
+                                  client.status.lastUpdated
+                                ).toLocaleString()}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-1 rounded-full">
+                                {client.status.users.length}
+                              </span>
+                              <UserRound className="text-gray-600 size-4" />
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <StatusBadge isOnline={client.status.isOnline} />
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            {user?.role === "admin" && (
+                              <button
+                                onClick={() => {
+                                  setClientToDelete(client.clientId);
+                                  setIsDeleteModalOpen(true);
+                                }}
+                                className="cursor-pointer inline-flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors duration-200 focus:outline-none bg-red-50 hover:bg-red-100 rounded-lg px-3 py-1.5"
+                              >
+                                <Trash2 size={16} />
+                                <span className="text-sm font-medium">
+                                  Delete
+                                </span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+
+                        {/* Session List */}
+                        {client.status.sessions.length > 0 && (
+                          <>
+                            {client.status.sessions.map(
+                              (session, sessionIndex) => (
+                                <tr
+                                  key={session.ID}
+                                  className={`bg-gray-50 hover:bg-gray-100 transition-colors duration-150 ${
+                                    sessionIndex !==
+                                    client.status.sessions.length - 1
+                                      ? "border-b border-gray-100"
+                                      : ""
+                                  }`}
+                                >
+                                  <td className="px-6 py-3 pl-12">
+                                    <div className="flex items-center gap-2">
+                                      <UserRound
+                                        size={16}
+                                        className="text-gray-500"
+                                      />
+                                      <span className="font-medium text-gray-700">
+                                        {session.User}
+                                      </span>
+                                      <span
+                                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                          session.State === "Active"
+                                            ? "bg-blue-100 text-blue-800"
+                                            : "bg-gray-200 text-gray-700"
+                                        }`}
+                                      >
+                                        {session.State}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-3"></td>
+                                  <td className="px-6 py-3"></td>
+                                  <td className="px-6 py-3"></td>
+                                  <td className="px-6 py-3"></td>
+                                </tr>
+                              )
+                            )}
+                          </>
+                        )}
+                      </>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+
+            <DeleteModal />
+          </>
         ) : (
           <Loader />
         )}
