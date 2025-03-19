@@ -4,7 +4,6 @@ import { UserRound, WifiOff, Wifi, Trash2, Computer } from "lucide-react";
 import { useMediaQuery } from "@uidotdev/usehooks";
 import { AuthContext } from "@/context/AuthContext";
 import { APP_CONFIG } from "@/utils/appconfig";
-import { motion, AnimatePresence } from "motion/react";
 
 interface Session {
   ID: string;
