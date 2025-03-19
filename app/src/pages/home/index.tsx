@@ -1,4 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { io, type Socket } from "socket.io-client";
 import { UserRound, WifiOff, Wifi, Trash2, Computer } from "lucide-react";
 import { useMediaQuery } from "@uidotdev/usehooks";
@@ -38,6 +44,53 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
 
   const { user, token } = useContext(AuthContext);
+
+  // Memoize event handlers
+  const handleConnect = useCallback(() => {
+    setIsConnected(true);
+    setError(null);
+  }, []);
+
+  const handleDisconnect = useCallback(() => {
+    setIsConnected(false);
+    setError("Connection lost. Attempting to reconnect...");
+  }, []);
+
+  const handleConnectError = useCallback((error: Error) => {
+    console.error("Connection error:", error);
+    setError(`Connection error: ${error.message}`);
+  }, []);
+
+  const handleInitialData = useCallback((data: [string, ClientStatus][]) => {
+    const formattedData = data.map(([clientId, status]) => ({
+      clientId,
+      status,
+    }));
+    setClients(formattedData);
+  }, []);
+
+  const handleUpdate = useCallback(
+    ({ clientId, status }: { clientId: string; status: ClientStatus }) => {
+      setClients((prev) => {
+        const clientIndex = prev.findIndex(
+          (client) => client.clientId === clientId
+        );
+        if (clientIndex === -1) {
+          // New client
+          return [...prev, { clientId, status }];
+        }
+        // Update existing client
+        const newClients = [...prev];
+        newClients[clientIndex] = { clientId, status };
+        return newClients;
+      });
+    },
+    []
+  );
+
+  const handleClientRemoved = useCallback((clientId: string) => {
+    setClients((prev) => prev.filter((client) => client.clientId !== clientId));
+  }, []);
 
   // Initial data fetch
   useEffect(() => {
@@ -102,63 +155,34 @@ export default function HomePage() {
     });
 
     // Connection event handlers
-    newSocket.on("connect", () => {
-      setIsConnected(true);
-      setError(null);
-    });
+    newSocket.on("connect", handleConnect);
+    newSocket.on("disconnect", handleDisconnect);
+    newSocket.on("connect_error", handleConnectError);
 
-    newSocket.on("disconnect", () => {
-      setIsConnected(false);
-      setError("Connection lost. Attempting to reconnect...");
-    });
-
-    newSocket.on("connect_error", (error) => {
-      console.error("Connection error:", error);
-      setError(`Connection error: ${error.message}`);
-    });
-
-    // Initial data from socket
-    newSocket.on("initial-data", (data: [string, ClientStatus][]) => {
-      const formattedData = data.map(([clientId, status]) => ({
-        clientId,
-        status,
-      }));
-      setClients(formattedData);
-    });
-
-    // Updates
-    newSocket.on(
-      "update",
-      ({ clientId, status }: { clientId: string; status: ClientStatus }) => {
-        setClients((prev) => {
-          const clientIndex = prev.findIndex(
-            (client) => client.clientId === clientId
-          );
-          if (clientIndex === -1) {
-            // New client
-            return [...prev, { clientId, status }];
-          }
-          // Update existing client
-          const newClients = [...prev];
-          newClients[clientIndex] = { clientId, status };
-          return newClients;
-        });
-      }
-    );
-
-    // Delete client
-    newSocket.on("client-removed", (clientId: string) => {
-      setClients((prev) =>
-        prev.filter((client) => client.clientId !== clientId)
-      );
-    });
+    // Data handlers
+    newSocket.on("initial-data", handleInitialData);
+    newSocket.on("update", handleUpdate);
+    newSocket.on("client-removed", handleClientRemoved);
 
     setSocket(newSocket);
 
     return () => {
+      newSocket.off("connect", handleConnect);
+      newSocket.off("disconnect", handleDisconnect);
+      newSocket.off("connect_error", handleConnectError);
+      newSocket.off("initial-data", handleInitialData);
+      newSocket.off("update", handleUpdate);
+      newSocket.off("client-removed", handleClientRemoved);
       newSocket.disconnect();
     };
-  }, []);
+  }, [
+    handleConnect,
+    handleDisconnect,
+    handleConnectError,
+    handleInitialData,
+    handleUpdate,
+    handleClientRemoved,
+  ]);
 
   // Loader component
   const Loader = () => (
@@ -188,21 +212,35 @@ export default function HomePage() {
     );
 
   // Connection status component
-  const ConnectionStatus = () => (
-    <div className="flex items-center min-w-fit w-full sm:w-fit gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out">
-      {isConnected ? (
-        <span className="text-emerald-600 flex items-center gap-2 font-medium">
-          <Wifi className="h-4 w-4" />
-          Connected
-        </span>
-      ) : (
-        <span className="text-red-600 flex items-center gap-2 font-medium">
-          <WifiOff className="h-4 w-4" />
-          Disconnected
-        </span>
-      )}
-    </div>
-  );
+  const ConnectionStatus = useMemo(() => {
+    return (
+      <AnimatePresence>
+        <div className="flex items-center min-w-fit w-full sm:w-fit gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out">
+          {isConnected ? (
+            <motion.span
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-emerald-600 flex items-center gap-2 font-medium"
+            >
+              <Wifi className="h-4 w-4" />
+              Connected
+            </motion.span>
+          ) : (
+            <motion.span
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-red-600 flex items-center gap-2 font-medium"
+            >
+              <WifiOff className="h-4 w-4" />
+              Disconnected
+            </motion.span>
+          )}
+        </div>
+      </AnimatePresence>
+    );
+  }, [isConnected]);
 
   // Error alert component
   const ErrorAlert = () =>
@@ -242,86 +280,89 @@ export default function HomePage() {
       </div>
     );
 
-  const DeleteModal = () => (
-    <AnimatePresence>
-      {isDeleteModalOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-10 overflow-y-auto"
-        >
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500/50 transition-opacity"></div>
+  const DeleteModal = useMemo(() => {
+    return (
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-10 overflow-y-auto"
+          >
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              <div className="fixed inset-0 bg-gray-500/50 transition-opacity"></div>
 
-            <span
-              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
-            >
-              &#8203;
-            </span>
+              <span
+                className="hidden sm:inline-block sm:align-middle sm:h-screen"
+                aria-hidden="true"
+              >
+                &#8203;
+              </span>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <svg
-                      className="h-6 w-6 text-red-600"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3
-                      className="text-lg leading-6 font-medium text-gray-900"
-                      id="modal-title"
-                    >
-                      Confirm Deletion
-                    </h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Are you sure you want to delete client "{clientToDelete}
-                        "? This action cannot be undone.
-                      </p>
+              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                      <svg
+                        className="h-6 w-6 text-red-600"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                      <h3
+                        className="text-lg leading-6 font-medium text-gray-900"
+                        id="modal-title"
+                      >
+                        Confirm Deletion
+                      </h3>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500">
+                          Are you sure you want to delete client "
+                          {clientToDelete}
+                          "? This action cannot be undone.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="cursor-pointer w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => deleteClient(clientToDelete as string)}
-                >
-                  Delete
-                </button>
-                <button
-                  type="button"
-                  className="cursor-pointer mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => {
-                    setIsDeleteModalOpen(false);
-                    setClientToDelete(null);
-                  }}
-                >
-                  Cancel
-                </button>
+                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                  <button
+                    type="button"
+                    className="cursor-pointer w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => deleteClient(clientToDelete as string)}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    type="button"
+                    className="cursor-pointer mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => {
+                      setIsDeleteModalOpen(false);
+                      setClientToDelete(null);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }, [isDeleteModalOpen, clientToDelete, deleteClient]);
 
   // Mobile view
   if (isMobile) {
@@ -339,7 +380,7 @@ export default function HomePage() {
                   {clients.length}
                 </div>
               </div>
-              <ConnectionStatus />
+              {ConnectionStatus}
             </div>
 
             <ErrorAlert />
@@ -453,7 +494,7 @@ export default function HomePage() {
           )}
         </div>
 
-        <DeleteModal />
+        {DeleteModal}
       </>
     );
   } else {
@@ -474,7 +515,7 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <ConnectionStatus />
+          {ConnectionStatus}
         </div>
 
         <ErrorAlert />
@@ -626,7 +667,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <DeleteModal />
+            {DeleteModal}
           </>
         ) : (
           <Loader />
