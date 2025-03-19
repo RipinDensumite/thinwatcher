@@ -1,10 +1,4 @@
-import {
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import { useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { io, type Socket } from "socket.io-client";
 import { UserRound, WifiOff, Wifi, Trash2, Computer } from "lucide-react";
 import { useMediaQuery } from "@uidotdev/usehooks";
@@ -214,13 +208,15 @@ export default function HomePage() {
   // Connection status component
   const ConnectionStatus = useMemo(() => {
     return (
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         <div className="flex items-center min-w-fit w-full sm:w-fit gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out">
           {isConnected ? (
             <motion.span
+              key="connected"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              exit={{ opacity: 1, x: 20 }}
+              transition={{ duration: 0.2 }}
               className="text-emerald-600 flex items-center gap-2 font-medium"
             >
               <Wifi className="h-4 w-4" />
@@ -228,9 +224,11 @@ export default function HomePage() {
             </motion.span>
           ) : (
             <motion.span
+              key="disconnected"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              exit={{ opacity: 1, x: 20 }}
+              transition={{ duration: 0.2 }}
               className="text-red-600 flex items-center gap-2 font-medium"
             >
               <WifiOff className="h-4 w-4" />
