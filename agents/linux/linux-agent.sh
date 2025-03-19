@@ -4,7 +4,7 @@ OS_TYPE="Linux"
 CLIENT_ID="THINCLIENT-01"
 BACKEND_URL="http://167.71.207.105:3001/api/status"
 TERMINATE_CHECK_URL="http://167.71.207.105:3001/api/terminate"
-HEARTBEAT_INTERVAL=10
+HEARTBEAT_INTERVAL=1
 
 get_session_data() {
     # Get active sessions using who command
