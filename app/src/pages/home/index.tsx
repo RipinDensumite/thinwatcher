@@ -5,6 +5,7 @@ import { useMediaQuery } from "@uidotdev/usehooks";
 import { AuthContext } from "@/context/AuthContext";
 import { APP_CONFIG } from "@/utils/appconfig";
 import { motion, AnimatePresence } from "motion/react";
+import { toast } from "sonner";
 
 interface Session {
   ID: string;
@@ -129,7 +130,8 @@ export default function HomePage() {
       }
     } catch (error) {
       console.error("Failed to delete client:", error);
-      setError("Failed to delete client. Please try again.");
+      toast.error("Failed to delete client. Please try again.")
+      // setError("Failed to delete client. Please try again.");
     } finally {
       setClientToDelete(null);
       setIsDeleteModalOpen(false);
