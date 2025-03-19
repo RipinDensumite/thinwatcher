@@ -42,12 +42,12 @@ ThinWatcher consists of three main components:
 ### Setting up the Backend
 
 1. Navigate to the backend directory:
-   ```bash
+   ```powershell
    cd backend
    ```
 
 2. Create a `.env` file based on the example:
-   ```bash
+   ```powershell
    cp .env.example .env
    ```
 
@@ -61,7 +61,7 @@ ThinWatcher consists of three main components:
    ```
 
 4. Install dependencies and start the server:
-   ```bash
+   ```powershell
    npm install
    npm start
    ```
@@ -69,12 +69,12 @@ ThinWatcher consists of three main components:
 ### Setting up the Frontend
 
 1. Navigate to the app directory:
-   ```bash
+   ```powershell
    cd app
    ```
 
 2. Create a `.env` file based on the example:
-   ```bash
+   ```powershell
    cp .env.example .env
    ```
 
@@ -85,13 +85,13 @@ ThinWatcher consists of three main components:
    ```
 
 4. Install dependencies and start the development server:
-   ```bash
+   ```powershell
    npm install
    npm run dev
    ```
 
 5. For production build:
-   ```bash
+   ```powershell
    npm run build
    ```
 
@@ -99,7 +99,7 @@ ThinWatcher consists of three main components:
 
 You can use Docker to run both frontend and backend:
 
-```bash
+```powershell
 docker-compose up -d
 ```
 
