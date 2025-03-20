@@ -33,6 +33,7 @@ export default function HomePage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [, setSocket] = useState<Socket | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConnectedLoading, setIsConnectedLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
@@ -43,16 +44,19 @@ export default function HomePage() {
   // Memoize event handlers
   const handleConnect = useCallback(() => {
     setIsConnected(true);
+    setIsConnectedLoading(false);
     setError(null);
   }, []);
 
   const handleDisconnect = useCallback(() => {
+    setIsConnected(false);
     setIsConnected(false);
     setError("Connection lost. Attempting to reconnect...");
   }, []);
 
   const handleConnectError = useCallback((error: Error) => {
     console.error("Connection error:", error);
+    setIsConnectedLoading(false);
     setError(`Connection error: ${error.message}`);
   }, []);
 
@@ -130,7 +134,7 @@ export default function HomePage() {
       }
     } catch (error) {
       console.error("Failed to delete client:", error);
-      toast.error("Failed to delete client. Please try again.")
+      toast.error("Failed to delete client. Please try again.");
       // setError("Failed to delete client. Please try again.");
     } finally {
       setClientToDelete(null);
@@ -211,8 +215,20 @@ export default function HomePage() {
   const ConnectionStatus = useMemo(() => {
     return (
       <AnimatePresence mode="wait">
-        <div className="flex items-center min-w-fit w-full sm:w-fit gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out">
-          {isConnected ? (
+        <div className="flex items-center min-w-fit w-full sm:w-fit gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out overflow-hidden">
+          {isConnectedLoading ? (
+            <motion.span
+              key="loading"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 1, x: 20 }}
+              transition={{ duration: 0.2 }}
+              className="text-slate-600 flex items-center gap-2 font-medium"
+            >
+              <span className="loading loading-spinner loading-xs"></span>
+              Connecting...
+            </motion.span>
+          ) : isConnected ? (
             <motion.span
               key="connected"
               initial={{ opacity: 0, y: 20 }}
@@ -240,7 +256,7 @@ export default function HomePage() {
         </div>
       </AnimatePresence>
     );
-  }, [isConnected]);
+  }, [isConnected, isConnectedLoading]);
 
   // Error alert component
   const ErrorAlert = () =>
