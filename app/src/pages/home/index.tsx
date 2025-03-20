@@ -50,7 +50,7 @@ export default function HomePage() {
 
   const handleDisconnect = useCallback(() => {
     setIsConnected(false);
-    setIsConnected(false);
+    setIsConnectedLoading(false);
     setError("Connection lost. Attempting to reconnect...");
   }, []);
 
