@@ -214,12 +214,12 @@ export default function AgentsPage() {
                       <p className="text-gray-600 mt-1 text-sm">
                         After installation completed, you'll be asked if you
                         want to run the launcher. Enter{" "}
-                        <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                        <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
                           y
                         </code>{" "}
                         to proceed. Alternatively, you can run it manually by
                         typing{" "}
-                        <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                        <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
                           thinwatcher.cmd
                         </code>{" "}
                         in powershell.
@@ -239,7 +239,7 @@ export default function AgentsPage() {
                       </p>
                       <p className="text-gray-600 mt-1 text-sm">
                         After running the thinwatcher program, type{" "}
-                        <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                        <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
                           1
                         </code>{" "}
                         to start the thinwatcher configuration. If no
@@ -268,7 +268,7 @@ export default function AgentsPage() {
                           <p className="text-gray-600 text-sm mt-1">
                             The URL of the backend server where the agent will
                             send data (e.g.,{" "}
-                            <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                            <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
                               https://your-backend-url.com
                             </code>
                             )
@@ -282,7 +282,7 @@ export default function AgentsPage() {
                           <p className="text-gray-600 text-sm mt-1">
                             The time interval in seconds at which the agent
                             sends a "heartbeat" signal (e.g.,{" "}
-                            <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                            <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
                               5
                             </code>
                             )
@@ -293,7 +293,7 @@ export default function AgentsPage() {
                           <p className="font-medium text-gray-800">Client ID</p>
                           <p className="text-gray-600 text-sm mt-1">
                             A unique identifier for this thin client (e.g.,{" "}
-                            <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                            <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
                               THINCLIENT-01
                             </code>
                             )
@@ -306,14 +306,13 @@ export default function AgentsPage() {
                           </p>
                           <p className="text-gray-600 text-sm mt-1">
                             Enable Dialog (true/false) (e.g.,{" "}
-                            <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                            <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
                               false
                             </code>
-                            ) The value is{" "}
-                            <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                            ) The default value is{" "}
+                            <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
                               false
                             </code>{" "}
-                            as default
                           </p>
                         </div>
                       </div>
