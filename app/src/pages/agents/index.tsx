@@ -132,8 +132,15 @@ export default function AgentsPage() {
                         Open PowerShell as Administrator
                       </p>
                       <p className="text-gray-600 mt-1 text-sm">
-                        Search for "PowerShell" in the Start menu, right-click
-                        on it, and select "Run as Administrator".
+                        Search for{" "}
+                        <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
+                          Powershell
+                        </code>{" "}
+                        in the Start menu, right-click on it, and select{" "}
+                        <code className="bg-gray-200 px-1 py-0.5 rounded text-slate-600">
+                          Run as Administrator
+                        </code>{" "}
+                        .
                       </p>
                     </div>
                   </div>
