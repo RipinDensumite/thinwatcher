@@ -212,8 +212,8 @@ export default function AgentsPage() {
                         Run the ThinWatcher launcher
                       </p>
                       <p className="text-gray-600 mt-1 text-sm">
-                        After installation, you'll be asked if you want to run
-                        the launcher. Enter{" "}
+                        After installation completed, you'll be asked if you
+                        want to run the launcher. Enter{" "}
                         <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
                           y
                         </code>{" "}
@@ -222,7 +222,7 @@ export default function AgentsPage() {
                         <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
                           thinwatcher.cmd
                         </code>{" "}
-                        in the command prompt.
+                        in powershell.
                       </p>
                     </div>
                   </div>
@@ -235,13 +235,13 @@ export default function AgentsPage() {
                     </span>
                     <div className="ml-4">
                       <p className="text-gray-700 font-medium">
-                        Start the installation
+                        Start the thinwatcher configuration for the first time
                       </p>
                       <p className="text-gray-600 mt-1 text-sm">
-                        Choose selection number 1 to start the installation. If
-                        no configuration file exists, the launcher will run the
-                        installation process. Follow the prompts to set up your
-                        agent.
+                        Choose selection number 1 to start the thinwatcher
+                        configuration. If no configuration file exists, the
+                        launcher will run the configuration process. Follow the
+                        prompts to set up your agent.
                       </p>
                     </div>
                   </div>
@@ -293,6 +293,23 @@ export default function AgentsPage() {
                               THINCLIENT-01
                             </code>
                             )
+                          </p>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <p className="font-medium text-gray-800">
+                            Dialog option
+                          </p>
+                          <p className="text-gray-600 text-sm mt-1">
+                            Enable Dialog (true/false) (e.g.,{" "}
+                            <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                              false
+                            </code>
+                            ) The value is{" "}
+                            <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                              false
+                            </code>{" "}
+                            as default
                           </p>
                         </div>
                       </div>
