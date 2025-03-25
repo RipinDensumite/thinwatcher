@@ -238,10 +238,14 @@ export default function AgentsPage() {
                         Start the thinwatcher configuration for the first time
                       </p>
                       <p className="text-gray-600 mt-1 text-sm">
-                        Choose selection number 1 to start the thinwatcher
-                        configuration. If no configuration file exists, the
-                        launcher will run the configuration process. Follow the
-                        prompts to set up your agent.
+                        After running the thinwatcher program, type{" "}
+                        <code className="bg-gray-100 px-1 py-0.5 rounded text-slate-600">
+                          1
+                        </code>{" "}
+                        to start the thinwatcher configuration. If no
+                        configuration file exists, the launcher will run the
+                        configuration process. Follow the prompts to set up your
+                        agent.
                       </p>
                     </div>
                   </div>
