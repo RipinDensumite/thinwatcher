@@ -682,9 +682,9 @@ io.on("connection", (socket) => {
   socket.emit("initial-data", Array.from(clients.entries()));
 });
 
-app.use('/api', (req, res) => {
+app.use("/api", (req, res) => {
   res.status(404).json({ message: "API route not found" });
-})
+});
 
 app.use(express.static(path.join(__dirname, "dist")));
 
