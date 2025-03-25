@@ -393,8 +393,8 @@ setInterval(() => {
   });
 }, CLEANUP_INTERVAL);
 
-// Client data endpoint - protected with both API key and JWT auth
-app.get("/api/clients", auth, apiKeyAuth, (req, res) => {
+// Client data endpoint - protected with JWT auth
+app.get("/api/clients", auth, (req, res) => {
   res.json(
     Array.from(clients.entries()).map(([id, data]) => ({
       clientId: id,
