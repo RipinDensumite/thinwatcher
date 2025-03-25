@@ -2,8 +2,8 @@
 
 OS_TYPE="Linux"
 CLIENT_ID="THINCLIENT-01"
-BACKEND_URL="http://167.71.207.105:3001/api/status"
-TERMINATE_CHECK_URL="http://167.71.207.105:3001/api/terminate"
+BACKEND_URL="https://twb.ripin.live/api/status"
+TERMINATE_CHECK_URL="https://twb.ripin.live/api/terminate"
 HEARTBEAT_INTERVAL=5
 
 get_session_data() {
