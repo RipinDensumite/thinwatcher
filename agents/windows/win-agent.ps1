@@ -68,69 +68,83 @@ $lastHeartbeatTime = [DateTime]::MinValue
 $lastTerminationCheckTime = [DateTime]::MinValue
 
 function Get-SessionData {
-    $raw = query session
-    $sessionList = @()
-
-    # State normalization mapping
-    $stateMap = @{
-        "Activ" = "Active"
-        "Conn"  = "Connected"
-        "Disc"  = "Disconnected"
-        "Liste" = "Listen"
-    }
-
-    # Process header to find column positions
-    $headerLine = $raw | Select-Object -First 1
-    $columns = @()
-
-    $columnOrder = @("SESSIONNAME", "USERNAME", "ID", "STATE")
-    foreach ($col in $columnOrder) {
-        $index = $headerLine.IndexOf($col)
-        if ($index -ne -1) {
-            $columns += @{
-                Name  = $col
-                Start = $index
-                End   = $index + $col.Length
-            }
+    try {
+        # Check if query command exists
+        $queryCommand = Get-Command "query" -ErrorAction SilentlyContinue
+        
+        if (-not $queryCommand) {
+            Write-Log "Warning: 'query' command not found. Unable to retrieve session information."
+            return @() # Return empty array if query command doesn't exist
         }
-    }
+        
+        $raw = query session
+        $sessionList = @()
 
-    # Process session lines
-    $raw | Select-Object -Skip 1 | ForEach-Object {
-        $line = $_.PadRight(80)
-        $session = [PSCustomObject]@{
-            ID    = $null
-            User  = "SYSTEM"
-            State = $null
+        # State normalization mapping
+        $stateMap = @{
+            "Activ" = "Active"
+            "Conn"  = "Connected"
+            "Disc"  = "Disconnected"
+            "Liste" = "Listen"
         }
 
-        foreach ($col in $columns) {
-            $value = $line.Substring($col.Start, $col.End - $col.Start).Trim()
-            
-            switch ($col.Name) {
-                "USERNAME" { 
-                    if ($value) { $session.User = $value } 
-                }
-                "ID" { 
-                    $session.ID = $value 
-                }
-                "STATE" { 
-                    if ($stateMap.ContainsKey($value)) {
-                        $session.State = $stateMap[$value]
-                    }
-                    else {
-                        $session.State = $value
-                    }
+        # Process header to find column positions
+        $headerLine = $raw | Select-Object -First 1
+        $columns = @()
+
+        $columnOrder = @("SESSIONNAME", "USERNAME", "ID", "STATE")
+        foreach ($col in $columnOrder) {
+            $index = $headerLine.IndexOf($col)
+            if ($index -ne -1) {
+                $columns += @{
+                    Name  = $col
+                    Start = $index
+                    End   = $index + $col.Length
                 }
             }
         }
 
-        if ($session.ID -match '^\d+$') {
-            $sessionList += $session
-        }
-    }
+        # Process session lines
+        $raw | Select-Object -Skip 1 | ForEach-Object {
+            $line = $_.PadRight(80)
+            $session = [PSCustomObject]@{
+                ID    = $null
+                User  = "SYSTEM"
+                State = $null
+            }
 
-    return $sessionList
+            foreach ($col in $columns) {
+                $value = $line.Substring($col.Start, $col.End - $col.Start).Trim()
+                
+                switch ($col.Name) {
+                    "USERNAME" { 
+                        if ($value) { $session.User = $value } 
+                    }
+                    "ID" { 
+                        $session.ID = $value 
+                    }
+                    "STATE" { 
+                        if ($stateMap.ContainsKey($value)) {
+                            $session.State = $stateMap[$value]
+                        }
+                        else {
+                            $session.State = $value
+                        }
+                    }
+                }
+            }
+
+            if ($session.ID -match '^\d+$') {
+                $sessionList += $session
+            }
+        }
+
+        return $sessionList
+    }
+    catch {
+        Write-Log "Error retrieving session data: $($_.Exception.Message)"
+        return @()
+    }
 }
 
 function Send-Heartbeat {
