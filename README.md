@@ -56,7 +56,6 @@ ThinWatcher consists of three main components:
    PORT=3001
    CORS_ORIGIN_PROD=https://your-production-domain.com
    CORS_ORIGIN_DEV=http://localhost:5173
-   API_KEY=your_secure_api_key
    JWT_SECRET=your_secure_jwt_secret
    ```
 
@@ -81,7 +80,6 @@ ThinWatcher consists of three main components:
 3. Edit the `.env` file to include your configuration:
    ```env
    VITE_BACKEND_API_URL=http://localhost:3001
-   VITE_API_KEY=your_secure_api_key
    ```
 
 4. Install dependencies and start the development server:

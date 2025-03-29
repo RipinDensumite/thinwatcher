@@ -5,7 +5,6 @@ function validateEnvironmentVariables() {
     "PORT",
     "CORS_ORIGIN_PROD",
     "CORS_ORIGIN_DEV",
-    "API_KEY",
     "JWT_SECRET",
   ];
 
@@ -86,7 +85,6 @@ const clients = new Map();
 const OFFLINE_TIMEOUT = parseInt(20000, 10);
 const CLEANUP_INTERVAL = parseInt(10000, 10);
 const PORT = process.env.PORT || 3001; // Fallback to 3001 if PORT is not set
-const API_KEY = process.env.API_KEY; // Load API key from environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key"; // JWT secret for authentication
 
 // Database setup
@@ -125,17 +123,6 @@ setupDatabase().catch((err) => {
   console.error("Database setup error:", err);
   process.exit(1);
 });
-
-// Middleware to check API key
-function apiKeyAuth(req, res, next) {
-  const apiKey = req.headers["x-api-key"]; // Get API key from request headers
-
-  if (apiKey === API_KEY) {
-    next(); // API key is valid, proceed to the next middleware/route
-  } else {
-    res.status(401).json({ error: "Unauthorized: Invalid API key" }); // API key is invalid
-  }
-}
 
 // JWT Authentication middleware
 const auth = async (req, res, next) => {
@@ -423,7 +410,7 @@ app.get("/api/check-client/:clientId", (req, res) => {
 });
 
 // Session termination - protected with both API key and JWT auth
-app.post("/api/terminate", auth, apiKeyAuth, (req, res) => {
+app.post("/api/terminate", auth, (req, res) => {
   const { clientId, sessionId } = req.body;
   const client = clients.get(clientId);
 
@@ -655,15 +642,7 @@ app.delete("/api/admin/users/:id", auth, adminAuth, async (req, res) => {
 
 // WebSocket initialization
 io.on("connection", (socket) => {
-  const apiKey = socket.handshake.query.apiKey;
   const authToken = socket.handshake.query.token;
-
-  // Verify API key first
-  if (apiKey !== API_KEY) {
-    console.log("Unauthorized WebSocket connection attempt - Invalid API key");
-    socket.disconnect(true); // Disconnect unauthorized clients
-    return;
-  }
 
   // Now verify JWT token if provided
   if (authToken) {
@@ -676,7 +655,7 @@ io.on("connection", (socket) => {
       return;
     }
   } else {
-    console.log("Authorized WebSocket connection (API key only)");
+    console.log("Authorized WebSocket connection");
   }
 
   socket.emit("initial-data", Array.from(clients.entries()));

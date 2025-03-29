@@ -26,7 +26,6 @@ interface Client {
 }
 
 const API_URL = APP_CONFIG.BACKEND_API_URL;
-const API_KEY = APP_CONFIG.API_KEY;
 
 export default function HomePage() {
   const isMobile = useMediaQuery("only screen and (max-width : 768px)");
@@ -97,7 +96,6 @@ export default function HomePage() {
       try {
         const response = await fetch(`${API_URL}/api/clients`, {
           headers: {
-            "x-api-key": API_KEY,
             Authorization: `Bearer ${token}`,
           },
         });
@@ -124,7 +122,6 @@ export default function HomePage() {
       const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
         method: "DELETE",
         headers: {
-          "x-api-key": API_KEY,
           Authorization: `Bearer ${token}`,
         },
       });
@@ -150,7 +147,6 @@ export default function HomePage() {
       reconnectionAttempts: 5,
       withCredentials: true,
       query: {
-        apiKey: API_KEY,
       },
     });
 

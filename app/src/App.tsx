@@ -75,7 +75,7 @@ function App() {
     </ProtectedRoute>
   );
 
-  if (!APP_CONFIG.BACKEND_API_URL || !APP_CONFIG.API_KEY) {
+  if (!APP_CONFIG.BACKEND_API_URL) {
     return (
       <section className="flex flex-col items-center justify-center min-h-[100dvh] bg-gradient-to-br from-slate-50 to-slate-200 p-6">
         <div className="max-w-md w-full">
@@ -91,16 +91,6 @@ function App() {
                 <div>
                   <p className="font-medium text-red-700">Missing Backend API URL</p>
                   <p className="text-sm text-red-600 mt-1">Please set the VITE_BACKEND_API_URL in your environment configuration.</p>
-                </div>
-              </div>
-            )}
-            
-            {!APP_CONFIG.API_KEY && (
-              <div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg">
-                <TriangleAlert size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium text-red-700">Missing API Key</p>
-                  <p className="text-sm text-red-600 mt-1">Please set the VITE_API_KEY in your environment configuration.</p>
                 </div>
               </div>
             )}
