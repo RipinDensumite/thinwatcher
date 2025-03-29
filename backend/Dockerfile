@@ -1,20 +1,19 @@
-FROM node:18-alpine as builder
-
-# Build frontend
-WORKDIR /app
-COPY app/package*.json ./
-RUN npm install
-COPY app/ .
-RUN npm run build
+FROM node:18-alpine
 
 # Setup backend
-FROM node:18-alpine
 WORKDIR /app
-COPY backend/package*.json ./
-RUN npm install --production
-COPY backend/ .
-# Copy built frontend
-COPY --from=builder /app/dist ./dist
 
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install --production
+
+# Copy application code
+COPY . .
+
+# Create data directory if it doesn't exist
+RUN mkdir -p data
+
+# Expose the port defined in .env (default is 80)
 EXPOSE 80
+
 CMD ["node", "index.js"]
