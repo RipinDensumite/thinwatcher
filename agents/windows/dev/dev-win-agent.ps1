@@ -10,7 +10,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 
 # Assign configuration values to variables
 $CLIENT_ID = "ThinClient1"
-$BACKEND_URL = "http://localhost:3001"
+$BACKEND_URL = "http://localhost:80"
 $HEARTBEAT_INTERVAL = 1
 $OS_TYPE = "Windows"
 
