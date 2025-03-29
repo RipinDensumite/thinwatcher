@@ -7,7 +7,6 @@ $ErrorActionPreference = "Stop"
 $ServiceName = "WinAgent"
 $InstallDir = "$env:ProgramFiles\ThinWatcher\scripts"
 $AgentScript = "win-agent.ps1"
-$GuiDialog = "dialog-gui.ps1"
 $ConfigFile = "$InstallDir\config.txt"
 $GitHubRepoBaseUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatcher/main/agents/windows/"
 
@@ -15,63 +14,6 @@ $GitHubRepoBaseUrl = "https://raw.githubusercontent.com/RipinDensumite/thinwatch
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`"" -Verb RunAs
     exit
-}
-
-# Install PsExec if necessary
-function Get-PsExec {
-    $psExecPath = "$env:SystemRoot\System32\PsExec.exe"
-    
-    if (-not (Test-Path $psExecPath)) {
-        $psExecUrl = "https://live.sysinternals.com/PsExec.exe"
-        
-        Write-Host "Installing PsExec..." -ForegroundColor Cyan
-
-        try {
-            # Download PsExec directly
-            Invoke-WebRequest -Uri $psExecUrl -OutFile $psExecPath -TimeoutSec 60
-            
-            if (Test-Path $psExecPath) {
-                Write-Host "PsExec installation complete." -ForegroundColor Green
-                return $true
-            }
-            else {
-                Write-Host "Failed to install PsExec: File not found after download." -ForegroundColor Red
-                return $false
-            }
-        }
-        catch {
-            Write-Host "Failed to install PsExec: $_" -ForegroundColor Red
-            
-            # Fallback method if direct download fails
-            try {
-                Write-Host "Trying alternative download method..." -ForegroundColor Yellow
-                $tempFile = "$env:TEMP\PsExec.exe"
-                
-                # Using .NET WebClient as alternative
-                $webClient = New-Object System.Net.WebClient
-                $webClient.DownloadFile($psExecUrl, $tempFile)
-                
-                # Copy to System32
-                Copy-Item -Path $tempFile -Destination $psExecPath -Force
-                Remove-Item -Path $tempFile -Force -ErrorAction SilentlyContinue
-                
-                if (Test-Path $psExecPath) {
-                    Write-Host "PsExec installation complete (alternative method)." -ForegroundColor Green
-                    return $true
-                }
-                else {
-                    return $false
-                }
-            }
-            catch {
-                Write-Host "Alternative download method also failed: $_" -ForegroundColor Red
-                return $false
-            }
-        }
-    }
-    
-    Write-Host "PsExec is already installed." -ForegroundColor Green
-    return $true
 }
 
 # Function to test backend connection
@@ -140,9 +82,7 @@ try {
     }
 
     # Download necessary scripts from GitHub
-    Write-Host "Downloading $AgentScript and $GuiDialog from GitHub..." -ForegroundColor Cyan
     Invoke-WebRequest -Uri "$GitHubRepoBaseUrl/$AgentScript" -OutFile "$InstallDir\$AgentScript"
-    Invoke-WebRequest -Uri "$GitHubRepoBaseUrl/$GuiDialog" -OutFile "$InstallDir\$GuiDialog"
 
     # Config file
     Write-Host "Please provide the following configuration values or CTRL + C to cancel the installation" -ForegroundColor Cyan
@@ -150,23 +90,11 @@ try {
     $BACKEND_URL = Read-Host "Backend URL (e.g., https://backend-url.com)"
     $HEARTBEAT_INTERVAL = Read-Host "Heartbeat Interval in seconds (e.g., 5)"
     $CLIENT_ID = Read-Host "Client ID (e.g., THINCLIENT-02)"
-    $ENABLE_DIALOG = Read-Host "Enable Dialog (true/false) [false]"
-
-    # Set default value for dialog if empty
-    if ([string]::IsNullOrWhiteSpace($ENABLE_DIALOG)) {
-        $ENABLE_DIALOG = "false"
-    }
 
     # Validate Heartbeat Interval
     if (-not ($HEARTBEAT_INTERVAL -match '^\d+$')) {
         Write-Host "Heartbeat Interval must be a number. Exiting." -ForegroundColor Red
         exit 1
-    }
-
-    # Validate Dialog Enabled
-    if (-not ($ENABLE_DIALOG -match '^(true|false)$')) {
-        Write-Host "Enable Dialog must be 'true' or 'false'. Defaulting to false." -ForegroundColor Yellow
-        $ENABLE_DIALOG = "false"
     }
 
     # Test backend connection
@@ -186,15 +114,10 @@ try {
 BACKEND_URL=$BACKEND_URL
 HEARTBEAT_INTERVAL=$HEARTBEAT_INTERVAL
 CLIENT_ID=$CLIENT_ID
-ENABLE_DIALOG=$ENABLE_DIALOG
 "@
 
     Set-Content -Path $ConfigFile -Value $configContent
     Write-Host "Configuration file created at $ConfigFile" -ForegroundColor Green
-
-    if (-not (Get-PsExec)) {
-        Write-Host "ERROR: Could not ensure PsExec is available. GUI functionality may not work."
-    }
 
     # Create scheduled task
     $TaskAction = New-ScheduledTaskAction `

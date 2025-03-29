@@ -5,7 +5,6 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $ServiceName = "WinAgent"
-$InstallDir = "$env:ProgramFiles\ThinWatcher\scripts"
 
 # Self-elevate if not running as admin
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
