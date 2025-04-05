@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: thinwatcher
+    restart: unless-stopped
+    ports:
+      - "3005:80"
+    environment:
+      PORT: "${PORT}"
+      CORS_ORIGIN_PROD: "${CORS_ORIGIN_PROD}"
+      CORS_ORIGIN_DEV: "${CORS_ORIGIN_DEV}"
+      JWT_SECRET: "${JWT_SECRET}"
+      NODE_ENV: "${NODE_ENV}" # Set to 'production' or 'development'
+    volumes:
+      - ./data:/usr/src/app/data

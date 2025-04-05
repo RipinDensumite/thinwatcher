@@ -1,19 +1,18 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
-# Setup backend
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install --production
 
-# Copy application code
-COPY . .
+RUN npm ci --only=production
 
-# Create data directory if it doesn't exist
-RUN mkdir -p data
+COPY server.js ./
+COPY dist/ ./dist/
 
-# Expose the port defined in .env (default is 80)
+RUN mkdir -p ./data
+
+VOLUME /usr/src/app/data
+
 EXPOSE 80
 
-CMD ["node", "index.js"]
+CMD ["node", "server.js"]
