@@ -8,6 +8,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   server: {
     proxy: {
+      // Make sure it your valid backend url
       "/api": "http://localhost:80",
     },
   },
