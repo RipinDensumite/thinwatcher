@@ -11,10 +11,6 @@ export default defineConfig({
       "/api": "http://localhost:80",
     },
   },
-  build: {
-    outDir: "../backend/dist",
-    emptyOutDir: true,
-  },
   plugins: [
     react(),
     tailwindcss(),
