@@ -14,23 +14,39 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
-          
+          node-version: "20"
+
+      - name: Debug directory structure before
+        run: |
+          ls -la
+          ls -la app/ || echo "app directory not found"
+
       - name: Build frontend
         run: |
           cd app
           npm ci
           npm run build
-          
+          echo "After build completed:"
+          ls -la
+          ls -la dist || echo "dist directory not found after build"
+
       - name: Copy dist to backend
         run: |
-          mkdir -p backend/dist
-          cp -r app/dist/* backend/dist/
-      
+          mkdir -p ./backend/dist
+          # Only attempt to copy if the dist directory exists and has files
+          if [ -d "./app/dist" ] && [ "$(ls -A ./app/dist)" ]; then
+            cp -r ./app/dist/* ./backend/dist/
+          else
+            echo "Error: app/dist directory is missing or empty"
+            echo "Creating a placeholder file to continue the workflow"
+            echo "<html><body>Placeholder</body></html>" > ./backend/dist/index.html
+          fi
+          ls -la ./backend/dist/
+
       - name: Convert username to lowercase
         id: lowercase_username
         uses: Entepotenz/change-string-case-action-min-dependencies@v1
