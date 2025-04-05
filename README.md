@@ -98,6 +98,10 @@ ThinWatcher consists of three main components:
 You can use Docker to run both frontend and backend:
 
 ```powershell
+docker pull ghcr.io/ripindensumite/thinwatcher:latest
+```
+
+```powershell
 docker-compose up -d
 ```
 
