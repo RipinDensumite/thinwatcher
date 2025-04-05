@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "cd ../app && npm run build"
+    "build": "cd ../app && npm run build && cd ../backend && npm run copy-dist",
+    "build:windows": "cd ../app && npm run build && xcopy /E /I /Y ..\\app\\dist\\* ..\\backend\\dist\\",
+    "build:linux": "cd ../app && npm run build && cp -r ./dist/* ../backend/dist/",
+    "copy-dist": "node -e \"require('fs-extra').copySync('../app/dist', 'dist')\""
   },
   "keywords": [],
   "author": "",
@@ -19,6 +22,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
+    "fs-extra": "^11.3.0",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^3.0.3",
     "socket.io": "^4.8.1",
