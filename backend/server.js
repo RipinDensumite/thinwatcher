@@ -665,12 +665,16 @@ app.use("/api", (req, res) => {
   res.status(404).json({ message: "API route not found" });
 });
 
-app.use(express.static(path.join(__dirname, "dist")));
+const frontendPath = path.resolve(__dirname, "../app/dist");
 
+// Serve static files
+app.use(express.static(frontendPath));
+
+// Serve index.html for all other routes (SPA support)
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
