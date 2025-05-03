@@ -1,6 +1,6 @@
-require("dotenv").config();
+require('dotenv').config();
 
-function validateEnvironmentVariables() {
+const validateEnvironmentVariables = () => {
   const requiredEnvVars = [
     "PORT",
     "CORS_ORIGIN_PROD",
@@ -23,7 +23,6 @@ function validateEnvironmentVariables() {
       "Please check your .env file. See .env.example for required variables."
     );
 
-    // Exit with error code if in production, otherwise continue with warnings
     if (process.env.NODE_ENV === "production") {
       console.error(
         "Exiting process due to missing environment variables in production mode."
@@ -37,9 +36,33 @@ function validateEnvironmentVariables() {
   } else {
     console.log("✅ All required environment variables are present");
   }
-}
+};
 
-validateEnvironmentVariables();
+const config = {
+  port: process.env.PORT || 3001,
+  jwt: {
+    secret: process.env.JWT_SECRET || "your_jwt_secret_key",
+    expiresIn: "1h"
+  },
+  cors: {
+    origins: [process.env.CORS_ORIGIN_PROD, process.env.CORS_ORIGIN_DEV],
+    methods: ["GET", "POST", "DELETE", "PUT"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+    credentials: true
+  },
+  socket: {
+    cors: {
+      origin: [process.env.CORS_ORIGIN_PROD, process.env.CORS_ORIGIN_DEV],
+      methods: ["GET", "POST"],
+      allowedHeaders: ["Content-Type"],
+      credentials: true
+    },
+    transports: ["websocket", "polling"]
+  },
+  client: {
+    offlineTimeout: parseInt(20000, 10),
+    cleanupInterval: parseInt(10000, 10)
+  }
+};
 
-// This file serves as the entry point and launches the structured application
-require('./src/server');
+module.exports = { config, validateEnvironmentVariables };
