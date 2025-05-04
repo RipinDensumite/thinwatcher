@@ -1,22 +1,11 @@
 services:
-  frontend:
-    image: ghcr.io/ripindensumite/thinwatcher-frontend:latest
+  app:
+    image: ghcr.io/ripindensumite/thinwatcher:latest
     ports:
-      - "5173:80"
-    depends_on:
-      - backend
+      - "5010:80"
     environment:
-      - VITE_BACKEND_API_URL=${VITE_BACKEND_API_URL}
-  
-  backend:
-    image: ghcr.io/ripindensumite/thinwatcher-backend:latest
-    ports:
-      - "5000:3001"
-    volumes:
-      - ./data:/app/data
-    environment:
-      - PORT=${PORT}
-      - CORS_ORIGIN_PROD=${CORS_ORIGIN_PROD}
-      - CORS_ORIGIN_DEV=${CORS_ORIGIN_DEV}
-      - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=${NODE_ENV}
+      - PORT=80
+      - JWT_SECRET=283ff762e284344765e58810ba2b191159b79e77f856baec79266536448bfaf5807e5dd6aa6915c94d5e8545792efbd8f9f3a2bbcaf5e1cb048a5f141fed34dad000d28ec3881a0565db8d83c5dd9c816b0bff5800a7f18e48a436ad06869da07164d920f4e026d15c6057fa50d216f91112d188e12429f424f568f1cf2d3bb34a2644ddb3233b248e836345aa388d5e610ca375914186643e61385d00337adccbe2bb01fc62cace29c5950af5b999b0ac71faa2645b81a572a86c49da6b28103b2f14db7e25e603df4cfa2c63fbdcac3d25e79be0d95f70fe6c1b61ae74754b4d00b450d0d04b0f439c3784294253037e792288425b766685a004fda0d013c3
+      - CORS_ORIGIN_PROD=http://localhost:5173
+      - CORS_ORIGIN_DEV=http://localhost:5173
+      - NODE_ENV=production
