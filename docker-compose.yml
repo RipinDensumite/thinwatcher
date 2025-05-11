@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/ripindensumite/thinwatcher:latest
+    image: thinwatcher
     ports:
       - "5010:80"
     environment:

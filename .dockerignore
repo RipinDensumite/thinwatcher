@@ -1,5 +1,6 @@
-node_modules/
-npm-debug.log
+node_modules
+**/node_modules
+*.log
 .git
 README.md
 LICENSE
@@ -8,3 +9,4 @@ coverage
 .env
 .editorconfig
 .aws
+database.db
