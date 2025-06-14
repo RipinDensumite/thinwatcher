@@ -156,7 +156,7 @@ function Send-Heartbeat {
         # Send heartbeat
         $jsonBody = ($body | ConvertTo-Json -Depth 4)
         $params = @{
-            Uri         = "$BACKEND_URL/api/status"
+            Uri         = "$BACKEND_URL/api/clients/status"
             Method      = "Post"
             ContentType = "application/json"
             Body        = $jsonBody
